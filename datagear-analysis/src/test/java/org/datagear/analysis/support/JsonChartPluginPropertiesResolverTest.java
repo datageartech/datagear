@@ -554,296 +554,32 @@ public class JsonChartPluginPropertiesResolverTest
 		}
 	}
 
-	@SuppressWarnings({ "unchecked", "deprecation" })
 	@Test
-	public void resolvePropertiesTest_5_5_0() throws IOException
+	public void resolvePropertiesTest_dataSignSpec_array() throws IOException
 	{
-		Locale enLocale = new Locale("en");
-		Locale zhLocale = new Locale("zh");
-		
+		InputStream jsonInputStream = getClass().getClassLoader().getResourceAsStream(
+				"org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest-dataSignSpec-array.json");
+
+		TestChartPlugin chartPlugin = new TestChartPlugin();
+		JsonChartPluginPropertiesResolver<TestChartPlugin> resolver = new JsonChartPluginPropertiesResolver<TestChartPlugin>(
+				chartPlugin);
+		resolver.resolveProperties(jsonInputStream, IOUtil.CHARSET_UTF_8);
+
+		assertEquals("test", chartPlugin.getId());
+
+		DataSignSpec dataSignSpec = chartPlugin.getDataSignSpec();
+		List<DataSign> dataSigns = dataSignSpec.getDataSigns();
+
+		assertEquals(2, dataSigns.size());
+
 		{
-			InputStream jsonInputStream = getClass().getClassLoader()
-					.getResourceAsStream(
-							"org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest-5.5.0.json");
+			DataSign dataSign = dataSigns.get(0);
+			assertEquals("name", dataSign.getName());
+		}
 
-			TestChartPlugin chartPlugin = new TestChartPlugin();
-			JsonChartPluginPropertiesResolver<TestChartPlugin> resolver = new JsonChartPluginPropertiesResolver<TestChartPlugin>(
-					chartPlugin);
-			resolver.resolveProperties(jsonInputStream, IOUtil.CHARSET_UTF_8);
-
-			assertEquals("pie-chart", chartPlugin.getId());
-			assertNotNull(chartPlugin.getNameLabel());
-			assertNotNull(chartPlugin.getDescLabel());
-			assertNotNull(chartPlugin.getIcons().size() > 0);
-			assertNotNull(chartPlugin.getConfigForm());
-			assertNotNull(chartPlugin.getDataSignSpec());
-			assertEquals("0.1.0", chartPlugin.getVersion());
-			assertEquals(2, chartPlugin.getOrder());
-			assertNotNull(chartPlugin.getCategories());
-			assertEquals(2, chartPlugin.getCategories().size());
-			assertNotNull(chartPlugin.getCategoryOrders());
-			assertEquals(2, chartPlugin.getCategoryOrders().size());
-			assertEquals("test", chartPlugin.getAuthor());
-			assertEquals("2024-09-01", chartPlugin.getIssueDate());
-
-			{
-				Label nameLabel = chartPlugin.getNameLabel();
-				assertEquals("饼图", nameLabel.getValue());
-				assertEquals("pie chart", nameLabel.getValue(enLocale));
-				assertEquals("饼图中文", nameLabel.getValue(zhLocale));
-			}
-
-			{
-				Label descLabel = chartPlugin.getDescLabel();
-				assertEquals("饼图描述", descLabel.getValue());
-				assertEquals("pie chart desc", descLabel.getValue(enLocale));
-				assertEquals("饼图描述中文", descLabel.getValue(zhLocale));
-			}
-
-			{
-				Map<String, String> icons = chartPlugin.getIcons();
-
-				assertEquals("icon-0.png", icons.get("LIGHT"));
-				assertEquals("icon-1.png", icons.get("DARK"));
-			}
-
-			DataSignSpec dataSignSpec = chartPlugin.getDataSignSpec();
-			List<DataSign> dataSigns = dataSignSpec.getDataSigns();
-			assertEquals(3, dataSigns.size());
-
-			{
-				DataSign dataSign = dataSigns.get(0);
-
-				assertEquals("x-value", dataSign.getName());
-				assertFalse(dataSign.isRequired());
-				assertFalse(dataSign.isMultiple());
-
-				Label nameLabel = dataSign.getNameLabel();
-				assertEquals("X值", nameLabel.getValue());
-				assertEquals("X value", nameLabel.getValue(enLocale));
-				assertEquals("X值中文", nameLabel.getValue(zhLocale));
-
-				Label descLabel = dataSign.getDescLabel();
-				assertEquals("X值描述", descLabel.getValue());
-				assertEquals("X value desc", descLabel.getValue(enLocale));
-				assertEquals("X值描述中文", descLabel.getValue(zhLocale));
-
-				Map<String, ?> additions = dataSign.getAdditions();
-				assertNotNull(additions);
-				assertEquals("field", additions.get("for"));
-				assertEquals("x-val", additions.get("name"));
-			}
-
-			{
-				DataSign dataSign = dataSigns.get(1);
-
-				assertEquals("y-value", dataSign.getName());
-				assertTrue(dataSign.isRequired());
-				assertTrue(dataSign.isMultiple());
-
-				Label nameLabel = dataSign.getNameLabel();
-				assertEquals("Y值", nameLabel.getValue());
-				assertEquals("Y value", nameLabel.getValue(enLocale));
-				assertEquals("Y值中文", nameLabel.getValue(zhLocale));
-
-				Label descLabel = dataSign.getDescLabel();
-				assertEquals("Y值描述", descLabel.getValue());
-				assertEquals("Y value desc", descLabel.getValue(enLocale));
-				assertEquals("Y值描述中文", descLabel.getValue(zhLocale));
-				assertNull(dataSign.getAdditions());
-			}
-
-			{
-				DataSign dataSign = dataSigns.get(2);
-
-				assertEquals("simple-value", dataSign.getName());
-				assertTrue(dataSign.isRequired());
-				assertFalse(dataSign.isMultiple());
-				assertNull(dataSign.getNameLabel());
-				assertNull(dataSign.getDescLabel());
-			}
-
-			{
-				ChartPluginDataSetRange dataSetRange = chartPlugin.getDataSetRange();
-				assertEquals(1, dataSetRange.getMain().getMin().intValue());
-				assertNull(dataSetRange.getMain().getMax());
-				assertNull(dataSetRange.getAttachment());
-			}
-
-			ChartPluginConfigForm configForm = chartPlugin.getConfigForm();
-			List<FormProperty> formProperties = configForm.getProperties();
-
-			{
-				FormProperty prop0 = formProperties.get(0);
-
-				assertTrue(prop0 instanceof InputFormProperty);
-
-				InputFormProperty a0 = (InputFormProperty) formProperties.get(0);
-
-				assertEquals("title", a0.getName());
-				assertEquals(PropertyType.STRING, a0.getType());
-
-				Label nameLabel = a0.getNameLabel();
-				assertEquals("标题", nameLabel.getValue());
-				assertEquals("title", nameLabel.getValue(enLocale));
-				assertEquals("标题中文", nameLabel.getValue(zhLocale));
-
-				Label descLabel = a0.getDescLabel();
-				assertEquals("标题描述", descLabel.getValue());
-				assertEquals("title desc", descLabel.getValue(enLocale));
-				assertEquals("标题描述中文", descLabel.getValue(zhLocale));
-				
-				assertFalse(a0.isRequired());
-				assertTrue(StringUtil.isEmpty(a0.getInputType()));
-				assertTrue(StringUtil.isEmpty(a0.getInputPayload()));
-
-				Group group = (Group) a0.getAdditions()
-						.get(JsonChartPluginPropertiesResolver.INPUT_PROPERTY_ADDITION_OLD_GROUP);
-				Label groupNameLabel = group.getNameLabel();
-				Label groupDescLabel = group.getDescLabel();
-
-				assertEquals("group-0", group.getName());
-				assertEquals(99, group.getOrder());
-
-				assertEquals("分组-0", groupNameLabel.getValue());
-				assertEquals("group-0", groupNameLabel.getValue(enLocale));
-				assertEquals("分组-0-中文", groupNameLabel.getValue(zhLocale));
-
-				assertEquals("分组-0-描述", groupDescLabel.getValue());
-				assertEquals("group-0 desc", groupDescLabel.getValue(enLocale));
-				assertEquals("分组-0-描述-中文", groupDescLabel.getValue(zhLocale));
-				
-				Map<String, ?> additions = a0.getAdditions();
-				assertNotNull(additions);
-				assertEquals("that", additions.get("for"));
-				assertEquals("title.text", additions.get("optionPath"));
-				assertEquals(3, ((Number) additions.get("priority")).intValue());
-			}
-
-			{
-				FormProperty prop1 = formProperties.get(0);
-
-				assertTrue(prop1 instanceof InputFormProperty);
-
-				InputFormProperty a1 = (InputFormProperty) formProperties.get(1);
-
-				assertEquals("interval", a1.getName());
-				assertEquals(PropertyType.NUMBER, a1.getType());
-
-				Label nameLabel = a1.getNameLabel();
-				assertEquals("间隔", nameLabel.getValue());
-				assertEquals("interval", nameLabel.getValue(enLocale));
-				assertEquals("间隔中文", nameLabel.getValue(zhLocale));
-
-				Label descLabel = a1.getDescLabel();
-				assertEquals("间隔描述", descLabel.getValue());
-				assertEquals("interval desc", descLabel.getValue(enLocale));
-				assertEquals("间隔描述中文", descLabel.getValue(zhLocale));
-				
-				assertTrue(a1.isRequired());
-				assertEquals("mytype", a1.getInputType());
-				assertEquals("mypayload", a1.getInputPayload());
-
-				Group group = (Group) a1.getAdditions()
-						.get(JsonChartPluginPropertiesResolver.INPUT_PROPERTY_ADDITION_OLD_GROUP);
-				Label groupNameLabel = group.getNameLabel();
-				Label groupDescLabel = group.getDescLabel();
-
-				assertEquals("group-1", group.getName());
-				assertEquals(0, group.getOrder());
-				assertNull(groupNameLabel);
-				assertNull(groupDescLabel);
-			}
-			
-			{
-				InputFormProperty a2 = (InputFormProperty) formProperties.get(2);
-				InputFormProperty a3 = (InputFormProperty) formProperties.get(3);
-				InputFormProperty a4 = (InputFormProperty) formProperties.get(4);
-				InputFormProperty a5 = (InputFormProperty) formProperties.get(5);
-				InputFormProperty a6 = (InputFormProperty) formProperties.get(6);
-				InputFormProperty a7 = (InputFormProperty) formProperties.get(7);
-
-				assertEquals("a2", a2.getName());
-				assertEquals(PropertyType.BOOLEAN, a2.getType());
-				assertNull(a2.getAdditions() == null ? null
-						: a2.getAdditions().get(JsonChartPluginPropertiesResolver.INPUT_PROPERTY_ADDITION_OLD_GROUP));
-				{
-					List<?> inputPayload = (List<?>)a2.getInputPayload();
-					assertEquals(2, inputPayload.size());
-					Map<String, ?> inputPayload0 = (Map<String, ?>)inputPayload.get(0);
-					Map<String, ?> inputPayload1 = (Map<String, ?>)inputPayload.get(1);
-					assertEquals("a", inputPayload0.get("name"));
-					assertEquals(2, ((Number) inputPayload0.get("value")).intValue());
-					assertEquals("b", inputPayload1.get("name"));
-					assertEquals(3, ((Number) inputPayload1.get("value")).intValue());
-				}
-
-				assertEquals("a3", a3.getName());
-				assertEquals(PropertyType.STRING, a3.getType());
-				assertEquals("a", a3.getDefaultValue());
-				{
-					List<?> inputPayload = (List<?>)a3.getInputPayload();
-					assertEquals(2, inputPayload.size());
-					assertEquals("a", inputPayload.get(0));
-					assertEquals("b", inputPayload.get(1));
-				}
-
-				assertEquals("a4", a4.getName());
-				assertEquals(PropertyType.NUMBER, a4.getType());
-				assertEquals(2, a4.getDefaultValue());
-				{
-					List<?> inputPayload = (List<?>)a4.getInputPayload();
-					assertEquals(2, inputPayload.size());
-					assertEquals(2, ((Number) inputPayload.get(0)).intValue());
-					assertEquals(3, ((Number) inputPayload.get(1)).intValue());
-				}
-
-				assertEquals("a5", a5.getName());
-				assertEquals(PropertyType.BOOLEAN, a5.getType());
-				assertNull(a5.getInputPayload());
-				assertEquals(false, a5.getDefaultValue());
-
-				assertEquals("a6", a6.getName());
-				assertEquals(PropertyType.STRING, a6.getType());
-				assertNull(a6.getInputPayload());
-
-				assertEquals("a7", a7.getName());
-				assertEquals(PropertyType.STRING, a7.getType());
-				assertNull(a7.getInputPayload());
-			}
-
-			{
-				List<Category> categories = chartPlugin.getCategories();
-
-				{
-					Category category = categories.get(0);
-					assertEquals("line", category.getName());
-					assertEquals("nameLabel-line", category.getNameLabel().getValue());
-					assertEquals("descLabel-line", category.getDescLabel().getValue());
-					assertEquals(41, category.getOrder());
-				}
-
-				{
-					Category category = categories.get(1);
-					assertEquals("bar", category.getName());
-					assertEquals("nameLabel-bar", category.getNameLabel().getValue());
-					assertEquals("descLabel-bar", category.getDescLabel().getValue());
-					assertEquals(51, category.getOrder());
-				}
-			}
-
-			{
-				List<Integer> categoryOrders = chartPlugin.getCategoryOrders();
-				assertEquals(41, categoryOrders.get(0).intValue());
-				assertEquals(51, categoryOrders.get(1).intValue());
-			}
-
-			{
-				Map<String, ?> additions = chartPlugin.getAdditions();
-				assertNotNull(additions);
-				assertEquals("aaa", additions.get("name"));
-				assertEquals(3, ((Number) additions.get("value")).intValue());
-			}
+		{
+			DataSign dataSign = dataSigns.get(1);
+			assertEquals("value", dataSign.getName());
 		}
 	}
 
@@ -965,6 +701,299 @@ public class JsonChartPluginPropertiesResolverTest
 			{
 				List<Integer> categoryOrders = chartPlugin.getCategoryOrders();
 				assertEquals(41, categoryOrders.get(0).intValue());
+			}
+		}
+	}
+
+	@SuppressWarnings({ "unchecked", "deprecation" })
+	@Test
+	public void resolvePropertiesTest_5_5_0() throws IOException
+	{
+		Locale enLocale = new Locale("en");
+		Locale zhLocale = new Locale("zh");
+		
+		{
+			InputStream jsonInputStream = getClass().getClassLoader()
+					.getResourceAsStream(
+							"org/datagear/analysis/support/JsonChartPluginPropertiesResolverTest-5.5.0.json");
+	
+			TestChartPlugin chartPlugin = new TestChartPlugin();
+			JsonChartPluginPropertiesResolver<TestChartPlugin> resolver = new JsonChartPluginPropertiesResolver<TestChartPlugin>(
+					chartPlugin);
+			resolver.resolveProperties(jsonInputStream, IOUtil.CHARSET_UTF_8);
+	
+			assertEquals("pie-chart", chartPlugin.getId());
+			assertNotNull(chartPlugin.getNameLabel());
+			assertNotNull(chartPlugin.getDescLabel());
+			assertNotNull(chartPlugin.getIcons().size() > 0);
+			assertNotNull(chartPlugin.getConfigForm());
+			assertNotNull(chartPlugin.getDataSignSpec());
+			assertEquals("0.1.0", chartPlugin.getVersion());
+			assertEquals(2, chartPlugin.getOrder());
+			assertNotNull(chartPlugin.getCategories());
+			assertEquals(2, chartPlugin.getCategories().size());
+			assertNotNull(chartPlugin.getCategoryOrders());
+			assertEquals(2, chartPlugin.getCategoryOrders().size());
+			assertEquals("test", chartPlugin.getAuthor());
+			assertEquals("2024-09-01", chartPlugin.getIssueDate());
+	
+			{
+				Label nameLabel = chartPlugin.getNameLabel();
+				assertEquals("饼图", nameLabel.getValue());
+				assertEquals("pie chart", nameLabel.getValue(enLocale));
+				assertEquals("饼图中文", nameLabel.getValue(zhLocale));
+			}
+	
+			{
+				Label descLabel = chartPlugin.getDescLabel();
+				assertEquals("饼图描述", descLabel.getValue());
+				assertEquals("pie chart desc", descLabel.getValue(enLocale));
+				assertEquals("饼图描述中文", descLabel.getValue(zhLocale));
+			}
+	
+			{
+				Map<String, String> icons = chartPlugin.getIcons();
+	
+				assertEquals("icon-0.png", icons.get("LIGHT"));
+				assertEquals("icon-1.png", icons.get("DARK"));
+			}
+	
+			DataSignSpec dataSignSpec = chartPlugin.getDataSignSpec();
+			List<DataSign> dataSigns = dataSignSpec.getDataSigns();
+			assertEquals(3, dataSigns.size());
+	
+			{
+				DataSign dataSign = dataSigns.get(0);
+	
+				assertEquals("x-value", dataSign.getName());
+				assertFalse(dataSign.isRequired());
+				assertFalse(dataSign.isMultiple());
+	
+				Label nameLabel = dataSign.getNameLabel();
+				assertEquals("X值", nameLabel.getValue());
+				assertEquals("X value", nameLabel.getValue(enLocale));
+				assertEquals("X值中文", nameLabel.getValue(zhLocale));
+	
+				Label descLabel = dataSign.getDescLabel();
+				assertEquals("X值描述", descLabel.getValue());
+				assertEquals("X value desc", descLabel.getValue(enLocale));
+				assertEquals("X值描述中文", descLabel.getValue(zhLocale));
+	
+				Map<String, ?> additions = dataSign.getAdditions();
+				assertNotNull(additions);
+				assertEquals("field", additions.get("for"));
+				assertEquals("x-val", additions.get("name"));
+			}
+	
+			{
+				DataSign dataSign = dataSigns.get(1);
+	
+				assertEquals("y-value", dataSign.getName());
+				assertTrue(dataSign.isRequired());
+				assertTrue(dataSign.isMultiple());
+	
+				Label nameLabel = dataSign.getNameLabel();
+				assertEquals("Y值", nameLabel.getValue());
+				assertEquals("Y value", nameLabel.getValue(enLocale));
+				assertEquals("Y值中文", nameLabel.getValue(zhLocale));
+	
+				Label descLabel = dataSign.getDescLabel();
+				assertEquals("Y值描述", descLabel.getValue());
+				assertEquals("Y value desc", descLabel.getValue(enLocale));
+				assertEquals("Y值描述中文", descLabel.getValue(zhLocale));
+				assertNull(dataSign.getAdditions());
+			}
+	
+			{
+				DataSign dataSign = dataSigns.get(2);
+	
+				assertEquals("simple-value", dataSign.getName());
+				assertTrue(dataSign.isRequired());
+				assertFalse(dataSign.isMultiple());
+				assertNull(dataSign.getNameLabel());
+				assertNull(dataSign.getDescLabel());
+			}
+	
+			{
+				ChartPluginDataSetRange dataSetRange = chartPlugin.getDataSetRange();
+				assertEquals(1, dataSetRange.getMain().getMin().intValue());
+				assertNull(dataSetRange.getMain().getMax());
+				assertNull(dataSetRange.getAttachment());
+			}
+	
+			ChartPluginConfigForm configForm = chartPlugin.getConfigForm();
+			List<FormProperty> formProperties = configForm.getProperties();
+	
+			{
+				FormProperty prop0 = formProperties.get(0);
+	
+				assertTrue(prop0 instanceof InputFormProperty);
+	
+				InputFormProperty a0 = (InputFormProperty) formProperties.get(0);
+	
+				assertEquals("title", a0.getName());
+				assertEquals(PropertyType.STRING, a0.getType());
+	
+				Label nameLabel = a0.getNameLabel();
+				assertEquals("标题", nameLabel.getValue());
+				assertEquals("title", nameLabel.getValue(enLocale));
+				assertEquals("标题中文", nameLabel.getValue(zhLocale));
+	
+				Label descLabel = a0.getDescLabel();
+				assertEquals("标题描述", descLabel.getValue());
+				assertEquals("title desc", descLabel.getValue(enLocale));
+				assertEquals("标题描述中文", descLabel.getValue(zhLocale));
+				
+				assertFalse(a0.isRequired());
+				assertTrue(StringUtil.isEmpty(a0.getInputType()));
+				assertTrue(StringUtil.isEmpty(a0.getInputPayload()));
+	
+				Group group = (Group) a0.getAdditions()
+						.get(JsonChartPluginPropertiesResolver.INPUT_PROPERTY_ADDITION_OLD_GROUP);
+				Label groupNameLabel = group.getNameLabel();
+				Label groupDescLabel = group.getDescLabel();
+	
+				assertEquals("group-0", group.getName());
+				assertEquals(99, group.getOrder());
+	
+				assertEquals("分组-0", groupNameLabel.getValue());
+				assertEquals("group-0", groupNameLabel.getValue(enLocale));
+				assertEquals("分组-0-中文", groupNameLabel.getValue(zhLocale));
+	
+				assertEquals("分组-0-描述", groupDescLabel.getValue());
+				assertEquals("group-0 desc", groupDescLabel.getValue(enLocale));
+				assertEquals("分组-0-描述-中文", groupDescLabel.getValue(zhLocale));
+				
+				Map<String, ?> additions = a0.getAdditions();
+				assertNotNull(additions);
+				assertEquals("that", additions.get("for"));
+				assertEquals("title.text", additions.get("optionPath"));
+				assertEquals(3, ((Number) additions.get("priority")).intValue());
+			}
+	
+			{
+				FormProperty prop1 = formProperties.get(0);
+	
+				assertTrue(prop1 instanceof InputFormProperty);
+	
+				InputFormProperty a1 = (InputFormProperty) formProperties.get(1);
+	
+				assertEquals("interval", a1.getName());
+				assertEquals(PropertyType.NUMBER, a1.getType());
+	
+				Label nameLabel = a1.getNameLabel();
+				assertEquals("间隔", nameLabel.getValue());
+				assertEquals("interval", nameLabel.getValue(enLocale));
+				assertEquals("间隔中文", nameLabel.getValue(zhLocale));
+	
+				Label descLabel = a1.getDescLabel();
+				assertEquals("间隔描述", descLabel.getValue());
+				assertEquals("interval desc", descLabel.getValue(enLocale));
+				assertEquals("间隔描述中文", descLabel.getValue(zhLocale));
+				
+				assertTrue(a1.isRequired());
+				assertEquals("mytype", a1.getInputType());
+				assertEquals("mypayload", a1.getInputPayload());
+	
+				Group group = (Group) a1.getAdditions()
+						.get(JsonChartPluginPropertiesResolver.INPUT_PROPERTY_ADDITION_OLD_GROUP);
+				Label groupNameLabel = group.getNameLabel();
+				Label groupDescLabel = group.getDescLabel();
+	
+				assertEquals("group-1", group.getName());
+				assertEquals(0, group.getOrder());
+				assertNull(groupNameLabel);
+				assertNull(groupDescLabel);
+			}
+			
+			{
+				InputFormProperty a2 = (InputFormProperty) formProperties.get(2);
+				InputFormProperty a3 = (InputFormProperty) formProperties.get(3);
+				InputFormProperty a4 = (InputFormProperty) formProperties.get(4);
+				InputFormProperty a5 = (InputFormProperty) formProperties.get(5);
+				InputFormProperty a6 = (InputFormProperty) formProperties.get(6);
+				InputFormProperty a7 = (InputFormProperty) formProperties.get(7);
+	
+				assertEquals("a2", a2.getName());
+				assertEquals(PropertyType.BOOLEAN, a2.getType());
+				assertNull(a2.getAdditions() == null ? null
+						: a2.getAdditions().get(JsonChartPluginPropertiesResolver.INPUT_PROPERTY_ADDITION_OLD_GROUP));
+				{
+					List<?> inputPayload = (List<?>)a2.getInputPayload();
+					assertEquals(2, inputPayload.size());
+					Map<String, ?> inputPayload0 = (Map<String, ?>)inputPayload.get(0);
+					Map<String, ?> inputPayload1 = (Map<String, ?>)inputPayload.get(1);
+					assertEquals("a", inputPayload0.get("name"));
+					assertEquals(2, ((Number) inputPayload0.get("value")).intValue());
+					assertEquals("b", inputPayload1.get("name"));
+					assertEquals(3, ((Number) inputPayload1.get("value")).intValue());
+				}
+	
+				assertEquals("a3", a3.getName());
+				assertEquals(PropertyType.STRING, a3.getType());
+				assertEquals("a", a3.getDefaultValue());
+				{
+					List<?> inputPayload = (List<?>)a3.getInputPayload();
+					assertEquals(2, inputPayload.size());
+					assertEquals("a", inputPayload.get(0));
+					assertEquals("b", inputPayload.get(1));
+				}
+	
+				assertEquals("a4", a4.getName());
+				assertEquals(PropertyType.NUMBER, a4.getType());
+				assertEquals(2, a4.getDefaultValue());
+				{
+					List<?> inputPayload = (List<?>)a4.getInputPayload();
+					assertEquals(2, inputPayload.size());
+					assertEquals(2, ((Number) inputPayload.get(0)).intValue());
+					assertEquals(3, ((Number) inputPayload.get(1)).intValue());
+				}
+	
+				assertEquals("a5", a5.getName());
+				assertEquals(PropertyType.BOOLEAN, a5.getType());
+				assertNull(a5.getInputPayload());
+				assertEquals(false, a5.getDefaultValue());
+	
+				assertEquals("a6", a6.getName());
+				assertEquals(PropertyType.STRING, a6.getType());
+				assertNull(a6.getInputPayload());
+	
+				assertEquals("a7", a7.getName());
+				assertEquals(PropertyType.STRING, a7.getType());
+				assertNull(a7.getInputPayload());
+			}
+	
+			{
+				List<Category> categories = chartPlugin.getCategories();
+	
+				{
+					Category category = categories.get(0);
+					assertEquals("line", category.getName());
+					assertEquals("nameLabel-line", category.getNameLabel().getValue());
+					assertEquals("descLabel-line", category.getDescLabel().getValue());
+					assertEquals(41, category.getOrder());
+				}
+	
+				{
+					Category category = categories.get(1);
+					assertEquals("bar", category.getName());
+					assertEquals("nameLabel-bar", category.getNameLabel().getValue());
+					assertEquals("descLabel-bar", category.getDescLabel().getValue());
+					assertEquals(51, category.getOrder());
+				}
+			}
+	
+			{
+				List<Integer> categoryOrders = chartPlugin.getCategoryOrders();
+				assertEquals(41, categoryOrders.get(0).intValue());
+				assertEquals(51, categoryOrders.get(1).intValue());
+			}
+	
+			{
+				Map<String, ?> additions = chartPlugin.getAdditions();
+				assertNotNull(additions);
+				assertEquals("aaa", additions.get("name"));
+				assertEquals(3, ((Number) additions.get("value")).intValue());
 			}
 		}
 	}

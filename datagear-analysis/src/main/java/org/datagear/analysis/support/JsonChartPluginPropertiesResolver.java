@@ -71,7 +71,7 @@ import org.datagear.util.i18n.Localizable;
  *   descLabel : "..." 、 { ... },
  *   icons : "..." 、 { "light" : "icons/light.png", "dark" : "icons/dark.png" },
  *   configForm : { ... },
- *   dataSignSpec: { ... },
+ *   dataSignSpec: { dataSigns: [ ... ] }、[ ... ],
  *   attributes :  [ { ... }, ... ], //兼容5.5.0格式，功能同configForm
  *   dataSigns : [ { ... }, ... ],   //兼容5.5.0格式，功能同dataSignSpec
  *   dataSetRange: 数值 、 "none" 、 { ... },
@@ -392,6 +392,12 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			return null;
 		else if (obj instanceof DataSignSpec)
 			return (DataSignSpec) obj;
+		else if ((obj instanceof Object[]) || (obj instanceof Collection<?>))
+		{
+			DataSignSpec spec = createDataSignSpec();
+			spec.setDataSigns(convertToDataSigns(obj, null));
+			return spec;
+		}
 		else if (obj instanceof Map<?, ?>)
 		{
 			@SuppressWarnings("unchecked")
