@@ -48,7 +48,8 @@ public class ChartPluginCategorizationResolver
 	 * @param chartPlugins
 	 * @return 最后一个元素包含所有未分组的{@linkplain ChartPlugin}
 	 */
-	public List<Categorization> resolve(List<? extends ChartPlugin> chartPlugins)
+	@SuppressWarnings("unchecked")
+	public <T extends ChartPlugin> List<Categorization> resolve(List<T> chartPlugins)
 	{
 		List<CategorizationInfo> categorizationInfos = new ArrayList<>();
 		List<ChartPluginInfo> uncategorizeds = new ArrayList<>();
@@ -109,6 +110,11 @@ public class ChartPluginCategorizationResolver
 			CategorizationInfo uncategorized = new CategorizationInfo(new Category(""));
 			uncategorized.setChartPluginInfos(uncategorizeds);
 			categorizationInfos.add(uncategorized);
+		}
+
+		for (CategorizationInfo ci : categorizationInfos)
+		{
+			Collections.sort(ci.getChartPluginInfos());
 		}
 
 		return toCategorizations(categorizationInfos);
@@ -228,6 +234,19 @@ public class ChartPluginCategorizationResolver
 
 			if (re == 0)
 				re = this.order - o.order;
+
+			if (re == 0)
+			{
+				String nameLabel = (this.chartPlugin.getNameLabel() == null ? null
+						: this.chartPlugin.getNameLabel().getValue());
+				nameLabel = (nameLabel == null ? "" : nameLabel);
+
+				String nameLabelo = (o.chartPlugin.getNameLabel() == null ? null
+						: o.chartPlugin.getNameLabel().getValue());
+				nameLabelo = (nameLabelo == null ? "" : nameLabelo);
+
+				return nameLabel.compareTo(nameLabelo);
+			}
 
 			return re;
 		}
