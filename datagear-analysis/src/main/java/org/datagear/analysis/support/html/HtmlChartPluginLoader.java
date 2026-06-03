@@ -53,10 +53,10 @@ import org.datagear.util.StringUtil;
  * <code>
  * <pre>
  * |---- plugin.json
- * |---- renderer.js             //可选，当plugin.json里没有定义renderer（或chartRenderer）属性时必须
- * |---- plugin-datasigns.json   //可选，当希望在单独文件中定义插件的dataSigns时使用，格式应为：[ ... ]
- * |---- plugin-configform.json  //可选，当希望在单独文件中定义插件的configForm时使用，格式应为：{ ... }
- * |---- manual.md               //可选，使用手册文件，此文件可有可无，不影响插件解析流程，这里主要是定义使用手册文件名规范
+ * |---- renderer.js                //可选，当plugin.json里没有定义renderer（或chartRenderer）属性时必须
+ * |---- plugin-datasignspec.json   //可选，当希望在单独文件中定义插件的dataSigns时使用，格式应为：[ ... ]
+ * |---- plugin-configform.json     //可选，当希望在单独文件中定义插件的configForm时使用，格式应为：{ ... }
+ * |---- manual.md                  //可选，使用手册文件，此文件可有可无，不影响插件解析流程，这里主要是定义使用手册文件名规范
  * |---- ...
  * </pre>
  * </code>
@@ -110,7 +110,7 @@ public class HtmlChartPluginLoader
 	/**
 	 * 插件数据标记JSON文件名
 	 */
-	public static final String FILE_NAME_DATASIGNLS = "plugin-datasigns.json";
+	public static final String FILE_NAME_DATASIGNSPEC = "plugin-datasignspec.json";
 
 	/**
 	 * 插件配置表单JSON文件名
@@ -502,7 +502,7 @@ public class HtmlChartPluginLoader
 		HtmlChartPlugin plugin = createHtmlChartPlugin();
 
 		Reader pluginIn = null;
-		Reader dataSignsIn = null;
+		Reader dataSignSpecIn = null;
 		Reader configFormIn = null;
 		Reader rendererIn = null;
 
@@ -520,10 +520,10 @@ public class HtmlChartPluginLoader
 					Reader reader = IOUtil.getReader(in, this.encoding);
 					pluginIn = new StringReader(IOUtil.readString(reader, false));
 				}
-				else if (name.equals(FILE_NAME_DATASIGNLS))
+				else if (name.equals(FILE_NAME_DATASIGNSPEC))
 				{
 					Reader reader = IOUtil.getReader(in, this.encoding);
-					dataSignsIn = new StringReader(IOUtil.readString(reader, false));
+					dataSignSpecIn = new StringReader(IOUtil.readString(reader, false));
 				}
 				else if (name.equals(FILE_NAME_CONFIGFORM))
 				{
@@ -540,12 +540,12 @@ public class HtmlChartPluginLoader
 			}
 
 			if (pluginIn != null)
-				inflateChartPluginProperties(plugin, pluginIn, dataSignsIn, configFormIn, rendererIn);
+				inflateChartPluginProperties(plugin, pluginIn, dataSignSpecIn, configFormIn, rendererIn);
 		}
 		finally
 		{
 			IOUtil.close(pluginIn);
-			IOUtil.close(dataSignsIn);
+			IOUtil.close(dataSignSpecIn);
 			IOUtil.close(configFormIn);
 			IOUtil.close(rendererIn);
 		}
@@ -576,22 +576,22 @@ public class HtmlChartPluginLoader
 		HtmlChartPlugin plugin = createHtmlChartPlugin();
 
 		Reader pluginIn = null;
-		Reader dataSignsIn = null;
+		Reader dataSignSpecIn = null;
 		Reader configFormIn = null;
 		Reader rendererIn = null;
 
 		try
 		{
-			File dataSignsFile = FileUtil.getFile(directory, FILE_NAME_DATASIGNLS);
+			File dataSignsFile = FileUtil.getFile(directory, FILE_NAME_DATASIGNSPEC);
 			File configFormFile = FileUtil.getFile(directory, FILE_NAME_CONFIGFORM);
 			File rendererFile = FileUtil.getFile(directory, FILE_NAME_RENDERER);
 
 			pluginIn = IOUtil.getReader(pluginFile, this.encoding);
-			dataSignsIn = (dataSignsFile.exists() ? IOUtil.getReader(dataSignsFile, this.encoding) : null);
+			dataSignSpecIn = (dataSignsFile.exists() ? IOUtil.getReader(dataSignsFile, this.encoding) : null);
 			configFormIn = (configFormFile.exists() ? IOUtil.getReader(configFormFile, this.encoding) : null);
 			rendererIn = (rendererFile.exists() ? IOUtil.getReader(rendererFile, this.encoding) : null);
 
-			inflateChartPluginProperties(plugin, pluginIn, dataSignsIn, configFormIn, rendererIn);
+			inflateChartPluginProperties(plugin, pluginIn, dataSignSpecIn, configFormIn, rendererIn);
 			inflateChartPluginResources(plugin, directory);
 		}
 		catch (HtmlChartPluginLoadException e)
@@ -605,7 +605,7 @@ public class HtmlChartPluginLoader
 		finally
 		{
 			IOUtil.close(pluginIn);
-			IOUtil.close(dataSignsIn);
+			IOUtil.close(dataSignSpecIn);
 			IOUtil.close(configFormIn);
 			IOUtil.close(rendererIn);
 		}
@@ -624,7 +624,7 @@ public class HtmlChartPluginLoader
 	 * 
 	 * @param plugin
 	 * @param pluginJsonIn
-	 * @param dataSignsIn
+	 * @param dataSignSpecIn
 	 *            允许{@code null}
 	 * @param configFormIn
 	 *            允许{@code null}
@@ -632,7 +632,7 @@ public class HtmlChartPluginLoader
 	 *            允许{@code null}
 	 * @throws Exception
 	 */
-	protected void inflateChartPluginProperties(HtmlChartPlugin plugin, Reader pluginJsonIn, Reader dataSignsIn,
+	protected void inflateChartPluginProperties(HtmlChartPlugin plugin, Reader pluginJsonIn, Reader dataSignSpecIn,
 			Reader configFormIn, Reader rendererIn) throws Exception
 	{
 		JsonHtmlChartPluginPropertiesResolver<HtmlChartPlugin> propertiesResolver = createPluginPropertiesResolver(
@@ -641,7 +641,7 @@ public class HtmlChartPluginLoader
 		// 渲染器在独立文件中定义
 		if (rendererIn != null)
 		{
-			propertiesResolver.resolveProperties(pluginJsonIn, dataSignsIn, configFormIn);
+			propertiesResolver.resolveProperties(pluginJsonIn, dataSignSpecIn, configFormIn);
 			String rendererCodeValue = IOUtil.readString(rendererIn, false);
 			plugin.setRenderer(new StringJsChartRenderer(JsChartRenderer.CODE_TYPE_INVOKE, rendererCodeValue));
 		}

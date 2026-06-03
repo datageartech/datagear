@@ -251,27 +251,27 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 * 从JSON字符串解析并设置{@linkplain #getChartPlugin()}属性。
 	 * 
 	 * @param pluginJson
-	 * @param dataSignsJson
+	 * @param dataSignSpecJson
 	 *            允许{@code null}
 	 * @param configFormJson
 	 *            允许{@code null}
 	 * @return
 	 * @throws IOException
 	 */
-	public T resolveProperties(String pluginJson, String dataSignsJson, String configFormJson) throws IOException
+	public T resolveProperties(String pluginJson, String dataSignSpecJson, String configFormJson) throws IOException
 	{
 		Reader pluginIn = new StringReader(pluginJson);
-		Reader dataSignsIn = (StringUtil.isEmpty(dataSignsJson) ? null : new StringReader(dataSignsJson));
+		Reader dataSignSpecIn = (StringUtil.isEmpty(dataSignSpecJson) ? null : new StringReader(dataSignSpecJson));
 		Reader configFormIn = (StringUtil.isEmpty(configFormJson) ? null : new StringReader(configFormJson));
 
 		try
 		{
-			return resolveProperties(pluginIn, dataSignsIn, configFormIn);
+			return resolveProperties(pluginIn, dataSignSpecIn, configFormIn);
 		}
 		finally
 		{
 			IOUtil.close(pluginIn);
-			IOUtil.close(dataSignsIn);
+			IOUtil.close(dataSignSpecIn);
 			IOUtil.close(configFormIn);
 		}
 	}
@@ -292,22 +292,22 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 * 从JSON输入流解析并设置{@linkplain #getChartPlugin()}属性。
 	 * 
 	 * @param pluginJsonIn
-	 * @param dataSignsIn
+	 * @param dataSignSpecIn
 	 *            允许{@code null}
 	 * @param configFormIn
 	 *            允许{@code null}
 	 * @return {@linkplain #getChartPlugin()}
 	 * @throws IOException
 	 */
-	public T resolveProperties(Reader pluginJsonIn, Reader dataSignsIn, Reader configFormIn)
+	public T resolveProperties(Reader pluginJsonIn, Reader dataSignSpecIn, Reader configFormIn)
 			throws IOException
 	{
 		@SuppressWarnings("unchecked")
 		Map<String, Object> properties = JsonSupport.parseNonStardand(pluginJsonIn, Map.class);
 
-		if (dataSignsIn != null)
+		if (dataSignSpecIn != null)
 		{
-			Object dataSigns = JsonSupport.parseNonStardand(dataSignsIn, List.class);
+			Object dataSigns = JsonSupport.parseNonStardand(dataSignSpecIn, List.class);
 			properties.put(JSON_PROPERTY_DATA_SIGNS, dataSigns);
 		}
 
@@ -338,7 +338,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 * 从JSON输入流解析并设置{@linkplain #getChartPlugin()}属性。
 	 * 
 	 * @param pluginJsonIn
-	 * @param dataSignsIn
+	 * @param dataSignSpecIn
 	 *            允许{@code null}
 	 * @param configFormIn
 	 *            允许{@code null}
@@ -346,11 +346,11 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 * @return {@linkplain #getChartPlugin()}
 	 * @throws IOException
 	 */
-	public T resolveProperties(InputStream pluginJsonIn, InputStream dataSignsIn, InputStream configFormIn,
+	public T resolveProperties(InputStream pluginJsonIn, InputStream dataSignSpecIn, InputStream configFormIn,
 			String encoding) throws IOException
 	{
 		Reader pluginReader = IOUtil.getReader(pluginJsonIn, encoding);
-		Reader dataSignsReader = (dataSignsIn == null ? null : IOUtil.getReader(dataSignsIn, encoding));
+		Reader dataSignsReader = (dataSignSpecIn == null ? null : IOUtil.getReader(dataSignSpecIn, encoding));
 		Reader configFormReader = (configFormIn == null ? null : IOUtil.getReader(configFormIn, encoding));
 		return resolveProperties(pluginReader, dataSignsReader, configFormReader);
 	}
