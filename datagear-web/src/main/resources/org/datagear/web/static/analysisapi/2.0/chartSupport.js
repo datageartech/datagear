@@ -837,7 +837,7 @@ SPT.gaugeRenderer = function(plugin, config)
 				let dataSetAlias = chart.dataSetAlias(dataSetBind);
 				let result = chart.resultOf(chartResult, dataSetBind);
 				
-				let minField = chart.dataSetFieldOfSign(dataSetBind, 1);
+				let minField = chart.dataSetFieldOfSign(dataSetBind, 2);
 				if(minField)
 				{
 					let minValues = chart.resultColumnArrayDatas(result, minField);
@@ -845,7 +845,7 @@ SPT.gaugeRenderer = function(plugin, config)
 					min = (min == null ? myMin : Math.min(min, myMin));
 				}
 				
-				let maxField = chart.dataSetFieldOfSign(dataSetBind, 2);
+				let maxField = chart.dataSetFieldOfSign(dataSetBind, 3);
 				if(maxField)
 				{
 					let maxValues = chart.resultColumnArrayDatas(result, maxField);
@@ -853,23 +853,14 @@ SPT.gaugeRenderer = function(plugin, config)
 					max = (max == null ? myMax : Math.max(max, myMax));
 				}
 				
-				let valueFields = chart.dataSetFieldsOfSign(dataSetBind, 0);
-				let valuess = chart.resultRowArrayDatas(result, valueFields);
-				let originalDatas = chart.resultDatas(result);
+				let nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
+				let valueFields = chart.dataSetFieldsOfSign(dataSetBind, 1);
 				
-				for(let j=0; j<valuess.length; j++)
+				for(let j=0; j<valueFields.length; j++)
 				{
-					let values = valuess[j];
-					let originalData = originalDatas[j];
-					
-					for(let k=0; k<values.length; k++)
-					{
-						let name = chart.dataSetFieldAlias(dataSetBind, valueFields[k]);
-						let data = { name: name, value: values[k] };
-						SPT.originalDataOfData(data, originalData);
-						
-						seriesData.push(data);
-					}
+					let data = chart.resultNameValueDatas(result, nameField, valueFields[j]);
+					SPT.originalDataOfResult(data, chart, result);
+					seriesData = seriesData.concat(data);
 				}
 				
 				if(CF.isEmpty(seriesName))
