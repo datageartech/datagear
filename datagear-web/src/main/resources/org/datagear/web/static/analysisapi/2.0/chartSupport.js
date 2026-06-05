@@ -856,11 +856,28 @@ SPT.gaugeRenderer = function(plugin, config)
 				let nameField = chart.dataSetFieldOfSign(dataSetBind, 0);
 				let valueFields = chart.dataSetFieldsOfSign(dataSetBind, 1);
 				
-				for(let j=0; j<valueFields.length; j++)
+				if(nameField != null)
 				{
-					let data = chart.resultNameValueDatas(result, nameField, valueFields[j]);
-					SPT.originalDataOfResult(data, chart, result);
-					seriesData = seriesData.concat(data);
+					for(let j=0; j<valueFields.length; j++)
+					{
+						let data = chart.resultNameValueDatas(result, nameField, valueFields[j]);
+						SPT.originalDataOfResult(data, chart, result);
+						seriesData = seriesData.concat(data);
+					}
+				}
+				else
+				{
+					for(let j=0; j<valueFields.length; j++)
+					{
+						let name = chart.dataSetFieldAlias(dataSetBind, valueFields[j]);
+						let data = chart.resultMapDatas(result, { value: valueFields[j] });
+						SPT.originalDataOfResult(data, chart, result);
+						
+						for(let k=0; k<data.length; k++)
+							data[k].name = name;
+						
+						seriesData = seriesData.concat(data);
+					}
 				}
 				
 				if(CF.isEmpty(seriesName))
