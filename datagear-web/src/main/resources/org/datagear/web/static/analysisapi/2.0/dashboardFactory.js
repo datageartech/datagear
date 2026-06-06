@@ -857,26 +857,37 @@ chartProto._updateTime = function(time)
 };
 
 /**
- * 获取/设置图表元素是否手动渲染图表。
+ * 获取/设置图表是否手动渲染。
+ * 默认规则：
+ * 如果this.element()为null，返回true；否则，根据图表元素上的dg-chart-manual-render判断。
  * 
- * @param manualRender 可选，设置是否手动渲染
+ * @param manualRender 可选，设置是否手动渲染，设置为null将采用默认规则
  * @returns true 是；false 否
  */
 chartProto.manualRender = function(manualRender)
 {
-	//注意：此属性不应以chart._initManualRender()的方式初始化，
-	//因为看板需要在chart.init()之前就读取它的值
-	
-	var ele = this._eleNonNull();
-	
 	if(arguments.length == 0)
 	{
-		var eleValue = CF.eleAttr(ele, elementAttrConst.MANUAL_RENDER);
-		return CF.isLiteralTrue(eleValue);
+		//注意：此属性不应以chart._initManualRender()的方式初始化，
+		//因为看板需要在chart.init()之前就读取它的值
+		
+		if(this._manualRender != null)
+			return (this._manualRender == true);
+		else
+		{
+			let ele = this.element();
+			
+			//元素不存在时应返回true，比如在<template></template>里
+			if(ele == null)
+				return true;
+			
+			let eleValue = CF.eleAttr(ele, elementAttrConst.MANUAL_RENDER);
+			return CF.isLiteralTrue(eleValue);
+		}
 	}
 	else
 	{
-		CF.eleAttr(ele, elementAttrConst.MANUAL_RENDER, manualRender);
+		this._manualRender = manualRender;
 	}
 };
 
@@ -1120,14 +1131,7 @@ dashboardProto._isChartRejectInit = function(chart)
 	if(chart == null)
 		return true;
 	
-	//图表元素不存在，比如在<template></template>里
-	if(chart.element() == null)
-		return true;
-	
-	if(chart.manualRender())
-		return true;
-	
-	return false;
+	return chart.manualRender();
 };
 
 dashboardProto._initChart = function(chart)
