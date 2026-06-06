@@ -857,29 +857,26 @@ chartProto._updateTime = function(time)
 };
 
 /**
- * 获取/设置图表是否手动渲染。
+ * 获取/设置图表元素是否手动渲染图表。
  * 
- * @param manualRender 可选，设置是否手动渲染，默认为：false
+ * @param manualRender 可选，设置是否手动渲染
  * @returns true 是；false 否
  */
 chartProto.manualRender = function(manualRender)
 {
+	//注意：此属性不应以chart._initManualRender()的方式初始化，
+	//因为看板需要在chart.init()之前就读取它的值
+	
+	var ele = this._eleNonNull();
+	
 	if(arguments.length == 0)
 	{
-		//注意：此属性不应以chart._initManualRender()的方式初始化，
-		//因为看板需要在chart.init()之前就读取它的值
-		
-		if(this._manualRender != null)
-			return (this._manualRender == true);
-		else
-		{
-			var eleValue = CF.eleAttr(this._eleNonNull(), elementAttrConst.MANUAL_RENDER);
-			return CF.isLiteralTrue(eleValue);
-		}
+		var eleValue = CF.eleAttr(ele, elementAttrConst.MANUAL_RENDER);
+		return CF.isLiteralTrue(eleValue);
 	}
 	else
 	{
-		this._manualRender = manualRender;
+		CF.eleAttr(ele, elementAttrConst.MANUAL_RENDER, manualRender);
 	}
 };
 
