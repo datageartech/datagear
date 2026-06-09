@@ -1270,11 +1270,13 @@ dashboardProto._chartIndex = function(charts, identity)
  * 如果图表已添加至看板，将不会再次添加，直接返回false。
  * 
  * @param chart 图表对象
- * @param syncStatus 可选，是否同步图表状态，默认值为：false
+ * @param syncStatus 可选，是否同步图表状态，默认值为：true
  * @returns true 已添加；false 未添加
  */
 dashboardProto.addChart = function(chart, syncStatus)
 {
+	syncStatus = (syncStatus === undefined ? true : syncStatus);
+	
 	var idx = this.chartIndex(chart);
 	
 	if(idx >= 0)
@@ -1283,7 +1285,7 @@ dashboardProto.addChart = function(chart, syncStatus)
 	var charts = this.charts();
 	charts.push(chart);
 	
-	if(syncStatus === true)
+	if(syncStatus)
 		this._syncAddedChartsStatus(chart);
 	
 	return true;
@@ -1294,12 +1296,13 @@ dashboardProto.addChart = function(chart, syncStatus)
  * 如果某个图表已添加至看板，将不会再次添加。
  * 
  * @param charts 图表对象、数组
- * @param syncStatus 可选，是否同步图表状态，默认值为：false
+ * @param syncStatus 可选，是否同步图表状态，默认值为：true
  * @returns [ ... ]，是否添加布尔值数组，其中：true 已添加；false 未添加
  */
 dashboardProto.addCharts = function(charts, syncStatus)
 {
 	charts = (CF.isArray(charts) ? charts : [ charts ]);
+	syncStatus = (syncStatus === undefined ? true : syncStatus);
 	
 	var re = [];
 	var addedCharts = [];
@@ -1320,7 +1323,7 @@ dashboardProto.addCharts = function(charts, syncStatus)
 	}
 	
 	//应先全部加入看板后再进行渲染，确保依赖库加载逻辑有全量的参考依赖库
-	if(syncStatus === true)
+	if(syncStatus)
 		this._syncAddedChartsStatus(addedCharts);
 	
 	return re;
