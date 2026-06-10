@@ -900,7 +900,7 @@ label.required-label::before,
 }
 .page-dashboard-design .design-resource-wrapper{
 	width: 20vw;
-	min-width: 10rem;
+	min-width: 16rem;
 }
 .page-dashboard-design .p-tabview .p-tabview-panels{
 	padding: 0.25rem 0 0 0;
