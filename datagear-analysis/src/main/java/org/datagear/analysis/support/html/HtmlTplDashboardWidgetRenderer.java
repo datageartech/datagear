@@ -413,7 +413,7 @@ public abstract class HtmlTplDashboardWidgetRenderer
 	 */
 	public HtmlChartWidget getHtmlChartWidgetForException(String htmlChartWidgetId, Throwable t)
 	{
-		return createHtmlChartWidgetForGetException(htmlChartWidgetId, t);
+		return createHtmlChartWidgetForGetException(htmlChartWidgetId, t, true);
 	}
 	
 	/**
@@ -464,7 +464,10 @@ public abstract class HtmlTplDashboardWidgetRenderer
 			}
 			catch (Throwable t)
 			{
-				chartWidget = createHtmlChartWidgetForGetException(id, t);
+				chartWidget = createHtmlChartWidgetForGetException(id, t, false);
+
+				if (LOGGER.isErrorEnabled())
+					LOGGER.debug("Get chart widget [" + id + "] error", t);
 			}
 		}
 
@@ -477,20 +480,25 @@ public abstract class HtmlTplDashboardWidgetRenderer
 		return (HtmlChartWidget) chartWidget;
 	}
 
-	protected HtmlChartWidget createHtmlChartWidgetForGetException(String exceptionWidgetId, Throwable t)
+	protected HtmlChartWidget createHtmlChartWidgetForGetException(String exceptionWidgetId, Throwable t,
+			boolean detailMsg)
 	{
 		ExceptionMsgHtmlChartPlugin plugin = getExceptionMsgHtmlChartPlugin();
 
 		HtmlChartWidget widget = new HtmlChartWidget(this.htmlChartWidgetIdForGetException,
 				"HtmlChartWidgetForException", ChartDefinition.EMPTY_DATA_SET_BINDS, plugin);
 
-		// 这里不添加t.getMessage()，因为其中可能存在敏感信息，不应发送至客户端
-		widget.setConfigValue(plugin.getConfigName(), "Chart widget '"
-				+ (exceptionWidgetId == null ? "" : exceptionWidgetId) + "' exception, see server logs for detail");
+		String msg = "";
 
-		if (LOGGER.isDebugEnabled())
-			LOGGER.debug("Create placeholder chart widget [" + widget.getId() + "] for [" + exceptionWidgetId
-					+ "] on exception", t);
+		if (detailMsg)
+			msg = "Chart widget '" + (exceptionWidgetId == null ? "" : exceptionWidgetId)
+					+ "' exception : " + t.getMessage();
+		else
+			msg = "Chart widget '" + (exceptionWidgetId == null ? "" : exceptionWidgetId)
+					+ "' exception, see server logs for detail";
+
+		// 这里不添加t.getMessage()，因为其中可能存在敏感信息，不应发送至客户端
+		widget.setConfigValue(plugin.getConfigName(), msg);
 
 		return widget;
 	}
@@ -505,10 +513,6 @@ public abstract class HtmlTplDashboardWidgetRenderer
 		widget.setConfigValue(plugin.getConfigName(),
 				"Chart widget '" + (notFoundWidgetId == null ? "" : notFoundWidgetId) + "' not found");
 
-		if (LOGGER.isDebugEnabled())
-			LOGGER.debug("Create placeholder chart widget [" + widget.getId() + "] for [" + notFoundWidgetId
-					+ "] on exception : not found");
-
 		return widget;
 	}
 
@@ -520,10 +524,6 @@ public abstract class HtmlTplDashboardWidgetRenderer
 				"HtmlChartWidgetForPluginNull", ChartDefinition.EMPTY_DATA_SET_BINDS, plugin);
 
 		widget.setConfigValue(plugin.getConfigName(), "Chart plugin is null");
-
-		if (LOGGER.isDebugEnabled())
-			LOGGER.debug("Create placeholder chart widget [" + widget.getId() + "] for [" + chartWidget.getId()
-					+ "] on exception : null chart plugin");
 
 		return widget;
 	}
