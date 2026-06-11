@@ -286,9 +286,6 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 			redirectPath = FileUtil.concatPath(redirectPath, name, FileUtil.PATH_SEPARATOR_SLASH, false);
 		}
 
-		redirectPath = addSessionIdParamIfNeed(redirectPath, request);
-		submitPath = addSessionIdParamIfNeed(submitPath, request);
-
 		boolean authed = isShowAuthed(request, user, dashboardWidget);
 
 		Map<String, Object> authModel = new HashMap<String, Object>();
@@ -408,8 +405,6 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 	{
 		resName = appendRequestQueryString((resName == null ? "" : resName), request);
 		String authPath = WebUtils.getContextPath(request) + resolveAuthPath(request, id);
-		authPath = addSessionIdParamIfNeed(authPath, request);
-		authPath = addSafeSessionParamIfNeed(authPath, request);
 
 		if (!StringUtil.isEmpty(resName))
 		{
@@ -487,7 +482,6 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 		if (requestPath.indexOf(correctPath) < 0)
 		{
 			String redirectPath = correctPath;
-			redirectPath = addSessionIdParamIfNeed(redirectPath, request);
 			redirectPath = appendRequestQueryString(redirectPath, request);
 			response.sendRedirect(redirectPath);
 		}
@@ -510,7 +504,6 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 			if (subPathSlashIdx > 0 && subPathSlashIdx < firstTemplate.length() - 1)
 			{
 				String redirectPath = correctPath + WebUtils.encodePathURL(firstTemplate);
-				redirectPath = addSessionIdParamIfNeed(redirectPath, request);
 				redirectPath = appendRequestQueryString(redirectPath, request);
 
 				response.sendRedirect(redirectPath);
@@ -558,7 +551,6 @@ public class DashboardVisualController extends AbstractDataAnalysisController im
 			{
 				String redirectPath = WebUtils.getContextPath(request) + resolveShowPath(request, id)
 						+ WebUtils.encodePathURL(resName);
-				redirectPath = addSessionIdParamIfNeed(redirectPath, request);
 				redirectPath = appendRequestQueryString(redirectPath, request);
 
 				response.sendRedirect(redirectPath);

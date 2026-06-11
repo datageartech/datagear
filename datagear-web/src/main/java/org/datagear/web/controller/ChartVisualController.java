@@ -177,7 +177,6 @@ public class ChartVisualController extends AbstractDataAnalysisController implem
 		if (requestPath.indexOf(correctPath) < 0)
 		{
 			String redirectPath = correctPath;
-			redirectPath = addSessionIdParamIfNeed(redirectPath, request);
 			redirectPath = appendRequestQueryString(redirectPath, request);
 			response.sendRedirect(redirectPath);
 		}

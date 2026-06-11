@@ -148,7 +148,6 @@ import org.datagear.web.util.DirectoryHtmlChartPluginManagerInitializer;
 import org.datagear.web.util.DtbsSourceTableCache;
 import org.datagear.web.util.ExpiredSessionAttrManager;
 import org.datagear.web.util.MessageChannel;
-import org.datagear.web.util.SessionIdParamResolver;
 import org.datagear.web.util.SqlDriverChecker;
 import org.datagear.web.util.WelcomeContentLoader;
 import org.datagear.web.util.XmlDriverEntityManagerInitializer;
@@ -403,13 +402,6 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 	public SessionDashboardInfoSupport sessionDashboardInfoSupport()
 	{
 		SessionDashboardInfoSupport bean = new SessionDashboardInfoSupport();
-		return bean;
-	}
-
-	@Bean
-	public SessionIdParamResolver sessionIdParamResolver()
-	{
-		SessionIdParamResolver bean = new SessionIdParamResolver();
 		return bean;
 	}
 

@@ -48,7 +48,6 @@ import org.datagear.web.analysis.SessionDashboardInfoSupport.DashboardInfo;
 import org.datagear.web.analysis.WebDashboardQueryConverter;
 import org.datagear.web.analysis.WebHtmlTplDashboardImportBuilder;
 import org.datagear.web.analysis.WebHtmlTplDashboardImportBuilderFactory;
-import org.datagear.web.util.SessionIdParamResolver;
 import org.datagear.web.util.ThemeSpec;
 import org.datagear.web.util.WebUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,46 +83,6 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	/** 看板卸载参数：看板ID */
 	public static final String UNLOAD_PARAM_DASHBOARD_ID = "dashboardId";
 
-	/**
-	 * 看板展示URL的请求参数名：启用安全会话。
-	 * <p>
-	 * 当看板嵌入不同源的iframe时，cookie会被浏览器禁用，会导致无法保持会话，需要设置此参数启用安全会话。
-	 * </p>
-	 * <p>
-	 * 注意：这里的启用安全会话功能无法支持看板展示页面内的链接，如果需要这些链接支持安全会话，
-	 * 需要定义看板时使用JS为这些链接添加启用安全会话参数、会话信息参数（可通过{@linkplain #DASHBOARD_SESSION_NAME_NAME}、{@linkplain #DASHBOARD_SESSION_VALUE_NAME}获取会话信息），示例：
-	 * </p>
-	 * <p>
-	 * <code>
-	 * &lt;a href="content.html;jsessionid=xxxxx?DG_SAFE_SESSION=1"&gt;看板超链接&lt;/a&gt;
-	 * <br>
-	 * &lt;script src="res/common.js;jsessionid=xxxxx"&gt;&lt;/script&gt;
-	 * </code>
-	 * </p>
-	 */
-	public static final String DASHBOARD_SHOW_PARAM_SAFE_SESSION = ChartDefinition.BUILTIN_NAME_PREFIX
-			+ "SAFE_SESSION";
-
-	/**
-	 * {@linkplain #DASHBOARD_SHOW_PARAM_SAFE_SESSION}的参数值规范：{@code 1}。
-	 */
-	public static final String DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_1 = "1";
-
-	/**
-	 * {@linkplain #DASHBOARD_SHOW_PARAM_SAFE_SESSION}的参数值规范：{@code true}。
-	 */
-	public static final String DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_TRUE = "true";
-
-	/**
-	 * {@linkplain #DASHBOARD_SHOW_PARAM_SAFE_SESSION}的参数值规范：{@code 0}。
-	 */
-	public static final String DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_0 = "0";
-
-	/**
-	 * {@linkplain #DASHBOARD_SHOW_PARAM_SAFE_SESSION}的参数值规范：{@code false}。
-	 */
-	public static final String DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_FALSE = "false";
-
 	@Autowired
 	private WebDashboardQueryConverter webDashboardQueryConverter;
 
@@ -138,9 +97,6 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 
 	@Autowired
 	private SessionDashboardInfoSupport sessionDashboardInfoSupport;
-
-	@Autowired
-	private SessionIdParamResolver sessionIdParamResolver;
 
 	public AbstractDataAnalysisController()
 	{
@@ -196,16 +152,6 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	public void setSessionDashboardInfoSupport(SessionDashboardInfoSupport sessionDashboardInfoSupport)
 	{
 		this.sessionDashboardInfoSupport = sessionDashboardInfoSupport;
-	}
-
-	public SessionIdParamResolver getSessionIdParamResolver()
-	{
-		return sessionIdParamResolver;
-	}
-
-	public void setSessionIdParamResolver(SessionIdParamResolver sessionIdParamResolver)
-	{
-		this.sessionIdParamResolver = sessionIdParamResolver;
 	}
 
 	/**
@@ -312,14 +258,6 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	protected void inflateWebRenderContext(HttpServletRequest request, RenderContext renderContext)
 	{
 		renderContext.put(RenderContextAttrs.CONTEXT_PATH, WebUtils.getContextPath(request));
-
-		// 如果是启用安全会话请求，则将会话信息返回给前端，前端需要构建安全会话链接时可能需要
-		if (isSafeSessionRequest(request))
-		{
-			renderContext.put(RenderContextAttrs.SESSION_NAME, this.sessionIdParamResolver.getSessionIdParamName());
-			renderContext.put(RenderContextAttrs.SESSION_VALUE,
-					this.sessionIdParamResolver.getAddableSessionId(request));
-		}
 	}
 
 	/**
@@ -498,25 +436,21 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 
 	protected void addFetchDataUrlValue(HttpServletRequest request, RenderContext renderContext, String fetchDataURL)
 	{
-		fetchDataURL = addSessionIdParamIfNotExplicitDisable(fetchDataURL, request);
 		renderContext.put(RenderContextAttrs.FETCH_DATA_URL, fetchDataURL);
 	}
 
 	protected void addLoadChartUrlValue(HttpServletRequest request, RenderContext renderContext, String loadChartURL)
 	{
-		loadChartURL = addSessionIdParamIfNotExplicitDisable(loadChartURL, request);
 		renderContext.put(RenderContextAttrs.LOAD_CHART_URL, loadChartURL);
 	}
 
 	protected void addHeartBeatUrlValue(HttpServletRequest request, RenderContext renderContext, String heartbeatURL)
 	{
-		heartbeatURL = addSessionIdParamIfNotExplicitDisable(heartbeatURL, request);
 		renderContext.put(RenderContextAttrs.HEARTBEAT_URL, heartbeatURL);
 	}
 
 	protected void addUnloadUrlValue(HttpServletRequest request, RenderContext renderContext, String unloadURL)
 	{
-		unloadURL = addSessionIdParamIfNotExplicitDisable(unloadURL, request);
 		renderContext.put(RenderContextAttrs.UNLOAD_URL, unloadURL);
 	}
 
@@ -535,121 +469,6 @@ public abstract class AbstractDataAnalysisController extends AbstractController
 	protected String resolvePluginResPathPrefix(HttpServletRequest request)
 	{
 		return "/vres/plugin/resource";
-	}
-
-	/**
-	 * 如果是启用安全会话请求，则为URL添加会话ID参数；否则，直接返回{@code url}。
-	 * 
-	 * @param url
-	 * @param request
-	 * @return
-	 */
-	protected String addSessionIdParamIfNeed(String url, HttpServletRequest request)
-	{
-		if (isSafeSessionRequest(request))
-		{
-			return addSessionIdParam(url, request);
-		}
-		else
-			return url;
-	}
-
-	/**
-	 * 如果没有明确禁用安全会话请求，则为URL添加会话ID参数；否则，直接返回{@code url}。
-	 * <p>
-	 * {@linkplain #DASHBOARD_SHOW_PARAM_SAFE_SESSION}是在4.7.0版本新加的特性，
-	 * 在之前版本，为了iframe嵌入，某些URL默认添加了会话ID参数，为了兼容，应仅在明确禁用安全会话时才移除这些URL中的会话ID参数。
-	 * </p>
-	 * 
-	 * @param url
-	 * @param request
-	 * @return
-	 */
-	protected String addSessionIdParamIfNotExplicitDisable(String url, HttpServletRequest request)
-	{
-		if (!isExplicitDisableSafeSessionRequest((request)))
-		{
-			return addSessionIdParam(url, request);
-		}
-		else
-			return url;
-	}
-
-	/**
-	 * 如果是启用安全会话请求，则为URL添加{@linkplain #DASHBOARD_SHOW_PARAM_SAFE_SESSION}参数；否则，直接返回{@code url}。
-	 * 
-	 * @param url
-	 * @param request
-	 * @return
-	 */
-	protected String addSafeSessionParamIfNeed(String url, HttpServletRequest request)
-	{
-		if (isSafeSessionRequest(request))
-			return WebUtils.addUrlParam(url, DASHBOARD_SHOW_PARAM_SAFE_SESSION, DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_TRUE);
-		else
-			return url;
-	}
-
-	/**
-	 * 是否是启用安全会话请求。
-	 * 
-	 * @param request
-	 * @return
-	 */
-	protected boolean isSafeSessionRequest(HttpServletRequest request)
-	{
-		String value = request.getParameter(DASHBOARD_SHOW_PARAM_SAFE_SESSION);
-
-		if (value == null)
-			return false;
-
-		return (DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_1.equals(value)
-				|| DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_TRUE.equalsIgnoreCase(value));
-	}
-
-	/**
-	 * 是否是明确禁用安全会话请求。
-	 * 
-	 * @param request
-	 * @return
-	 */
-	protected boolean isExplicitDisableSafeSessionRequest(HttpServletRequest request)
-	{
-		String value = request.getParameter(DASHBOARD_SHOW_PARAM_SAFE_SESSION);
-
-		if (value == null)
-			return false;
-
-		return (DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_0.equals(value)
-				|| DASHBOARD_SHOW_PARAM_SAFE_SESSION_VALUE_FALSE.equalsIgnoreCase(value));
-	}
-
-	/**
-	 * 为指定URL添加会话ID参数。
-	 * <p>
-	 * 图表、看板展示页可能会以&lt;iframe&gt;的方式嵌入外部网页中，当在跨域场景时，某些浏览器会禁用&lt;iframe&gt;内的cookie，导致会话无法保持，
-	 * 从而引起图表、看板内的ajax请求失效，此方法可以解决上述问题。
-	 * </p>
-	 * 
-	 * @param url
-	 * @param sessionId
-	 * @return
-	 */
-	protected String addSessionIdParam(String url, String sessionId)
-	{
-		return this.sessionIdParamResolver.addSessionId(url, sessionId);
-	}
-
-	/**
-	 * 为指定URL添加会话参数。
-	 * 
-	 * @param url
-	 * @param session
-	 * @return
-	 */
-	protected String addSessionIdParam(String url, HttpServletRequest request)
-	{
-		return this.sessionIdParamResolver.addSessionId(url, request);
 	}
 
 	/**
