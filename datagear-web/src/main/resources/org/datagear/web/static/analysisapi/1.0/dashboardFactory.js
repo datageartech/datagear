@@ -149,8 +149,6 @@
 	renderContextAttrConst.HEARTBEAT_URL = "DG_HEARTBEAT_URL";
 	renderContextAttrConst.UNLOAD_URL = "DG_UNLOAD_URL";
 	renderContextAttrConst.PLUGIN_RES_URL_PREFIX = "DG_PLUGIN_RES_URL_PREFIX";
-	renderContextAttrConst.SESSION_NAME = "DG_SESSION_NAME";
-	renderContextAttrConst.SESSION_VALUE = "DG_SESSION_VALUE";
 	
 	//----------------------------------------
 	// renderContextAttrConst结束
@@ -341,16 +339,6 @@
 			else if(name == renderContextAttrConst.PLUGIN_RES_URL_PREFIX)
 			{
 				webContext.attributes["pluginResUrlPrefix"] = value;
-				del = true;
-			}
-			else if(name == renderContextAttrConst.SESSION_NAME)
-			{
-				webContext.attributes["sessionName"] = value;
-				del = true;
-			}
-			else if(name == renderContextAttrConst.SESSION_VALUE)
-			{
-				webContext.attributes["sessionValue"] = value;
 				del = true;
 			}
 			

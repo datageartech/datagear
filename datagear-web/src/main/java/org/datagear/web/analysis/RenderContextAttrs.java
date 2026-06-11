@@ -68,10 +68,4 @@ public class RenderContextAttrs
 
 	/** 插件资源URL前缀 */
 	public static final String PLUGIN_RES_URL_PREFIX = BUILTIN_ATTR_PREFIX + "PLUGIN_RES_URL_PREFIX";
-
-	/** 会话名 */
-	public static final String SESSION_NAME = BUILTIN_ATTR_PREFIX + "SESSION_NAME";
-
-	/** 会话值 */
-	public static final String SESSION_VALUE = BUILTIN_ATTR_PREFIX + "SESSION_VALUE";
 }

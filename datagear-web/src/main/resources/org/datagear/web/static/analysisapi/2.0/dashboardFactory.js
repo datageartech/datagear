@@ -135,8 +135,6 @@ renderContextAttrConst.FETCH_DATA_URL ="DG_FETCH_DATA_URL";
 renderContextAttrConst.LOAD_CHART_URL = "DG_LOAD_CHART_URL";
 renderContextAttrConst.HEARTBEAT_URL = "DG_HEARTBEAT_URL";
 renderContextAttrConst.UNLOAD_URL = "DG_UNLOAD_URL";
-renderContextAttrConst.SESSION_NAME = "DG_SESSION_NAME";
-renderContextAttrConst.SESSION_VALUE = "DG_SESSION_VALUE";
 
 //----------------------------------------
 // renderContextAttrConst结束
