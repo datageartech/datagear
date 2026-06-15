@@ -670,6 +670,15 @@ $.inflateDashboardDesignEditor = function(po)
 		return re;
 	};
 	
+	po.getSelectInfoInCodeEditor = function(tab)
+	{
+		tab = (tab == null ? po.getCurrentEditTab() : tab);
+		var codeEditorEle = po.elementOfId(po.resCodeEditorEleId(tab));
+		var codeEditor = po.codeEditorInstance(codeEditorEle);
+		
+		return po.getSelectedCodeInfo(codeEditor);
+	};
+	
 	po.searchInCodeEditor = function(tab, text, noTipIfNone)
 	{
 		if(!text)
@@ -3867,11 +3876,17 @@ $.inflateDashboardDesignEditorForms = function(po)
 			
 			onCodeReplacePanelShow: function(e)
 			{
+				var tab = po.getCurrentEditTab();
 				var form = po.elementOfPidPrefix("codeReplaceForm", document.body);
 				var model = pm.codeReplace.model;
+				var selectInfo = po.getSelectInfoInCodeEditor(tab);
 				
-				if(!$.isEmpty(pm.codeSearch.model.value))
+				if(selectInfo.text)
+					model.source = selectInfo.text;
+				else if(!$.isEmpty(pm.codeSearch.model.value))
 					model.source = pm.codeSearch.model.value;
+				else
+					model.source = "";
 				
 				model.replaceTo = "";
 				
@@ -3883,8 +3898,6 @@ $.inflateDashboardDesignEditorForms = function(po)
 					},
 					submitHandler:function()
 					{
-						var tab = po.getCurrentEditTab();
-						
 						if(model.submitType == "next")
 						{
 							po.searchInCodeEditor(tab, model.source);
