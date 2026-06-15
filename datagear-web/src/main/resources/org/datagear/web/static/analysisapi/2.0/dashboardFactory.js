@@ -1655,14 +1655,14 @@ dashboardProto._assertActive = function()
  * }
  * 或者，简写为其name属性值。
  * 
- * @param form 要渲染的<form>表单HTML元素、HTML元素ID，表单结构允许灵活自定义，具体参考chartTool.renderDataSetParamForm
+ * @param form 要渲染的<form>表单HTML元素、元素选择器字符串，表单结构允许灵活自定义，具体参考chartTool.renderDataSetParamForm
  * @param config 可选，表单配置对象，默认为表单元素的elementAttrConst.DASHBOARD_FORM属性值
  */
 dashboardProto.renderForm = function(form, config)
 {
 	this._assertAlive();
 	
-	form = this._toElementCareId(form);
+	form = this._toElement(form);
 	
 	CF.eleAddClass(form, "dg-dashboard-form");
 	
@@ -1788,7 +1788,7 @@ dashboardProto.resizeCharts = function(charts)
 /**
  * 重新调整指定元素内（不包括元素自身）包含的所有已加入看板的活跃图表的尺寸。
  * 
- * @param element HTML元素、HTML元素ID
+ * @param element HTML元素、元素选择器字符串
  * @return 已调整尺寸的图表数组：[ ... ]
  */
 dashboardProto.resizeChartsIn = function(element)
@@ -2632,7 +2632,7 @@ dashboardProto._dashboardQueryOfForm = function(dashboardQueryForm, dashboardQue
  * dashboard.loadChart(element, add);
  * dashboard.loadChart(element, chartWidgetId, add);
  * 
- * @param element 用于渲染图表的<div>元素、元素ID
+ * @param element 用于渲染图表的<div>元素、元素选择器字符串
  * @param chartWidgetId 选填，要加载的图表部件ID，如果不设置，将从元素的"dg-chart-widget"属性取
  * @param add 可选，是否在加载完成后加入看板，默认值为：true
  * @returns Promise 兑现时表示已加载完成，兑现值为：已加载的图表
@@ -2646,7 +2646,7 @@ dashboardProto.loadChart = function(element, chartWidgetId, add)
 		chartWidgetId = undefined;
 	}
 	
-	element = this._toElementCareId(element);
+	element = this._toElement(element);
 	
 	if(!CF.isChartTagName(element))
 		throw new Error("load chart element must be : <"+CF.CHART_TAG_NAME+">");
@@ -2706,14 +2706,14 @@ dashboardProto.loadCharts = function(elements, chartWidgetIds, add)
 	return promise;
 };
 
-dashboardProto._toElementCareId = function(element)
+dashboardProto._toElement = function(element)
 {
 	if(element == null)
 		return null;
 	
-	//元素ID
+	//元素选择器字符串
 	if(CF.isString(element))
-		return CF.eleOfId(element);
+		return CF.eleOfSelector(element);
 	
 	//元素对象
 	return element;
@@ -2950,14 +2950,14 @@ dashboardProto._createLoadedChart = function(chartRoot, element, chartWidgetId)
  * dashboard.createChart(element, add);
  * dashboard.createChart(element, chartRoot, add);
  * 
- * @param element 用于渲染图表的<div>元素、元素ID
+ * @param element 用于渲染图表的<div>元素、元素选择器字符串
  * @param chartRoot 选填，要创建的图表根对象，结构同DF.createLocalChart()函数的同名参数，如果不设置，将从元素的"dg-chart-local"属性取
  * @param add 可选，是否在创建完成后加入看板，默认值为：true
  * @returns Promise，兑现时表示已创建完成、且已设置其插件，兑现值为：创建的图表对象
  */
 dashboardProto.createChart = function(element, chartRoot, add)
 {
-	element = this._toElementCareId(element);
+	element = this._toElement(element);
 	
 	if(!CF.isChartTagName(element))
 		throw new Error("chart element must be : <"+CF.CHART_TAG_NAME+">");
@@ -3655,11 +3655,11 @@ dashboardProto.contextURL = function(url)
 /**
  * 销毁看板表单。
  * 
- * @param form 表单HTML元素、HTML元素ID
+ * @param form 表单HTML元素、元素选择器字符串
  */
 dashboardProto.destroyForm = function(form)
 {
-	form = this._toElementCareId(form);
+	form = this._toElement(form);
 	
 	if(CF.isEleMatches(form, "form.dg-dashboard-form"))
 	{
@@ -3686,12 +3686,12 @@ dashboardProto.apiVersion = function()
 /**
  * 获取指定元素内（不包括元素自身）包含的所有已加入看板的图表。
  *
- * @param element HTML元素、HTML元素ID
+ * @param element HTML元素、元素选择器字符串
  * @return [ ... ]
  */
 dashboardProto.chartsIn = function(element)
 {
-	element = this._toElementCareId(element);
+	element = this._toElement(element);
 	
 	var re = [];
 	
