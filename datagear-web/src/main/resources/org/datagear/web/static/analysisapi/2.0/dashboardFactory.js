@@ -1387,10 +1387,11 @@ dashboardProto.removeChart = function(identity, doDestroy)
 /**
  * 获取当前在指定HTML元素上渲染的图表对象，返回null表示元素上并未渲染图表。
  * 
- * @param element HTML元素、HTML元素ID
+ * @param element HTML元素、元素选择器字符串
  */
 dashboardProto.renderedChart = function(element)
 {
+	element = this._toElement(element);
 	return CF.renderedChart(element);
 };
 
