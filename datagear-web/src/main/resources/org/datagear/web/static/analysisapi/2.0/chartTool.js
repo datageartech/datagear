@@ -2018,7 +2018,7 @@ TOOL.setChartToolButtonOptions = function(button, buttonOptions)
 		CF.eleStyle(button, buttonOptions.style);
 	
 	if(buttonOptions.styleClass)
-		button.addClass(buttonOptions.styleClass);
+		CF.eleAddClass(button, buttonOptions.styleClass);
 };
 
 TOOL.setChartToolBoxThemeStyle = function(chart, boxEle)
