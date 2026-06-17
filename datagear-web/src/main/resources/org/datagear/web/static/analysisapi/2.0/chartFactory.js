@@ -3318,10 +3318,10 @@ chartProto.hasDataSetParam = function(dataSetBinds)
  * 
  * @param dataSetBind 数据集绑定或其索引
  * @param field 与this.dataSetField()函数的identity参数相同
- * @param dataSign 可选，要设置的标记字符串、数据标记对象，或者它们的数组，不设置则执行获取操作
+ * @param dataSigns 可选，要设置的标记，与this.pluginDataSign()函数的identity参数相同、或者是它们的数组，不设置则执行获取操作
  * @returns 数据标记名字符串数组，空数组表示没有
  */
-chartProto.dataSetFieldSigns = function(dataSetBind, field, dataSign)
+chartProto.dataSetFieldSigns = function(dataSetBind, field, dataSigns)
 {
 	dataSetBind = this._dataSetBindOf(dataSetBind);
 	field = this._dataSetFieldNestedNonNull(dataSetBind, field);
@@ -3337,8 +3337,8 @@ chartProto.dataSetFieldSigns = function(dataSetBind, field, dataSign)
 	}
 	else
 	{
-		dataSign = this._toDataSignValues(dataSign);
-		dataSetBind.fieldSigns[fullname] = dataSign;
+		var dataSignValues = this._toDataSignValues(dataSigns);
+		dataSetBind.fieldSigns[fullname] = dataSignValues;
 	}
 };
 
@@ -3355,14 +3355,17 @@ chartProto._toDataSignValues = function(dataSigns)
 	for(let i=0; i<dataSigns.length; i++)
 	{
 		let dsi = dataSigns[i];
+		let dsiObj = this.pluginDataSign(dsi);
 		let fullname = null;
 		
-		if(dsi != null)
+		if(dsiObj != null)
 		{
-			if(CF.isString(dsi))
-				fullname = dsi;
-			else if(dsi.fullname !== undefined)
-				fullname = dsi.fullname;
+			fullname = this._fullnameOfDataSignNonNull(dsiObj);
+		}
+		//允许自定义标记字符串
+		else if(CF.isString(dsi))
+		{
+			fullname = dsi;
 		}
 		
 		//标记数组不应包含null，也不应有重复项
@@ -4110,7 +4113,7 @@ chartProto._isSignsMatches = function(signs, dataSign)
  * 获取/设置数据集数据标记。
  * 
  * @param dataSetBind 数据集绑定或其索引
- * @param dataSigns 可选，要设置的标记字符串、数据标记对象，或者它们的数组，不设置则执行获取操作
+ * @param dataSigns 可选，要设置的标记，与this.pluginDataSign()函数的identity参数相同、或者是它们的数组，不设置则执行获取操作
  * @returns 标记数组，空数组表示没有
  */
 chartProto.dataSetSigns = function(dataSetBind, dataSigns)
@@ -4126,8 +4129,8 @@ chartProto.dataSetSigns = function(dataSetBind, dataSigns)
 	}
 	else
 	{
-		dataSigns = this._toDataSignValues(dataSigns);
-		dataSetBind.dataSetSigns = dataSigns;
+		var dataSignValues = this._toDataSignValues(dataSigns);
+		dataSetBind.dataSetSigns = dataSignValues;
 	}
 };
 
