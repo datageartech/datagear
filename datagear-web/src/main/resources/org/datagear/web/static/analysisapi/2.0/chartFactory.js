@@ -2633,9 +2633,12 @@ chartProto._dataSetFieldsOfSign = function(dataSetBind, fieldsOwner, dataSign, c
 	var re = [];
 	
 	var fields = this.dataSetFields(fieldsOwner);
-	var dataSignObj = this.pluginDataSign(dataSign);
-	
 	fields = this.sortDataSetFields(dataSetBind, fields);
+	
+	//避免下面循环中每次都查找
+	var dataSignObj = this.pluginDataSign(dataSign);
+	if(dataSignObj != null)
+		dataSign = dataSignObj;
 	
 	for(let i=0; i<fields.length; i++)
 	{
@@ -2643,12 +2646,7 @@ chartProto._dataSetFieldsOfSign = function(dataSetBind, fieldsOwner, dataSign, c
 			break;
 		
 		let field = fields[i];
-		let matches = false;
-		
-		if(dataSign == null)
-			matches = this.isDataSetFieldSigned(dataSetBind, field, null);
-		else
-			matches = (dataSignObj == null ? false : this.isDataSetFieldSigned(dataSetBind, field, dataSignObj));
+		let matches = this.isDataSetFieldSigned(dataSetBind, field, dataSign);
 		
 		if(matches)
 			re.push(field);
@@ -2754,7 +2752,7 @@ chartProto.resultData = function(dataSetResult, data)
 /**
  * 获取/设置指定数据集绑定对应的数据集结果对象包含的数据。
  * 
- * @param chartResult 图表结果、数据集结果数组
+ * @param chartResult 图表结果
  * @param dataSetBind 数据集绑定、索引数值
  * @param data 可选，要设置的数据，通常是：{ ... }、[ { ... }, ... ]，不设置则执行获取操作
  * @return 要获取的数据集结果数据，没有则返回null
@@ -2801,7 +2799,7 @@ chartProto.resultDatas = function(dataSetResult)
 /**
  * 获取指定数据集绑定对应的数据集结果对象包含的数据对象数组。
  * 
- * @param chartResult 图表结果、数据集结果数组
+ * @param chartResult 图表结果
  * @param dataSetBind 数据集绑定、索引数值
  * @return 不会为null的数组
  */
@@ -3736,7 +3734,14 @@ chartProto._dataSetBindsOf = function(count, attachment, dataSign)
 	var re = [];
 	
 	var dataSetBinds = this.dataSetBinds();
-	var dataSignObj = (dataSign === false ? null : this.pluginDataSign(dataSign));
+	
+	if(dataSign !== false)
+	{
+		//避免下面循环中每次都查找
+		var dataSignObj = this.pluginDataSign(dataSign);
+		if(dataSignObj != null)
+			dataSign = dataSignObj;
+	}
 	
 	for(let i=0; i<dataSetBinds.length; i++)
 	{
@@ -3752,10 +3757,8 @@ chartProto._dataSetBindsOf = function(count, attachment, dataSign)
 		 //忽略数据标记匹配
 		else if(dataSign === false)
 			matches = true;
-		else if(dataSign == null)
-			matches = this.isDataSetSigned(dsb, null);
 		else
-			matches = (dataSignObj == null ? false : this.isDataSetSigned(dsb, dataSignObj));
+			matches = this.isDataSetSigned(dsb, dataSign);
 		
 		if(matches)
 			re.push(dsb);
@@ -4057,21 +4060,8 @@ chartProto._fullnameOfDataSignNonNull = function(dataSign)
  */
 chartProto.isDataSetSigned = function(dataSetBind, dataSign)
 {
-	dataSetBind = this._dataSetBindOf(dataSetBind);
 	var dss = this.dataSetSigns(dataSetBind);
-	
-	//匹配无任何标记的
-	if(dataSign == null && CF.isEmpty(dss))
-		return true;
-	
-	var dataSignObj = this.pluginDataSign(dataSign);
-	
-	if(dataSignObj == null)
-		return false;
-	
-	var fullname = this._fullnameOfDataSignNonNull(dataSignObj);
-	
-	return (CF.indexInArray(dss, fullname) >= 0);
+	return this._isSignsMatches(dss, dataSign);
 };
 
 /**
@@ -4085,19 +4075,35 @@ chartProto.isDataSetSigned = function(dataSetBind, dataSign)
 chartProto.isDataSetFieldSigned = function(dataSetBind, field, dataSign)
 {
 	var fieldSigns = this.dataSetFieldSigns(dataSetBind, field);
-	
-	//匹配无任何标记的
-	if(dataSign == null && CF.isEmpty(fieldSigns))
+	return this._isSignsMatches(fieldSigns, dataSign);
+};
+
+chartProto._isSignsMatches = function(signs, dataSign)
+{
+	//null应匹配空数组
+	if(dataSign == null && CF.isEmpty(signs))
 		return true;
 	
-	var dataSignObj = this.pluginDataSign(dataSign);
-	
-	if(dataSignObj == null)
+	if(signs == null)
 		return false;
 	
-	var fullname = this._fullnameOfDataSignNonNull(dataSignObj);
+	var fullname = null;
+	var dataSignObj = this.pluginDataSign(dataSign);
 	
-	return (CF.indexInArray(fieldSigns, fullname) >= 0);
+	if(dataSignObj != null)
+	{
+		fullname = this._fullnameOfDataSignNonNull(dataSignObj);
+	}
+	//允许自定义标记字符串，与设置操作兼容
+	else if(CF.isString(dataSign))
+	{
+		fullname = dataSign;
+	}
+	
+	if(fullname == null)
+		return false;
+	
+	return (CF.indexInArray(signs, fullname) >= 0);
 };
 
 /**
@@ -4519,7 +4525,7 @@ chartProto.resultIgnoreFetch = function(dataSetResult, ignoreFetch)
 /**
  * 获取/设置指定数据集绑定对应的数据集结果是否是忽略获取的。
  * 
- * @param chartResult 图表结果、数据集结果数组
+ * @param chartResult 图表结果
  * @param dataSetBind 数据集绑定、索引数值
  * @param ignoreFetch 可选，要设置的值，true 忽略；false 不忽略
  * @returns true、false
@@ -4577,7 +4583,7 @@ chartProto._rendererAddition = function(renderer, name)
  * 获取未忽略结果的数据集绑定数组。
  * 
  * @param dataSetBinds 数据集绑定、数组
- * @param chartResult 可选，用于校验的图表结果、数据集结果数组，如果未设置，则使用this.dataSetIgnoreFetch()匹配
+ * @param chartResult 可选，用于校验的图表结果，如果未设置，则使用this.dataSetIgnoreFetch()匹配
  * @returns [ ... ]，空数组表示没有
  */
 chartProto.dataSetBindsFetched = function(dataSetBinds, chartResult)
