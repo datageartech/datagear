@@ -65,7 +65,7 @@ public class HtmlChartPlugin extends AbstractChartPlugin implements ApiVersionAw
 	public static final String PROPERTY_RENDERER = "renderer";
 	public static final String PROPERTY_PLATFORM_VERSION = "platformVersion";
 	public static final String PROPERTY_API_VERSION = "apiVersion";
-	public static final String PROPERTY_USAGE = "usage";
+	public static final String PROPERTY_USE = "use";
 
 	/** HTML换行符 */
 	public static final String HTML_NEW_LINE = "\n";
@@ -98,10 +98,10 @@ public class HtmlChartPlugin extends AbstractChartPlugin implements ApiVersionAw
 	/**
 	 * 插件用途。
 	 * <p>
-	 * 默认需为{@linkplain HtmlChartPluginUsage#NORMAL}
+	 * 默认需为{@linkplain HtmlChartPluginUse#NORMAL}
 	 * </p>
 	 */
-	private String usage = HtmlChartPluginUsage.NORMAL;
+	private String use = HtmlChartPluginUse.NORMAL;
 
 	private HtmlChartPluginScriptObjectWriter pluginWriter;
 
@@ -139,7 +139,7 @@ public class HtmlChartPlugin extends AbstractChartPlugin implements ApiVersionAw
 		this(plugin.getId(), plugin.getNameLabel(), plugin.getRenderer(), plugin.getPluginWriter(),
 				plugin.getRenderContextWriter(), plugin.getChartWriter());
 
-		setUsage(plugin.getUsage());
+		setUse(plugin.getUse());
 		setDescLabel(plugin.getDescLabel());
 		setResources(plugin.getResources());
 		setIcons(plugin.getIcons());
@@ -188,14 +188,14 @@ public class HtmlChartPlugin extends AbstractChartPlugin implements ApiVersionAw
 		this.apiVersion = apiVersion;
 	}
 
-	public String getUsage()
+	public String getUse()
 	{
-		return usage;
+		return use;
 	}
 
-	public void setUsage(String usage)
+	public void setUse(String use)
 	{
-		this.usage = usage;
+		this.use = use;
 	}
 
 	public HtmlChartPluginScriptObjectWriter getPluginWriter()

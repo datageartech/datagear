@@ -23,7 +23,7 @@ package org.datagear.analysis.support.html;
  * @author datagear@163.com
  *
  */
-public class HtmlChartPluginUsage
+public class HtmlChartPluginUse
 {
 	/**
 	 * 插件用途：正常。

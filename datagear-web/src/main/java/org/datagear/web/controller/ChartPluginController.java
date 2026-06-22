@@ -38,7 +38,7 @@ import org.datagear.analysis.support.ChartPluginCategorizationResolver;
 import org.datagear.analysis.support.ChartPluginCategorizationResolver.Categorization;
 import org.datagear.analysis.support.html.HtmlChartPlugin;
 import org.datagear.analysis.support.html.HtmlChartPluginLoader;
-import org.datagear.analysis.support.html.HtmlChartPluginUsage;
+import org.datagear.analysis.support.html.HtmlChartPluginUse;
 import org.datagear.management.domain.HtmlChartPluginVo;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
@@ -430,7 +430,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 
 			for (HtmlChartPlugin plugin : plugins)
 			{
-				if (ignoreLib && HtmlChartPluginUsage.LIB.equals(plugin.getUsage()))
+				if (ignoreLib && HtmlChartPluginUse.LIB.equals(plugin.getUse()))
 					continue;
 
 				if (!apiVersionEmpty && !apiVersion.equals(plugin.getApiVersion()))

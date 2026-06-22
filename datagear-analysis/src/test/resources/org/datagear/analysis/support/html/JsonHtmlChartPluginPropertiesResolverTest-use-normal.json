@@ -2,5 +2,5 @@
 	"id" : "author-issueDate",
 	"nameLabel" : "",
 	"apiVersion": "2.0",
-	"usage": "LIB"
+	"use": "normal"
 }

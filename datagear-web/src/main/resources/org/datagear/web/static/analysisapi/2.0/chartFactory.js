@@ -274,8 +274,8 @@ CF.DataSetFieldDataType =
 	UNKNOWN: "unknown"
 };
 
-//org.datagear.analysis.support.html.HtmlChartPluginUsage
-CF.HtmlChartPluginUsage =
+//org.datagear.analysis.support.html.HtmlChartPluginUse
+CF.HtmlChartPluginUse =
 {
 	NORMAL: "normal",
 	LIB: "lib"
@@ -7036,7 +7036,7 @@ CF.allContextLibPlugins = function()
 			let plugin = plugins[id];
 			
 			//不应从非lib类型的插件加载依赖库，一是安全考虑，另外主要的原因是未来可能客户端仅会加载必要的插件
-			if(plugin && CF.HtmlChartPluginUsage.LIB == plugin.usage)
+			if(plugin && CF.HtmlChartPluginUse.LIB == plugin.use)
 			{
 				libPlugins.push(plugin);
 			}

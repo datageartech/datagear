@@ -45,7 +45,7 @@ public class JsonHtmlChartPluginPropertiesResolverTest
 		resolver.resolveProperties(jsonInputStream, IOUtil.CHARSET_UTF_8);
 
 		assertEquals("5.2.0", chartPlugin.getPlatformVersion());
-		assertEquals(HtmlChartPluginUsage.NORMAL, chartPlugin.getUsage());
+		assertEquals(HtmlChartPluginUse.NORMAL, chartPlugin.getUse());
 	}
 
 	@Test
@@ -60,14 +60,14 @@ public class JsonHtmlChartPluginPropertiesResolverTest
 		resolver.resolveProperties(jsonInputStream, IOUtil.CHARSET_UTF_8);
 
 		assertEquals("2.0", chartPlugin.getApiVersion());
-		assertEquals(HtmlChartPluginUsage.NORMAL, chartPlugin.getUsage());
+		assertEquals(HtmlChartPluginUse.NORMAL, chartPlugin.getUse());
 	}
 
 	@Test
 	public void resolvePropertiesTest_type_lib() throws IOException
 	{
 		InputStream jsonInputStream = getClass().getClassLoader().getResourceAsStream(
-				"org/datagear/analysis/support/html/JsonHtmlChartPluginPropertiesResolverTest-usage-lib.json");
+				"org/datagear/analysis/support/html/JsonHtmlChartPluginPropertiesResolverTest-use-lib.json");
 
 		HtmlChartPlugin chartPlugin = new HtmlChartPlugin();
 		JsonHtmlChartPluginPropertiesResolver<HtmlChartPlugin> resolver = new JsonHtmlChartPluginPropertiesResolver<HtmlChartPlugin>(
@@ -75,14 +75,14 @@ public class JsonHtmlChartPluginPropertiesResolverTest
 		resolver.resolveProperties(jsonInputStream, IOUtil.CHARSET_UTF_8);
 
 		assertEquals("2.0", chartPlugin.getApiVersion());
-		assertEquals(HtmlChartPluginUsage.LIB, chartPlugin.getUsage());
+		assertEquals(HtmlChartPluginUse.LIB, chartPlugin.getUse());
 	}
 
 	@Test
 	public void resolvePropertiesTest_type_normal() throws IOException
 	{
 		InputStream jsonInputStream = getClass().getClassLoader().getResourceAsStream(
-				"org/datagear/analysis/support/html/JsonHtmlChartPluginPropertiesResolverTest-usage-normal.json");
+				"org/datagear/analysis/support/html/JsonHtmlChartPluginPropertiesResolverTest-use-normal.json");
 
 		HtmlChartPlugin chartPlugin = new HtmlChartPlugin();
 		JsonHtmlChartPluginPropertiesResolver<HtmlChartPlugin> resolver = new JsonHtmlChartPluginPropertiesResolver<HtmlChartPlugin>(
@@ -90,14 +90,14 @@ public class JsonHtmlChartPluginPropertiesResolverTest
 		resolver.resolveProperties(jsonInputStream, IOUtil.CHARSET_UTF_8);
 
 		assertEquals("2.0", chartPlugin.getApiVersion());
-		assertEquals(HtmlChartPluginUsage.NORMAL, chartPlugin.getUsage());
+		assertEquals(HtmlChartPluginUse.NORMAL, chartPlugin.getUse());
 	}
 
 	@Test
 	public void resolvePropertiesTest_type_unknown() throws IOException
 	{
 		InputStream jsonInputStream = getClass().getClassLoader().getResourceAsStream(
-				"org/datagear/analysis/support/html/JsonHtmlChartPluginPropertiesResolverTest-usage-unknown.json");
+				"org/datagear/analysis/support/html/JsonHtmlChartPluginPropertiesResolverTest-use-unknown.json");
 
 		HtmlChartPlugin chartPlugin = new HtmlChartPlugin();
 		JsonHtmlChartPluginPropertiesResolver<HtmlChartPlugin> resolver = new JsonHtmlChartPluginPropertiesResolver<HtmlChartPlugin>(
@@ -105,6 +105,6 @@ public class JsonHtmlChartPluginPropertiesResolverTest
 		resolver.resolveProperties(jsonInputStream, IOUtil.CHARSET_UTF_8);
 
 		assertEquals("2.0", chartPlugin.getApiVersion());
-		assertEquals(HtmlChartPluginUsage.NORMAL, chartPlugin.getUsage());
+		assertEquals(HtmlChartPluginUse.NORMAL, chartPlugin.getUse());
 	}
 }
