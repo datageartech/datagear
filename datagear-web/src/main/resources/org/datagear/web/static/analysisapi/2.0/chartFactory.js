@@ -2242,7 +2242,7 @@ chartProto.registerEventHandlerDelegate = function(type, handler, delegate)
 /**
  * 查找图表事件处理函数代理信息。
  * 
- * @param filter 可选，查找过滤函数，格式为：function(delegateObj){ return true、false; }，返回true表示匹配
+ * @param filter 查找过滤函数，格式为：function(delegateObj){ return true、false; }，返回true表示匹配
  * @returns [ ... ]，空数组表示没有
  */
 chartProto.findEventHandlerDelegates = function(filter)
@@ -2258,7 +2258,7 @@ chartProto.findEventHandlerDelegates = function(filter)
 	{
 		let delegateObj = delegateObjs[i];
 		
-		if(filter == null || filter(delegateObj))
+		if(filter != null && filter(delegateObj))
 		{
 			re.push(delegateObj);
 		}
