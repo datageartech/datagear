@@ -216,6 +216,8 @@ builtinOptionNames.customOptionNames = "customOptionNames";
 builtinOptionNames.beautifyScrollbar = "beautifyScrollbar";
 /** 内置图表选项名：更新追加模式 */
 builtinOptionNames.updateAppendMode = "updateAppendMode";
+/** 内置图表选项名：禁用内置工具 */
+builtinOptionNames.disableTool = "disableTool";
 /** 内置图表选项名：内置工具（参数/数据） */
 builtinOptionNames.builtinTool = "builtinTool";
 
@@ -626,6 +628,7 @@ chartProto.init = function()
 	
 	this._initForPre();
 	
+	//options应最先初始化，因为后续的初始化可能会使用它
 	this._initOptions();
 	this._initTheme();
 	this._initListener();
@@ -829,19 +832,19 @@ chartProto._bodyAutoResize = function()
 
 /**
  * 初始化图表是否禁用工具。
- * 此函数依次从图表选项builtinTool.disable、图表元素的elementAttrConst.DISABLE_TOOL属性获取是否禁用值。
+ * 此函数依次从图表选项disableTool、图表元素的elementAttrConst.DISABLE_TOOL属性获取是否禁用值。
  */
 chartProto._initDisableTool = function()
 {
 	var re;
 	
 	var options = this.options();
-	var builtinTool = CF.builtinOptionValue(options, builtinOptionNames.builtinTool);
+	var optionValue = CF.builtinOptionValue(options, builtinOptionNames.disableTool);
 	
 	//图表选项里的优先级应最高，不然图表展示页的选项不起效
-	if(builtinTool != null && !CF.isEmpty(builtinTool.disable))
+	if(!CF.isEmpty(optionValue))
 	{
-		re = builtinTool.disable;
+		re = optionValue;
 	}
 	else
 	{
