@@ -1,6 +1,6 @@
 DataGear-v${project.version}
 
-DataGear是一款开源免费的数据可视化分析平台，自由制作任何您想要的数据看板。
+DataGear是一款开源免费的数据可视化分析平台，自由制作任何数据看板。
 
 系统要求：
 	JDK 8+
