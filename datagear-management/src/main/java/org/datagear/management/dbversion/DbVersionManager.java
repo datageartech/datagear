@@ -616,8 +616,8 @@ public class DbVersionManager extends AbstractVersionContentReader
 					}
 					catch (Throwable t)
 					{
-						if (LOGGER.isErrorEnabled())
-							LOGGER.error("Execute sql silently error", t);
+						if (LOGGER.isWarnEnabled())
+							LOGGER.warn("Execute sql silently error", t);
 					}
 				}
 				else
