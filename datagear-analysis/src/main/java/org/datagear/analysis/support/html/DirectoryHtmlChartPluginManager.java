@@ -491,11 +491,18 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 				this._fileNameCheckTimeMap.clear();
 			}
 
+			int loadedCount = 0;
+
 			for (FileCheckTime reload : reloads)
-				loadAndRegisterHtmlChartPlugin(reload.getFile(), true);
+			{
+				HtmlChartPlugin loadedPlugin = loadAndRegisterHtmlChartPlugin(reload.getFile(), true);
+
+				if (loadedPlugin != null)
+					loadedCount++;
+			}
 
 			if (LOGGER.isInfoEnabled())
-				LOGGER.info("Loaded " + reloads.size() + " chart plugins");
+				LOGGER.info("Loaded " + loadedCount + " chart plugins");
 		}
 		finally
 		{
