@@ -2738,9 +2738,21 @@ TOOL.adjustChartToolPanelPosition = function(boxEle, panel, btn, chart)
 //聚焦至指定元素内的第一个可操作（非只读、非禁用）输入框
 TOOL.focusOnFirstInput = function(ele)
 {
-	var input = CF.eleOfSelector("input:not(:disabled,[readonly])", ele);
+	//这个选择器不兼容旧版浏览器（Chrome-86.0.4240.75、Firefox-78.0）
+	//var input = CF.eleOfSelector("input:not(:disabled,[readonly])", ele);
 	
-	if(input)
+	var input = null;
+	var inputs = CF.elesOfSelector("input", ele);
+	for(let i=0; i<inputs.length; i++)
+	{
+		if(CF.eleAttr(inputs[i], "disabled") == null && CF.eleAttr(inputs[i], "readonly") == null)
+		{
+			input = inputs[i];
+			break;
+		}
+	}
+	
+	if(input && (CF.isEleMatches(input, "[type='text']") || CF.isEleMatches(input, "[type='textarea']")))
 		input.focus();
 };
 
