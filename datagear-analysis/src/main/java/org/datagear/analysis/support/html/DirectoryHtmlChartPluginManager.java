@@ -430,7 +430,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 
 					if (LOGGER.isDebugEnabled())
 						LOGGER.debug("Chart plugin file [" + fileCheckTime.getFileName()
-								+ "] has been modified, reload is coming");
+								+ "] modified, need reload");
 				}
 			}
 
@@ -440,7 +440,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 					reloads.add(new FileCheckTime(child));
 
 				if (LOGGER.isDebugEnabled())
-					LOGGER.debug("Some chart plugin file has been deleted, full reload is coming");
+					LOGGER.debug("Some chart plugin file deleted, need full reload");
 			}
 			else
 			{
@@ -466,7 +466,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 
 						if (LOGGER.isDebugEnabled())
 							LOGGER.debug("Chart plugin file [" + fileCheckTime.getFileName()
-									+ "] is new, load is coming");
+									+ "] is new, need load");
 					}
 				}
 			}
