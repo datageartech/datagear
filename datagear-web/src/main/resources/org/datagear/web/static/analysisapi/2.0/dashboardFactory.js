@@ -3325,7 +3325,13 @@ dashboardProto.dataSetParamValueBatched = function(sourceData, batchConfig, sour
 					re.push(targetChart);
 			}
 			
-			targetChart.dataSetParamValue(dataSetIdx, param, dataValue);
+			let paramValue = dataValue;
+			let paramObj = targetChart.dataSetParam(dataSetIdx, param);
+			
+			if(paramObj != null)
+				paramValue = CF.convertDataSetParamValue(paramObj, paramValue);
+			
+			targetChart.dataSetParamValue(dataSetIdx, param, paramValue);
 		}
 	}
 	
