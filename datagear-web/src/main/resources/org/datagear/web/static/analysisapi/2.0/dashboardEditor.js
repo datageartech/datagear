@@ -50,7 +50,7 @@ i18n.hyperlinkEleRequired = "不是超链接元素";
 i18n.videoEleRequired = "不是视频元素";
 i18n.iframeEleRequired = "不是内嵌框体元素";
 i18n.labelEleRequired = "不是文本标签元素";
-i18n.chartPluginNoAttrDefined = "此类型图表插件没有定义可编辑属性";
+i18n.chartPluginNoConfigDefined = "此类型图表插件没有定义可编辑配置项";
 i18n.bindChartElementMustBeDiv = "绑定图表的元素必须是<div>元素";
 
 //参考org.datagear.web.controller.DashboardVisualController.RENDER_CONTEXT_ATTR_EDIT_HTML_INFO
@@ -676,7 +676,7 @@ DE.checkAttrChartElement = function(ele)
 	var form = (chart.plugin() == null ? null : chart.pluginConfigForm());
 	if(form == null || form.properties == null || form.properties.length == 0)
 	{
-		DE.tipInfo(i18n.chartPluginNoAttrDefined);
+		DE.tipInfo(i18n.chartPluginNoConfigDefined);
 		return false;
 	}
 	

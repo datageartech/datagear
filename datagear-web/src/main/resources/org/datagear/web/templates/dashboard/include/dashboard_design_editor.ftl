@@ -128,7 +128,7 @@
 	po.i18n.videoEleRequired = "<@spring.message code='dashboard.opt.tip.videoEleRequired' />";
 	po.i18n.iframeEleRequired = "<@spring.message code='dashboard.opt.tip.iframeEleRequired' />";
 	po.i18n.labelEleRequired = "<@spring.message code='dashboard.opt.tip.labelEleRequired' />";
-	po.i18n.chartPluginNoAttrDefined = "<@spring.message code='dashboard.opt.tip.chartPluginNoAttrDefined' />";
+	po.i18n.chartPluginNoConfigDefined = "<@spring.message code='dashboard.opt.tip.chartPluginNoConfigDefined' />";
 	po.i18n.bindChartElementMustBeDiv = "<@spring.message code='dashboard.opt.tip.bindChartElementMustBeDiv' />";
 	po.i18n.chart = "<@spring.message code='chart' />";
 	po.i18n.chartPlugin = "<@spring.message code='chartPlugin' />";
