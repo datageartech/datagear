@@ -8376,13 +8376,19 @@ CF.convertDataSetParamValue = function(type, value)
 				re = null;
 			else
 			{
-				//如果失败则撤销转换，交由后台处理
-				//这里不使用JSON.parse()函数，以允许单引号等非标准格式
-				re = chartFactory.evalSilently(value, value);
+				var trimValue = CF.trim(value);
+				var charStart = trimValue.charAt(0);
+				var charEnd = trimValue.charAt(trimValue.length-1);
+				
+				//严格限定格式，避免eval引起安全问题
+				if((charStart == '{' && charEnd == '}') || (charStart == '[' && charEnd == ']'))
+				{
+					//如果失败则撤销转换，交由后台处理
+					//这里不使用JSON.parse()函数，以允许单引号等非标准格式
+					re = chartFactory.evalSilently(value, value);
+				}
 			}
 		}
-		else
-			re = value;
 	}
 	else if(CF.isArray(value))
 	{
