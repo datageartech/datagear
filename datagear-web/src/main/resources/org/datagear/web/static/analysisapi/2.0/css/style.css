@@ -828,7 +828,7 @@
 .dg-rsp-h-28rem{ height: 28rem; }
 .dg-rsp-h-29rem{ height: 29rem; }
 .dg-rsp-h-30rem{ height: 30rem; }
-@media (min-width: 640px) /*sm*/
+@media (min-width: 40rem) /*sm*/
 {
 	.dg-rsp-col-sm-1{ flex: 0 0 auto; width: 8.33333333%; }
 	.dg-rsp-col-sm-2{ flex: 0 0 auto; width: 16.66666667%; }
@@ -928,7 +928,7 @@
 	.dg-rsp-h-sm-29rem{ height: 29rem; }
 	.dg-rsp-h-sm-30rem{ height: 30rem; }
 }
-@media (min-width: 768px) /*md*/
+@media (min-width: 48rem) /*md*/
 {
 	.dg-rsp-col-md-1{ flex: 0 0 auto; width: 8.33333333%; }
 	.dg-rsp-col-md-2{ flex: 0 0 auto; width: 16.66666667%; }
@@ -1028,7 +1028,7 @@
 	.dg-rsp-h-md-29rem{ height: 29rem; }
 	.dg-rsp-h-md-30rem{ height: 30rem; }
 }
-@media (min-width: 1024px) /*lg*/
+@media (min-width: 64rem) /*lg*/
 {
 	.dg-rsp-col-lg-1{ flex: 0 0 auto; width: 8.33333333%; }
 	.dg-rsp-col-lg-2{ flex: 0 0 auto; width: 16.66666667%; }
@@ -1128,7 +1128,7 @@
 	.dg-rsp-h-lg-29rem{ height: 29rem; }
 	.dg-rsp-h-lg-30rem{ height: 30rem; }
 }
-@media (min-width: 1280px) /*xl*/
+@media (min-width: 80rem) /*xl*/
 {
 	.dg-rsp-col-xl-1{ flex: 0 0 auto; width: 8.33333333%; }
 	.dg-rsp-col-xl-2{ flex: 0 0 auto; width: 16.66666667%; }
@@ -1228,7 +1228,7 @@
 	.dg-rsp-h-xl-29rem{ height: 29rem; }
 	.dg-rsp-h-xl-30rem{ height: 30rem; }
 }
-@media (min-width: 1536px) /*2xl*/
+@media (min-width: 96rem) /*2xl*/
 {
 	.dg-rsp-col-2xl-1{ flex: 0 0 auto; width: 8.33333333%; }
 	.dg-rsp-col-2xl-2{ flex: 0 0 auto; width: 16.66666667%; }
