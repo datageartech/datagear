@@ -188,12 +188,7 @@ public class WebHtmlTplDashboardImportBuilder implements HtmlTplDashboardImportB
 					libPrefix + "/echarts-5.6.0/echarts.min.js"));
 			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY_DATETIMEPICKER,
 					libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js"));
-			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY,
-					libPrefix + "/jquery-3.7.1/jquery-3.7.1.min.js"));
-			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_ECHARTS,
-					libPrefix + "/echarts-5.6.0/echarts.min.js"));
-			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_JQUERY_DATETIMEPICKER,
-					libPrefix + "/jquery-datetimepicker-2.5.20/jquery.datetimepicker.full.min.js"));
+
 			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_CHARTFACTORY,
 					apiPrefix + "/chartFactory.js?v=" + Global.VERSION));
 			impts.add(HtmlTplDashboardImport.valueOfJavaScript(BUILTIN_DASHBOARD_IMPORT_NAME_DASHBOARDFACTORY,
