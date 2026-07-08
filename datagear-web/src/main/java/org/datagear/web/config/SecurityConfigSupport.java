@@ -491,7 +491,7 @@ public class SecurityConfigSupport
 	{
 		UrlsAccess edit = new UrlsAccess(dataManagerAuthorizationManager(), //
 				"/dtbsSource/add", "/dtbsSource/saveAdd", "/dtbsSource/edit", "/dtbsSource/saveEdit",
-				"/dtbsSource/delete");
+				"/dtbsSource/testConnection", "/dtbsSource/delete");
 
 		UrlsAccess read = new UrlsAccess(dataAnalystAuthorizationManager(), "/dtbsSource/**");
 
