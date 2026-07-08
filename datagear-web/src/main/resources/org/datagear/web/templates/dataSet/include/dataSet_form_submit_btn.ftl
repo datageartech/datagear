@@ -26,7 +26,7 @@
 	<div class="flex-shink-1"  style="flex-basis:50%;"></div>
 	<div class="flex-grow-0 flex-shink-0 flex justify-content-center px-3 gap-2 white-space-nowrap">
 		<#include "dataSet_form_preview.ftl">
-		<p-button type="submit" label="<@spring.message code='save' />" class="hide-if-readonly"></p-button>
+		<p-button type="submit" label="<@spring.message code='save' />"></p-button>
 	</div>
 	<div class="flex-shink-1 flex justify-content-start align-items-center" style="flex-basis:50%;">
 		<#include "dataSet_form_setting.ftl">

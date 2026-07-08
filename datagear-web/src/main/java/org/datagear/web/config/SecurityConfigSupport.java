@@ -447,7 +447,7 @@ public class SecurityConfigSupport
 	{
 		UrlsAccess edit = new UrlsAccess(dataManagerAuthorizationManager(), //
 				"/dataSet/add/**", "/dataSet/saveAdd/**", "/dataSet/edit/**", "/dataSet/saveEdit/**",
-				"/dataSet/copy", "/dataSet/delete", "/dataSet/uploadFile");
+				"/dataSet/preview/**", "/dataSet/copy", "/dataSet/delete", "/dataSet/uploadFile");
 
 		UrlsAccess read = new UrlsAccess(dataAnalystAuthorizationManager(), "/dataSet/**");
 
