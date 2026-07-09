@@ -2838,6 +2838,7 @@ SPT.treeRenderer = function(plugin, config)
 				series: [{ type: "tree", data: [] }]
 			};
 			
+			this._nonEmptySeriesData(options);
 			options = EU.prepareRenderOptions(chart, options);
 			EU.initWithOptions(chart, options);
 		},
@@ -2851,8 +2852,20 @@ SPT.treeRenderer = function(plugin, config)
 			
 			this._inflateUpdateOptions(chart, options);
 			options = EU.prepareUpdateOptions(chart, options);
-			
+			this._nonEmptySeriesData(options);
 			EU.setOptionsReplaceMerge(chart, options);
+		},
+		
+		//XXX ECharts-6.1.0版本存在bug，series[i].data为空时会报错，此函数可解决这个问题
+		_nonEmptySeriesData: function(options)
+		{
+			var series = (options ? options.series : []);
+			
+			for(let i=0; i<series.length; i++)
+			{
+				if(CF.isEmpty(series[i].data))
+					series[i].data = [ {} ];
+			}
 		},
 		
 		_inflateUpdateOptions: function(chart, updateOptions)
