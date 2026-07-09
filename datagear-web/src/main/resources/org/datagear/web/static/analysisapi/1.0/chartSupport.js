@@ -10231,7 +10231,7 @@
 		}
 		
 		html += "<div style='display:flex;flex-direction:column;gap:6px;'>";
-		html += 	"<div>"+title+"</div>";
+		html += 	"<div>"+chartFactory.escapeHtml(title)+"</div>";
 		
 		for(let i=0; i<datas.length; i++)
 		{
@@ -10240,13 +10240,13 @@
 			
 			html +=	"<div style='display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:20px;'>";
 			html +=		"<div style='display:flex;flex-direction:row;align-items:center;gap:5px;'>";
-			html +=			"<div style='width:10px;height:10px;border-radius:10px;background:"+di.color+"'></div><div>"+di.name+"</div>";
+			html +=			"<div style='width:10px;height:10px;border-radius:10px;background:"+di.color+"'></div><div>"+chartFactory.escapeHtml(di.name)+"</div>";
 			html +=		"</div>";
 			html +=		"<div style='display:flex;flex-direction:row;align-items:center;gap:5px;font-weight:bold;'>";
 			
 			for(let j=0; j<vs.length; j++)
 			{
-				html +=		"<div>"+vs[j]+"</div>";
+				html +=		"<div>"+chartFactory.escapeHtml(vs[j])+"</div>";
 			}
 			
 			html +=		"</div>";

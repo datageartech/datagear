@@ -8464,7 +8464,7 @@ EU.customTooltip = function(params, extractor)
 	}
 	
 	html += "<div style='display:flex;flex-direction:column;gap:6px;'>";
-	html += 	"<div>"+title+"</div>";
+	html += 	"<div>"+CF.escapeHtml(title)+"</div>";
 	
 	for(let i=0; i<datas.length; i++)
 	{
@@ -8479,13 +8479,13 @@ EU.customTooltip = function(params, extractor)
 			html +=		"<div style='width:10px;height:10px;border-radius:10px;background:"+di.color+"'></div>";
 		}
 		
-		html +=			"<div>"+di.name+"</div>";
+		html +=			"<div>"+CF.escapeHtml(di.name)+"</div>";
 		html +=		"</div>";
 		html +=		"<div style='display:flex;flex-direction:row;align-items:center;gap:12px;font-weight:bold;'>";
 		
 		for(let j=0; j<vs.length; j++)
 		{
-			html +=		"<div>"+vs[j]+"</div>";
+			html +=		"<div>"+CF.escapeHtml(vs[j])+"</div>";
 		}
 		
 		html +=		"</div>";
