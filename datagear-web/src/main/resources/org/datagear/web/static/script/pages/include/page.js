@@ -2150,6 +2150,8 @@ $.inflateChartConfigValuesForm = function(po)
 	
 	avo.doTrimProperty = function(prop, pluginConfigForm)
 	{
+		avo.trimPropertyTypeForV5_5_0(prop);
+		
 		prop.domId = po.concatPid("avoprop_"+ (avo.propertyDomIdIndex++));
 		prop.nameLabel = (prop.nameLabel == null ? {} : prop.nameLabel);
 		prop.nameLabel.value = ($.isEmpty(prop.nameLabel.value) ? prop.name : prop.nameLabel.value);
@@ -2257,6 +2259,24 @@ $.inflateChartConfigValuesForm = function(po)
 			prop.array = true;
 			prop.inputPayload.multiple = false;
 		}
+	};
+	
+	//具体参考：org.datagear.web.analysis.ChartPluginManagerJsFactory.PropertyTypeV5_5_0
+	avo.trimPropertyTypeForV5_5_0 = function(prop)
+	{
+		if(!prop)
+			return;
+		
+		if(prop.type == "STRING")
+			prop.type = avo.FormPropertyType.STRING;
+		else if(prop.type == "BOOLEAN")
+			prop.type = avo.FormPropertyType.BOOLEAN;
+		else if(prop.type == "INTEGER")
+			prop.type = avo.FormPropertyType.INTEGER;
+		else if(prop.type == "NUMBER")
+			prop.type = avo.FormPropertyType.NUMBER;
+		else if(prop.type == "OBJECT")
+			prop.type = avo.FormPropertyType.OBJECT;
 	};
 	
 	avo.trimPropertyInputPayloadIfMap = function(inputProp, inputPayload)
