@@ -685,3 +685,9 @@ ALTER TABLE DATAGEAR_DATA_SET_PROP ADD COLUMN PROP_ARRAY VARCHAR(10);
 ALTER TABLE DATAGEAR_DATA_SET_PROP DROP UNIQUE DG_UK_DS_PROP_DS_ID_NAME/*silent*/;
 
 ALTER TABLE DATAGEAR_DATA_SET_PROP DROP UNIQUE UK_DS_PROP_DS_ID_NAME/*silent*/;
+
+
+/*-----------------------------------------*/
+/*--version[6.1.0], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
+
