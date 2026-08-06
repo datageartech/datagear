@@ -433,6 +433,7 @@ CF.registerMapHandler = function(mapHandler)
 
 /**
  * 创建图表实例，为其添加图表API，并设置chart.statusPreInit(true)状态，但不调用chart.init()函数。
+ * 注意：创建后还应先执行chart.plugin(plugin)或chart.renderer(renderer)函数，才能渲染图表。
  * 
  * @param root 图表根对象，格式参考CF.Chart()函数
  * @returns 新图表实例
@@ -5639,7 +5640,13 @@ CF.renderContextValNonNull = function(renderContext, name)
  */
 CF.renderContextContextPath = function(renderContext)
 {
-	return CF.renderContextValNonNull(renderContext, renderContextAttrConst.CONTEXT_PATH);
+	var contextPath = CF.renderContextValue(renderContext, renderContextAttrConst.CONTEXT_PATH);
+	
+	//未设置时应返回""默认值
+	if(contextPath == null)
+		contextPath = "";
+	
+	return contextPath;
 };
 
 /**
@@ -5702,7 +5709,12 @@ CF.toPluginResourceURL = function(renderContext, plugin, name)
 {
 	name = (name || "");
 	
-	var urlPrefix = CF.renderContextValNonNull(renderContext, renderContextAttrConst.PLUGIN_RES_URL_PREFIX);
+	var urlPrefix = CF.renderContextValue(renderContext, renderContextAttrConst.PLUGIN_RES_URL_PREFIX);
+	
+	//未设置时应采用""默认值
+	if(urlPrefix == null)
+		urlPrefix = "";
+	
 	var url = urlPrefix+"/"+encodeURIComponent(plugin.id)+"/"+name;
 	url = CF.toRenderContextPathURL(renderContext, url);
 	

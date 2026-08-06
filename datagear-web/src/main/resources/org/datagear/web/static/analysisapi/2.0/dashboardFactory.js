@@ -344,7 +344,12 @@ DF.startHeartBeat = function(renderContext, dashboardId)
 		DF._heartbeatIntervalId = null;
 	}
 	
-	var heartbeatURL = CF.renderContextValNonNull(renderContext, renderContextAttrConst.HEARTBEAT_URL);
+	var heartbeatURL = CF.renderContextValue(renderContext, renderContextAttrConst.HEARTBEAT_URL);
+	
+	//未设置时应忽略心跳功能
+	if(heartbeatURL == null)
+		return;
+	
 	heartbeatURL = CF.toRenderContextPathURL(renderContext, heartbeatURL);
 	
 	DF._heartbeatIntervalId = setInterval(function()
@@ -449,10 +454,25 @@ DF.inflateChartPlugin = function(charts)
 			if(chart.plugin() == null)
 			{
 				let chartRoot = chart._root;
-				let plugin = chartRoot.plugin;
-				let pluginId = (plugin == null ? null : (CF.isString(plugin) ? plugin : plugin.id));
-				plugin = (pluginId == null ? null : CF.findPluginById(pluginId));
-				chart.plugin(plugin);
+				let plugin = (chartRoot ? chartRoot.plugin : null);
+				
+				if(plugin != null)
+				{
+					//插件ID
+					if(CF.isString(plugin))
+					{
+						plugin = CF.findPluginById(plugin);
+					}
+					// 插件对象：{ id: "...", ... }
+					else
+					{
+						let foundPlugin = (plugin.id ? CF.findPluginById(plugin.id) : null);
+						//未找到时应使用原始对象
+						plugin = (foundPlugin != null ? foundPlugin : plugin);
+					}
+					
+					chart.plugin(plugin);
+				}
 			}
 		}
 		
@@ -1088,7 +1108,12 @@ dashboardProto._initUnloadDashboardHandler = function()
 	this._windowBeforeunloadHandler = function()
 	{
 		var renderContext = thisDashboard.renderContext();
-		var unloadURL = CF.renderContextValNonNull(renderContext, renderContextAttrConst.UNLOAD_URL);
+		var unloadURL = CF.renderContextValue(renderContext, renderContextAttrConst.UNLOAD_URL);
+		
+		//未设置时应忽略卸载功能
+		if(unloadURL == null)
+			return;
+		
 		unloadURL = thisDashboard.contextURL(unloadURL);
 		var formData = new FormData();
 		formData.append(DF.unloadConfig.dashboardIdParamName, thisDashboard.id());
