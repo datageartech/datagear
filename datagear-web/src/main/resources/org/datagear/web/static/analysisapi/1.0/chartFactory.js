@@ -145,6 +145,27 @@
 	/**内置图表选项名定义，所有内置图表选项名都应定义于此，便于因名字冲突需要重新定义*/
 	var builtinOptionNames = (chartFactory.builtinOptionNames || (chartFactory.builtinOptionNames = {}));
 	
+	/**
+	 * 图表插件管理器。
+	 */
+	var chartPluginManager = (chartFactory.chartPluginManager || (chartFactory.chartPluginManager =
+	{
+		plugins: {},
+		get: function(id)
+		{
+			return (id == null ? null : this.plugins[id]);
+		},
+		getAll: function()
+		{
+			return this.plugins;
+		},
+		add: function(plugin)
+		{
+			if(plugin != null && plugin.id != null)
+				this.plugins[plugin.id] = plugin;
+		}
+	}));
+
 	//----------------------------------------
 	// chartStatusConst开始
 	//----------------------------------------
@@ -551,14 +572,11 @@
 		delete chart.configValues;
 		delete chart.resultDataFormat;
 		
-		if(chartFactory.chartPluginManager && chartFactory.chartPluginManager.get)
-		{
-			var pluginId = (chart.plugin ? chart.plugin.id : null);
-			var plugin = (pluginId ? chartFactory.chartPluginManager.get(pluginId) : null);
-			
-			if(plugin)
-				chart.plugin = plugin;
-		}
+		var pluginId = (chart.plugin ? chart.plugin.id : null);
+		var plugin = (pluginId ? chartPluginManager.get(pluginId) : null);
+		
+		if(plugin)
+			chart.plugin = plugin;
 	};
 	
 	//----------------------------------------

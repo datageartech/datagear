@@ -118,6 +118,27 @@ var builtinOptionNames = (CF.builtinOptionNames || (CF.builtinOptionNames = {}))
 /**已注册的全局图表渲染器依赖库*/
 var globalLibs = (CF.globalLibs || (CF.globalLibs = []));
 
+/**
+ * 图表插件管理器。
+ */
+var chartPluginManager = (CF.chartPluginManager || (CF.chartPluginManager =
+{
+	plugins: {},
+	get: function(id)
+	{
+		return (id == null ? null : this.plugins[id]);
+	},
+	getAll: function()
+	{
+		return this.plugins;
+	},
+	add: function(plugin)
+	{
+		if(plugin != null && plugin.id != null)
+			this.plugins[plugin.id] = plugin;
+	}
+}));
+
 //----------------------------------------
 // chartStatusConst开始
 //----------------------------------------
@@ -576,28 +597,12 @@ CF.initDataSetParams = function(params, chartRoot, dataSetBindIndex)
 
 CF.findPluginById = function(pluginId)
 {
-	if(pluginId == null)
-		return null;
-	
-	var plugin = null;
-	
-	if(CF.chartPluginManager && CF.chartPluginManager.get)
-		plugin = CF.chartPluginManager.get(pluginId);
-	
-	return plugin;
+	return chartPluginManager.get(pluginId);
 };
 
 CF.getAllPlugins = function()
 {
-	var re = null;
-	
-	if(CF.chartPluginManager && CF.chartPluginManager.getAll)
-		re = CF.chartPluginManager.getAll();
-	
-	if(re == null)
-		re = {};
-	
-	return re;
+	return chartPluginManager.getAll();
 };
 
 //----------------------------------------

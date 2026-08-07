@@ -290,6 +290,25 @@ DF.initRenderContext = function(renderContext)
 };
 
 /**
+ * 创建用于离线图表插件开发的看板实例。
+ * 
+ * @param options 创建选项，格式为：
+ *				{
+ *				  //可选，初始渲染上下文
+ *				  renderContext: { ... },
+ *				  //可选，初始看板实例
+ *				  dashboard: { ... },
+ *				  //获取插件资源URL处理函数
+ *				  pluginResourceURL: function(plugin, name){ return "..."; }
+ *				}
+ * 
+ */
+DF.createForPluginDev = function(options)
+{
+	//TODO
+};
+
+/**
  * 创建看板实例
  * 
  * @param root 看板根对象，格式应为：

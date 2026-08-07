@@ -27,8 +27,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import org.datagear.analysis.ChartPluginCategoryInfo;
 import org.datagear.analysis.ChartPlugin;
+import org.datagear.analysis.ChartPluginCategoryInfo;
 import org.datagear.analysis.ChartPluginConfigForm;
 import org.datagear.analysis.ChartPluginManager;
 import org.datagear.analysis.DataSign;
@@ -54,6 +54,9 @@ import org.springframework.cache.Cache.ValueWrapper;
  * <p>
  * 此类将{@linkplain #getChartPluginManager()}中的所有{@linkplain HtmlChartPlugin}按照预设块大小拆分构建为{@linkplain ChartPluginManagerJs}，
  * 使得后续看板展示页可以分块引入，避免单个文件过大加载缓慢。
+ * </p>
+ * <p>
+ * 注意：此类生成的JS脚本需要运行环境已加载<code>chartFactory.chartPluginManager</code>对象，具体参考：<code>chartFactory.js</code>相关代码。
  * </p>
  * 
  * @author datagear@163.com
@@ -250,19 +253,9 @@ public class ChartPluginManagerJsFactory implements CacheAware
 		buffer.append("(function(global) {");
 		buffer.append(newLine);
 
-		buffer.append("var CF = (global.chartFactory || (global.chartFactory = {}));");
+		buffer.append("var CF = global.chartFactory;");
 		buffer.append(newLine);
-		buffer.append("var " + managerVar + " = (CF.chartPluginManager || (CF.chartPluginManager = {}));");
-		buffer.append(newLine);
-		buffer.append(managerVar + ".plugins = (" + managerVar + ".plugins || {});");
-		buffer.append(newLine);
-
-		buffer.append("if(" + managerVar + ".get == null){" + managerVar
-				+ ".get = function(id){ return this.plugins[id]; }; }");
-		buffer.append(newLine);
-
-		buffer.append("if(" + managerVar + ".getAll == null){" + managerVar
-				+ ".getAll = function(){ return this.plugins; }; }");
+		buffer.append("var " + managerVar + " = CF.chartPluginManager;");
 		buffer.append(newLine);
 
 		if (DashboardApiVersion.isV1(apiVersion))
@@ -301,8 +294,7 @@ public class ChartPluginManagerJsFactory implements CacheAware
 				out.write(newLine);
 			}
 
-			out.write(managerVar + ".plugins[" + StringUtil.toJavaScriptString(plugin.getId()) + "] = "
-					+ pluginVar + ";");
+			out.write(managerVar + ".add(" + pluginVar + ");");
 			out.write(newLine);
 		}
 		finally
