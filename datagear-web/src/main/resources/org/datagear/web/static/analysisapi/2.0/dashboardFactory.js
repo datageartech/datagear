@@ -290,22 +290,53 @@ DF.initRenderContext = function(renderContext)
 };
 
 /**
- * 创建用于离线图表插件开发的看板实例。
+ * 创建用于前端项目中图表插件开发的看板实例。
+ * 注意：这是一个公开API，要注意兼容支持。
  * 
  * @param options 创建选项，格式为：
  *				{
- *				  //可选，初始渲染上下文
- *				  renderContext: { ... },
+ *				  //可选，要加载的图表插件信息对象或其数组
+ *				  plugins: { plugin: ..., dataSignSpec: ..., configForm: ..., renderer: ... }、[ ... ],
  *				  //可选，初始看板实例
  *				  dashboard: { ... },
- *				  //获取插件资源URL处理函数
- *				  pluginResourceURL: function(plugin, name){ return "..."; }
+ *				  //可选，获取插件资源URL处理函数
+ *				  pluginResourceURL: function(plugin, name){ return name; }
  *				}
- * 
+ * @returns 看板对象
  */
 DF.createForPluginDev = function(options)
 {
-	//TODO
+	options = (options || {});
+	options.dashboard = (options.dashboard || {});
+	
+	if(options.pluginResourceURL == null)
+	{
+		//默认函数应直接返回name，这是前端项目的常用逻辑
+		options.pluginResourceURL = function(plugin, name)
+		{
+			return name;
+		};
+	}
+	
+	//需要重写此函数，以正确加载插件资源
+	CF.toPluginResourceURL = function(renderContext, plugin, name)
+	{
+		return options.pluginResourceURL(plugin, name);
+	};
+	
+	//TODO 处理options.plugins
+	
+	var dashboard = options.dashboard;
+	dashboard.id = (dashboard.id == null ? "chartPluginDev" : dashboard.id);
+	dashboard.name = (dashboard.name == null ? "chartPluginDev" : dashboard.name);
+	dashboard.charts = (dashboard.charts == null ? [] : dashboard.charts);
+	dashboard.renderContext = (dashboard.renderContext == null ? {} : dashboard.renderContext);
+	//org.datagear.analysis.support.html.DashboardApiVersion.V2
+	dashboard.apiVersion = "2.0";
+	
+	dashboard = DF.create(dashboard);
+	
+	return dashboard;
 };
 
 /**
