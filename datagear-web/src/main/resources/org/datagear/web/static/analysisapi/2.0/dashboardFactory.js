@@ -290,56 +290,6 @@ DF.initRenderContext = function(renderContext)
 };
 
 /**
- * 创建用于前端项目中图表插件开发的看板实例。
- * 注意：这是一个公开API，要注意兼容支持。
- * 
- * @param options 创建选项，格式为：
- *				{
- *				  //可选，要加载的图表插件信息对象或其数组
- *				  plugins: { plugin: ..., dataSignSpec: ..., configForm: ..., renderer: ... }、[ ... ],
- *				  //可选，初始看板实例
- *				  dashboard: { ... },
- *				  //可选，获取插件资源URL处理函数
- *				  pluginResourceURL: function(plugin, name){ return name; }
- *				}
- * @returns 看板对象
- */
-DF.createForPluginDev = function(options)
-{
-	options = (options || {});
-	options.dashboard = (options.dashboard || {});
-	
-	if(options.pluginResourceURL == null)
-	{
-		//默认函数应直接返回name，这是前端项目的常用逻辑
-		options.pluginResourceURL = function(plugin, name)
-		{
-			return name;
-		};
-	}
-	
-	//需要重写此函数，以正确加载插件资源
-	CF.toPluginResourceURL = function(renderContext, plugin, name)
-	{
-		return options.pluginResourceURL(plugin, name);
-	};
-	
-	//TODO 处理options.plugins
-	
-	var dashboard = options.dashboard;
-	dashboard.id = (dashboard.id == null ? "chartPluginDev" : dashboard.id);
-	dashboard.name = (dashboard.name == null ? "chartPluginDev" : dashboard.name);
-	dashboard.charts = (dashboard.charts == null ? [] : dashboard.charts);
-	dashboard.renderContext = (dashboard.renderContext == null ? {} : dashboard.renderContext);
-	//org.datagear.analysis.support.html.DashboardApiVersion.V2
-	dashboard.apiVersion = "2.0";
-	
-	dashboard = DF.create(dashboard);
-	
-	return dashboard;
-};
-
-/**
  * 创建看板实例
  * 
  * @param root 看板根对象，格式应为：
@@ -3970,6 +3920,234 @@ DF.fetchOptsOfPostForm = function(formData)
 DF.msgOfResponse = function(response)
 {
 	return (response.statusText ? response.statusText : response.status+"");
+};
+
+/**
+ * 创建用于前端项目中图表插件开发的看板实例。
+ * 注意：这是一个公开API，要注意兼容支持。
+ * 
+ * @param options 创建选项，格式为：
+ *				{
+ *				  //可选，要加载的图表插件信息对象或其数组
+ *				  plugins: 插件信息、[ 插件信息, ... ],
+ *				  //可选，初始看板实例
+ *				  dashboard: { ... },
+ *				  //可选，获取插件资源URL处理函数
+ *				  pluginResourceURL: function(plugin, name){ return name; },
+ *				  //可选，看板全局变量名，null时将不设置，默认为：dashboard
+ *				  globalVar: "dashboard"
+ *				}
+ *				其中，【插件信息】格式为：
+ *				{
+ *				  //必填，插件信息，对应plugin.json
+ *				  plugin: { ... },
+ *				  //可选，数据标记规范信息，对应plugin-datasignspec.json
+ *				  dataSignSpec: ...,
+ *				  //可选，配置表单信息，对应plugin-configform.json
+ *				  configForm: ...,
+ *				  //可选，渲染器信息，对应renderer.js
+ *				  renderer: "..."、{ ... }
+ *				}
+ * @returns 看板对象
+ */
+DF.createForPluginDev = function(options)
+{
+	options = (options || {});
+	options.dashboard = (options.dashboard || {});
+	options.globalVar = (options.globalVar === undefined ? "dashboard" : options.globalVar);
+	
+	if(options.pluginResourceURL == null)
+	{
+		//默认函数应直接返回name，这是前端项目的常用逻辑
+		options.pluginResourceURL = function(plugin, name)
+		{
+			return name;
+		};
+	}
+	
+	//需要重写此函数，以正确加载插件资源
+	CF.toPluginResourceURL = function(renderContext, plugin, name)
+	{
+		return options.pluginResourceURL(plugin, name);
+	};
+	
+	if(options.plugins)
+	{
+		let pluginInfos = (CF.isArray(options.plugins) ? options.plugins : [ options.plugins ]);
+		for(let i=0; i<pluginInfos.length; i++)
+		{
+			let pluginInfo = pluginInfos[i];
+			let plugin = (pluginInfo.plugin == null ? null : pluginInfo.plugin);
+			
+			if(plugin == null)
+				continue;
+			
+			DF.normalizeChartPlugin(plugin, pluginInfo);
+			CF.chartPluginManager.add(plugin);
+		}
+	}
+	
+	var dashboard = options.dashboard;
+	dashboard.id = (dashboard.id == null ? "chartPluginDev" : dashboard.id);
+	dashboard.name = (dashboard.name == null ? "chartPluginDev" : dashboard.name);
+	dashboard.charts = (dashboard.charts == null ? [] : dashboard.charts);
+	dashboard.renderContext = (dashboard.renderContext == null ? {} : dashboard.renderContext);
+	//org.datagear.analysis.support.html.DashboardApiVersion.V2
+	dashboard.apiVersion = "2.0";
+	
+	if(dashboard.renderContext[renderContextAttrConst.USER] == null)
+	{
+		//org.datagear.web.analysis.AnalysisUser
+		dashboard.renderContext[renderContextAttrConst.USER] =
+		{
+			id: "chartPluginDevUser",
+			name: "chartPluginDevUser",
+			realName: "chartPluginDevUser",
+			admin: false,
+			anonymous: false,
+			roles: [],
+			enabledRoleNames: []
+		};
+	}
+	
+	dashboard = DF.create(dashboard);
+	
+	if(options.globalVar != null)
+		global[options.globalVar] = dashboard;
+	
+	return dashboard;
+};
+
+/**
+ * 规范化图表插件，规则参考官网文档图表插件格式说明。
+ */
+DF.normalizeChartPlugin = function(plugin, pluginInfo)
+{
+	if(plugin == null)
+		return;
+	
+	if(pluginInfo != null)
+	{
+		if(pluginInfo.dataSignSpec != null)
+			plugin.dataSignSpec = pluginInfo.dataSignSpec;
+		
+		if(pluginInfo.configForm != null)
+			plugin.configForm = pluginInfo.configForm;
+	}
+	
+	DF.normalizeLabeled(plugin);
+	
+	if(plugin.dataSignSpec != null)
+	{
+		plugin.dataSignSpec = (CF.isArray(plugin.dataSignSpec) ? { dataSigns: plugin.dataSignSpec } : plugin.dataSignSpec);
+		DF.normalizeDataSigns(plugin.dataSignSpec.dataSigns);
+	}
+	
+	DF.normalizeConfigForm(plugin.configForm);
+	
+	if(pluginInfo && pluginInfo.renderer != null)
+	{
+		let renderer = pluginInfo.renderer;
+		
+		if(CF.isString(renderer))
+			renderer = new Function("plugin", "return "+renderer)(plugin);
+		
+		plugin.renderer = renderer;
+	}
+};
+
+/**
+ * 规范化DataSign对象，规则参考官网文档图表插件格式说明。
+ */
+DF.normalizeDataSigns = function(dataSigns, parent)
+{
+	if(CF.isEmpty(dataSigns))
+		return;
+	
+	for(let i=0; i<dataSigns.length; i++)
+	{
+		let dataSign = dataSigns[i];
+		DF.normalizeLabeled(dataSign);
+		
+		if(CF.isEmpty(dataSign.fullname))
+			dataSign.fullname = CF.toFullname(dataSign.name, (parent == null ? null : parent.fullname));
+		
+		if(dataSign.targets == null)
+			dataSign.targets = [ "field" ];
+		else
+			dataSign.targets = (CF.isArray(dataSign.targets) ? dataSign.targets : [ dataSign.targets ]);
+		
+		if(dataSign.required == null)
+			dataSign.required = true;
+		
+		if(dataSign.multiple == null)
+			dataSign.multiple = false;
+		
+		DF.normalizeDataSigns(dataSign.children, dataSign);
+	}
+};
+
+/**
+ * 规范化配置表单，规则参考官网文档图表插件格式说明。
+ */
+DF.normalizeConfigForm = function(form)
+{
+	if(form == null)
+		return;
+	
+	DF.normalizeConfigFormProperties(form.properties);
+	DF.normalizeConfigFormGroups(form.groups);
+}
+
+/**
+ * 规范化配置表单属性，规则参考官网文档图表插件格式说明。
+ */
+DF.normalizeConfigFormProperties = function(properties)
+{
+	if(CF.isEmpty(properties))
+		return;
+	
+	for(let i=0; i<properties.length; i++)
+	{
+		let prop = properties[i];
+		
+		DF.normalizeLabeled(prop);
+		
+		if(prop.required == null)
+			prop.required = false;
+		
+		if(prop.array == null)
+			prop.array = false;
+		
+		DF.normalizeConfigFormProperties(prop.properties);
+	}
+}
+
+/**
+ * 规范化配置表单分组，规则参考官网文档图表插件格式说明。
+ */
+DF.normalizeConfigFormGroups = function(groups)
+{
+	if(CF.isEmpty(groups))
+		return;
+	
+	for(let i=0; i<groups.length; i++)
+		DF.normalizeLabeled(groups[i]);
+}
+
+/**
+ * 规范化Labeled对象，规则参考官网文档图表插件格式说明。
+ */
+DF.normalizeLabeled = function(labeled)
+{
+	if(labeled == null)
+		return;
+	
+	if(labeled.nameLabel != null)
+		labeled.nameLabel = (CF.isString(labeled.nameLabel) ? { value: labeled.nameLabel } : labeled.nameLabel);
+	
+	if(labeled.descLabel != null)
+		labeled.descLabel = (CF.isString(labeled.descLabel) ? { value: labeled.descLabel } : labeled.descLabel);
 };
 
 })(this, window);
