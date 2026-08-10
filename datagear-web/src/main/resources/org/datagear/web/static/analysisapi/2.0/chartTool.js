@@ -17,7 +17,7 @@
 
 /**
  * 图表设置库，参数表单、数据表格。
- * 全局变量名：window.chartFactory.chartTool
+ * 全局变量名：chartFactory.chartTool
  * 
  * 加载时依赖：
  *   无

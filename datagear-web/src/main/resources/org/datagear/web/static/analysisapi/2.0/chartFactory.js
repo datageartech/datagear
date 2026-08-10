@@ -17,7 +17,7 @@
 
 /**
  * 图表工厂，用于初始化图表对象，为图表对象添加功能函数。
- * 全局变量名：window.chartFactory
+ * 全局变量名：chartFactory
  * 
  * 加载时依赖：
  *   无
@@ -8103,7 +8103,7 @@ CF.isLibLoadedInEnv = function(lib)
 	}
 	else
 	{
-		if(window[lib.name] !== undefined)
+		if(CF.isNameDefinedInGlobal(lib.name))
 			return true;
 		
 		if(!CF.isEmpty(lib.alias))
@@ -8112,19 +8112,24 @@ CF.isLibLoadedInEnv = function(lib)
 			{
 				for(let i=0; i<lib.alias.length; i++)
 				{
-					if(window[lib.alias[i]] !== undefined)
+					if(CF.isNameDefinedInGlobal(lib.alias[i]))
 						return true;
 				}
 			}
 			else
 			{
-				if(window[lib.alias] !== undefined)
+				if(CF.isNameDefinedInGlobal(lib.alias))
 					return true;
 			}
 		}
 		
 		return false;
 	}
+};
+
+CF.isNameDefinedInGlobal = function(name)
+{
+	return (global[name] !== undefined);
 };
 
 /**

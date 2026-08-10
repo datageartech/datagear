@@ -17,7 +17,7 @@
 
 /**
  * 图表支持库。
- * 全局变量名：window.chartFactory.chartSupport
+ * 全局变量名：chartFactory.chartSupport
  * 
  * 加载时依赖：
  *   chartFactory.js

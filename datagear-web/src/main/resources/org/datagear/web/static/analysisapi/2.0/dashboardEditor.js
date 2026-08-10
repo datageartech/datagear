@@ -17,7 +17,7 @@
 
 /**
  * 看板可视编辑器。
- * 全局变量名：window.dashboardFactory.dashboardEditor
+ * 全局变量名：dashboardFactory.dashboardEditor
  * 
  * 加载时依赖：
  *   chartFactory.js
@@ -26,7 +26,7 @@
  * 运行时依赖:
  * 
  */
-(function(global)
+(function(global, window)
 {
 
 var CF = global.chartFactory;
@@ -3806,4 +3806,4 @@ DE._evalInsertLayoutHeightStyle = function(fillParent, parentEle)
 };
 
 })
-(this);
+(this, window);

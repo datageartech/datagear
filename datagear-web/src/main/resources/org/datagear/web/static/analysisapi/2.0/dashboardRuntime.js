@@ -17,7 +17,7 @@
 
 /**
  * 看板运行环境，封装对外开放的看板运行环境API。
- * 全局变量名：window.dashboardRuntime
+ * 全局变量名：dashboardRuntime
  * 
  * 加载时依赖：
  *   无

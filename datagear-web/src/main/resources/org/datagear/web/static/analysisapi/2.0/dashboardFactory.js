@@ -17,7 +17,7 @@
 
 /**
  * 看板工厂，用于初始化看板对象，为看板对象添加功能函数。
- * 全局变量名：window.dashboardFactory
+ * 全局变量名：dashboardFactory
  * 
  * 加载时依赖：
  *   chartFactory.js
