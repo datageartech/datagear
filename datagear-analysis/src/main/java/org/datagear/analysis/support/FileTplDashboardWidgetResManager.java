@@ -31,6 +31,7 @@ import org.datagear.analysis.Dashboard;
 import org.datagear.analysis.TplDashboardWidgetResManager;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
+import org.datagear.util.StringUtil;
 
 /**
  * 基于文件的{@linkplain TplDashboardWidgetResManager}。
@@ -112,6 +113,39 @@ public class FileTplDashboardWidgetResManager extends AbstractTplDashboardWidget
 	{
 		File myDirectory = FileUtil.getDirectory(this.rootDirectory, id);
 		IOUtil.copy(directory, myDirectory);
+	}
+
+	@Override
+	public void moveFromDir(String id, File directory) throws IOException
+	{
+		File myDirectory = FileUtil.getDirectory(this.rootDirectory, id);
+
+		if (!directory.exists())
+			return;
+
+		File[] children = directory.listFiles();
+
+		for (File from : children)
+		{
+			String name = from.getName();
+			File to = FileUtil.getFile(myDirectory, name);
+			FileUtil.move(from, to);
+		}
+	}
+
+	@Override
+	public void moveFromFile(String id, File file, String rename) throws IOException
+	{
+		File myDirectory = FileUtil.getDirectory(this.rootDirectory, id);
+
+		if (!file.exists())
+			return;
+
+		if (StringUtil.isEmpty(rename))
+			rename = file.getName();
+
+		File to = FileUtil.getFile(myDirectory, rename);
+		FileUtil.move(file, to);
 	}
 
 	@Override

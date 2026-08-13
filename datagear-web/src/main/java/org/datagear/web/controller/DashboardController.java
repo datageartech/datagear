@@ -631,25 +631,11 @@ public class DashboardController extends AbstractDataAnalysisController
 				IOUtil.close(zin);
 			}
 			
-			dashboardWidgetResManager.copyFrom(id, unzipRoot);
+			dashboardWidgetResManager.moveFromDir(id, unzipRoot);
 		}
 		else
 		{
-			InputStream in = null;
-			OutputStream out = null;
-	
-			try
-			{
-				in = IOUtil.getInputStream(uploadFile);
-				out = dashboardWidgetResManager.getOutputStream(id, resourceName);
-	
-				IOUtil.write(in, out);
-			}
-			finally
-			{
-				IOUtil.close(in);
-				IOUtil.close(out);
-			}
+			dashboardWidgetResManager.moveFromFile(id, uploadFile, resourceName);
 		}
 
 		return optSuccessResponseEntity(request);
@@ -880,7 +866,7 @@ public class DashboardController extends AbstractDataAnalysisController
 		TplDashboardWidgetResManager dashboardWidgetResManager = this.htmlTplDashboardWidgetEntityService
 				.getTplDashboardWidgetResManager();
 
-		dashboardWidgetResManager.copyFrom(entity.getId(), uploadDirectory);
+		dashboardWidgetResManager.moveFromDir(entity.getId(), uploadDirectory);
 
 		toFormResponseData(request, entity);
 

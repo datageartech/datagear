@@ -982,59 +982,48 @@ public class FileUtil
 
 	/**
 	 * 移动文件至指定目录内。
-	 * <p>
-	 * 此方法不支持覆盖已有文件、不支持原子操作（避免底层不支持原子移动而报错）。
-	 * </p>
-	 * <p>
-	 * 注意：谨慎使用此方法，因为在Windows里，此方法不支持将文件移到不同的磁盘驱动器。
-	 * </p>
 	 * 
 	 * @param file
 	 * @param toDir
-	 *            目标目录，应是已存在的
+	 *            目标目录，如果其中已存在同名文件，将会先被删除
 	 * @return
 	 * @throws IOException
 	 */
 	public static File moveToDir(File file, File toDir) throws IOException
 	{
 		File toFile = FileUtil.getFile(toDir, file.getName());
-
-		Path fp = file.toPath();
-		Path tp = toFile.toPath();
-
-		Path re = Files.move(fp, tp);
-
-		return re.toFile();
+		return move(file, toFile);
 	}
 
 	/**
 	 * 移动文件。
-	 * <p>
-	 * 此方法不支持覆盖已有文件、不支持原子操作（避免底层不支持原子移动而报错）。
-	 * </p>
-	 * <p>
-	 * 注意：谨慎使用此方法，因为在Windows里，此方法不支持将文件移到不同的磁盘驱动器。
-	 * </p>
 	 * 
 	 * @param from
 	 * @param to
-	 *            不存在的上级目录会自动创建
+	 *            如果已存在，将会先被删除，不存在的上级目录会自动创建
 	 * @return
 	 * @throws IOException
 	 */
 	public static File move(File from, File to) throws IOException
 	{
+		if (!from.exists())
+			throw new IllegalArgumentException("[from] not exists");
+
+		if (to.exists())
+			deleteFile(to);
+
 		File toParent = to.getParentFile();
+		mkdirsIfNot(toParent);
 
-		if (to != null)
-			mkdirsIfNot(toParent);
+		boolean rename = from.renameTo(to);
 
-		Path fp = from.toPath();
-		Path tp = to.toPath();
+		if (!rename)
+		{
+			IOUtil.copy(from, to);
+			deleteFile(from);
+		}
 
-		Path re = Files.move(fp, tp);
-
-		return re.toFile();
+		return to;
 	}
 
 	/**

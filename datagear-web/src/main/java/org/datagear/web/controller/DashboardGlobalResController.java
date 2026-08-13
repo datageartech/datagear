@@ -193,8 +193,8 @@ public class DashboardGlobalResController extends AbstractController implements 
 			if (isEmpty(form.getSavePath()))
 				throw new IllegalInputException();
 
-			File resFile = FileUtil.getFile(this.dashboardGlobalResRootDirectory, savePath, true);
-			IOUtil.copy(file, resFile);
+			File resFile = FileUtil.getFile(this.dashboardGlobalResRootDirectory, savePath);
+			FileUtil.move(file, resFile);
 		}
 
 		return optSuccessResponseEntity(request);

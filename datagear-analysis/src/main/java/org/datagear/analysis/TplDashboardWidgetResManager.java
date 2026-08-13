@@ -149,6 +149,32 @@ public interface TplDashboardWidgetResManager
 	void copyFrom(String id, File directory) throws IOException;
 
 	/**
+	 * 将指定目录下的所有文件作为资源移入。
+	 * <p>
+	 * 功能与{@linkplain #copyFrom(String, File)}类似，但是底层时移动操作，不必IO复制，更快。
+	 * </p>
+	 * 
+	 * @param id
+	 * @param directory
+	 * @throws IOException
+	 */
+	void moveFromDir(String id, File directory) throws IOException;
+
+	/**
+	 * 将指定文件作为资源移入。
+	 * <p>
+	 * 功能与{@linkplain #copyFrom(String, File)}类似，但是底层时移动操作，不必IO复制，更快。
+	 * </p>
+	 * 
+	 * @param id
+	 * @param file
+	 * @param rename
+	 *            重命名，为{@code null}、{@code ""}表示不改名
+	 * @throws IOException
+	 */
+	void moveFromFile(String id, File file, String rename) throws IOException;
+
+	/**
 	 * 将指定{@linkplain TplDashboardWidget#getId()}的所有资源拷贝至目标目录。
 	 * 
 	 * @param id

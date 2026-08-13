@@ -104,6 +104,18 @@ public class NameAsTplDashboardWidgetResManager extends AbstractTplDashboardWidg
 	}
 
 	@Override
+	public void moveFromDir(String id, File directory) throws IOException
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void moveFromFile(String id, File file, String rename) throws IOException
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public void copyTo(String id, File directory) throws IOException
 	{
 		throw new UnsupportedOperationException();
