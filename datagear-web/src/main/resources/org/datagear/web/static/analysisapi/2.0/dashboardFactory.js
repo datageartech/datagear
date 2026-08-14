@@ -4036,14 +4036,11 @@ DF.normalizeChartPlugin = function(plugin, pluginInfo)
 	}
 	
 	DF.normalizeLabeled(plugin);
-	
-	if(plugin.dataSignSpec != null)
-	{
-		plugin.dataSignSpec = (CF.isArray(plugin.dataSignSpec) ? { dataSigns: plugin.dataSignSpec } : plugin.dataSignSpec);
-		DF.normalizeDataSigns(plugin.dataSignSpec.dataSigns);
-	}
-	
-	DF.normalizeConfigForm(plugin.configForm);
+	DF.normalizeDataSignSpec(plugin);
+	DF.normalizeConfigForm(plugin);
+	DF.normalizeDataSetRange(plugin);
+	DF.normalizeIcons(plugin);
+	DF.normalizeCategoryInfos(plugin);
 	
 	if(pluginInfo && pluginInfo.renderer != null)
 	{
@@ -4054,6 +4051,18 @@ DF.normalizeChartPlugin = function(plugin, pluginInfo)
 		
 		plugin.renderer = renderer;
 	}
+};
+
+/**
+ * 规范化数据标记规范，规则参考官网文档图表插件格式说明。
+ */
+DF.normalizeDataSignSpec = function(plugin)
+{
+	if(plugin.dataSignSpec == null)
+		return;
+	
+	plugin.dataSignSpec = (CF.isArray(plugin.dataSignSpec) ? { dataSigns: plugin.dataSignSpec } : plugin.dataSignSpec);
+	DF.normalizeDataSigns(plugin.dataSignSpec.dataSigns);
 };
 
 /**
@@ -4090,14 +4099,16 @@ DF.normalizeDataSigns = function(dataSigns, parent)
 /**
  * 规范化配置表单，规则参考官网文档图表插件格式说明。
  */
-DF.normalizeConfigForm = function(form)
+DF.normalizeConfigForm = function(plugin)
 {
+	var form = plugin.configForm;
+	
 	if(form == null)
 		return;
 	
 	DF.normalizeConfigFormProperties(form.properties);
 	DF.normalizeConfigFormGroups(form.groups);
-}
+};
 
 /**
  * 规范化配置表单属性，规则参考官网文档图表插件格式说明。
@@ -4121,7 +4132,7 @@ DF.normalizeConfigFormProperties = function(properties)
 		
 		DF.normalizeConfigFormProperties(prop.properties);
 	}
-}
+};
 
 /**
  * 规范化配置表单分组，规则参考官网文档图表插件格式说明。
@@ -4133,7 +4144,7 @@ DF.normalizeConfigFormGroups = function(groups)
 	
 	for(let i=0; i<groups.length; i++)
 		DF.normalizeLabeled(groups[i]);
-}
+};
 
 /**
  * 规范化Labeled对象，规则参考官网文档图表插件格式说明。
@@ -4148,6 +4159,67 @@ DF.normalizeLabeled = function(labeled)
 	
 	if(labeled.descLabel != null)
 		labeled.descLabel = (CF.isString(labeled.descLabel) ? { value: labeled.descLabel } : labeled.descLabel);
+};
+
+/**
+ * 规范化数据集范围，规则参考官网文档图表插件格式说明。
+ */
+DF.normalizeDataSetRange = function(plugin)
+{
+	if(plugin.dataSetRange == null)
+		return;
+		
+	var dataSetRange = plugin.dataSetRange;
+	
+	if(CF.isNumber(dataSetRange))
+		dataSetRange = { main: { min: dataSetRange } };
+	else if(dataSetRange == "none")
+		dataSetRange = { main: { min: 0,  max: 0 }, attachment: { min: 0, max: 0 } };
+	// { min: ..., max: ... }
+	else if(dataSetRange.min !== undefined || dataSetRange.max !== undefined)
+		dataSetRange = { main: dataSetRange };
+	
+	plugin.dataSetRange = dataSetRange;
+};
+
+/**
+ * 规范化图标，规则参考官网文档图表插件格式说明。
+ */
+DF.normalizeIcons = function(plugin)
+{
+	if(plugin.icons == null)
+		return;
+	
+	if(CF.isString(plugin.icons))
+	{
+		//org.datagear.analysis.ChartPlugin.DEFAULT_ICON_THEME_NAME
+		plugin.icons = { "default": plugin.icons };
+	}
+};
+
+/**
+ * 规范化类别信息，规则参考官网文档图表插件格式说明。
+ */
+DF.normalizeCategoryInfos = function(plugin)
+{
+	if(plugin.categoryInfos == null)
+		return;
+	
+	var cis = (CF.isArray(plugin.categoryInfos) ? plugin.categoryInfos : [ plugin.categoryInfos ]);
+	
+	for(let i=0; i<cis.length; i++)
+	{
+		let ci = cis[i];
+		
+		if(CF.isString(ci))
+			ci = { category: { name: ci, order: 0 }, order: 0 };
+		else if(ci.name !== undefined)
+			ci = { category: ci, order: 0 };
+		
+		cis[i] = ci;
+	}
+	
+	plugin.categoryInfos = cis;
 };
 
 })(this, window);
