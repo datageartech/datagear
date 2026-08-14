@@ -711,6 +711,13 @@ public class DatabaseMetaDataPrinter extends AbstractDevotedDBMetaResolver
 		}
 
 		@Override
+		public void moveFromDriverLibraryFile(DriverEntity driverEntity, File file, String libraryName)
+				throws DriverEntityManagerException
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
 		public boolean[] deleteDriverLibrary(DriverEntity driverEntity, String... libraryName)
 				throws DriverEntityManagerException
 		{

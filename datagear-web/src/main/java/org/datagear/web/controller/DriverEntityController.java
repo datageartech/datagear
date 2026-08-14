@@ -167,18 +167,7 @@ public class DriverEntityController extends AbstractController
 				File driverLibraryFile = getTempDriverLibraryFile(directory, driverLibraryFileName);
 
 				if (driverLibraryFile.exists())
-				{
-					InputStream in = IOUtil.getInputStream(driverLibraryFile);
-
-					try
-					{
-						this.driverEntityManager.addDriverLibrary(entity, driverLibraryFileName, in);
-					}
-					finally
-					{
-						IOUtil.close(in);
-					}
-				}
+					this.driverEntityManager.moveFromDriverLibraryFile(entity, driverLibraryFile, "");
 			}
 		}
 

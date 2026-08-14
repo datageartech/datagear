@@ -40,6 +40,7 @@ import java.util.zip.ZipOutputStream;
 
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
+import org.datagear.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -254,6 +255,29 @@ public abstract class AbstractFileDriverEntityManager implements DriverEntityMan
 		finally
 		{
 			IOUtil.close(out);
+		}
+	}
+
+	@Override
+	public void moveFromDriverLibraryFile(DriverEntity driverEntity, File file, String libraryName)
+			throws DriverEntityManagerException
+	{
+		// 需先释放资源
+		removePathDriverFactoryInfo(driverEntity);
+
+		if (StringUtil.isEmpty(libraryName))
+			libraryName = file.getName();
+
+		File directory = getDriverLibraryDirectory(driverEntity.getId(), true);
+		File to = FileUtil.getFile(directory, libraryName);
+
+		try
+		{
+			FileUtil.move(file, to);
+		}
+		catch (IOException e)
+		{
+			throw new DriverEntityManagerException(e);
 		}
 	}
 

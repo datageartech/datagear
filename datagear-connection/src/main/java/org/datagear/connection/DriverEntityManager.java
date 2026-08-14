@@ -17,6 +17,8 @@
 
 package org.datagear.connection;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Driver;
@@ -103,6 +105,21 @@ public interface DriverEntityManager
 	 * @throws DriverEntityManagerException
 	 */
 	void addDriverLibrary(DriverEntity driverEntity, String libraryName, InputStream in)
+			throws DriverEntityManagerException;
+
+	/**
+	 * 将指定文件作为驱动库移入。
+	 * <p>
+	 * 功能与{@linkplain #addDriverLibrary(DriverEntity, String, InputStream)}类似，但是底层时移动操作，不必IO复制，更快。
+	 * </p>
+	 * 
+	 * @param id
+	 * @param file
+	 * @param libraryName
+	 *            重命名，为{@code null}、{@code ""}表示不改名
+	 * @throws IOException
+	 */
+	void moveFromDriverLibraryFile(DriverEntity driverEntity, File file, String libraryName)
 			throws DriverEntityManagerException;
 
 	/**
