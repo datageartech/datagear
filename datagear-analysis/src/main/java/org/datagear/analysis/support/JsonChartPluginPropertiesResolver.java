@@ -388,9 +388,14 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			Map<String, String> icons = new HashMap<>();
 
 			Map<?, ?> map = (Map<?, ?>) obj;
-
 			for (Map.Entry<?, ?> entry : map.entrySet())
-				icons.put(entry.getKey().toString(), entry.getValue().toString());
+			{
+				Object key = entry.getKey();
+				Object value = entry.getValue();
+
+				if (key != null && value != null)
+					icons.put(key.toString(), value.toString());
+			}
 
 			return icons;
 		}
