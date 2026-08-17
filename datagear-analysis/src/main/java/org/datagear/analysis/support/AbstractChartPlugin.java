@@ -18,7 +18,6 @@
 package org.datagear.analysis.support;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -146,12 +145,7 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 		String exactResName = null;
 		String likeResName = null;
 
-		Map<String, String> lowerKeyMap = new HashMap<String, String>();
-
 		for (Map.Entry<String, String> entry : this.icons.entrySet())
-			lowerKeyMap.put(entry.getKey().toLowerCase(), entry.getValue());
-
-		for (Map.Entry<String, String> entry : lowerKeyMap.entrySet())
 		{
 			String myThemeName = entry.getKey();
 			String myResName = entry.getValue();
@@ -159,10 +153,15 @@ public abstract class AbstractChartPlugin extends AbstractIdentifiable implement
 			if (StringUtil.isEmpty(firstResName))
 				firstResName = myResName;
 
-			if (myThemeName.equals(themeName))
+			if (themeName.equalsIgnoreCase(myThemeName))
 				exactResName = myResName;
-			else if (myThemeName.indexOf(themeName) > -1 || themeName.indexOf(myThemeName) > -1)
-				likeResName = myResName;
+			else
+			{
+				myThemeName = myThemeName.toLowerCase();
+
+				if (myThemeName.indexOf(themeName) > -1 || themeName.indexOf(myThemeName) > -1)
+					likeResName = myResName;
+			}
 		}
 
 		String resName = null;
