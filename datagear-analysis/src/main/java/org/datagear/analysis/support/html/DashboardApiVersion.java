@@ -115,4 +115,15 @@ public class DashboardApiVersion
 
 		return dftVersion;
 	}
+
+	/**
+	 * 是否有效的版本号。
+	 * 
+	 * @param version
+	 * @return
+	 */
+	public static boolean isValidVersion(String version)
+	{
+		return (isV1(version) || isV2(version));
+	}
 }

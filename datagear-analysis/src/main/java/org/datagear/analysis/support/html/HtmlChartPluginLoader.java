@@ -39,6 +39,7 @@ import org.datagear.analysis.support.html.HtmlChartPluginJsDefResolver.JsDefCont
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
+import org.datagear.util.i18n.Label;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -132,8 +133,6 @@ public class HtmlChartPluginLoader
 
 	private HtmlChartPluginJsDefResolver pluginJsDefResolver = new HtmlChartPluginJsDefResolver();
 
-	private JsonHtmlChartPluginPropertiesResolver<HtmlChartPlugin> jsonPluginPropertiesResolver = new JsonHtmlChartPluginPropertiesResolver<HtmlChartPlugin>();
-
 	private HtmlChartPluginScriptObjectWriter pluginScriptObjectWriter = HtmlChartPluginScriptObjectWriter.INSTANCE;
 
 	private HtmlRenderContextScriptObjectWriter renderContextScriptObjectWriter = HtmlRenderContextScriptObjectWriter.INSTANCE;
@@ -160,17 +159,6 @@ public class HtmlChartPluginLoader
 	public void setPluginJsDefResolver(HtmlChartPluginJsDefResolver pluginJsDefResolver)
 	{
 		this.pluginJsDefResolver = pluginJsDefResolver;
-	}
-
-	public JsonHtmlChartPluginPropertiesResolver<HtmlChartPlugin> getJsonPluginPropertiesResolver()
-	{
-		return jsonPluginPropertiesResolver;
-	}
-
-	public void setJsonPluginPropertiesResolver(
-			JsonHtmlChartPluginPropertiesResolver<HtmlChartPlugin> jsonPluginPropertiesResolver)
-	{
-		this.jsonPluginPropertiesResolver = jsonPluginPropertiesResolver;
 	}
 
 	public HtmlChartPluginScriptObjectWriter getPluginScriptObjectWriter()
@@ -319,7 +307,7 @@ public class HtmlChartPluginLoader
 	 * 从指定目录加载单个{@linkplain HtmlChartPlugin}。
 	 * 
 	 * @param directory
-	 * @return {@code null}表示目录结构不合法
+	 * @return {@code null}表示文件结构或内容不合法
 	 * @throws HtmlChartPluginLoadException
 	 */
 	public HtmlChartPlugin load(File directory) throws HtmlChartPluginLoadException
@@ -333,7 +321,7 @@ public class HtmlChartPluginLoader
 	 * 从指定ZIP文件加载单个{@linkplain HtmlChartPlugin}。
 	 * 
 	 * @param zip
-	 * @return {@code null}表示ZIP结构不合法
+	 * @return {@code null}表示文件结构或内容不合法
 	 * @throws HtmlChartPluginLoadException
 	 */
 	public HtmlChartPlugin loadZip(File zip) throws HtmlChartPluginLoadException
@@ -350,7 +338,7 @@ public class HtmlChartPluginLoader
 	 * </p>
 	 * 
 	 * @param in
-	 * @return {@code null}表示ZIP结构不合法
+	 * @return {@code null}表示文件结构或内容不合法
 	 * @throws HtmlChartPluginLoadException
 	 */
 	public HtmlChartPlugin loadZip(ZipInputStream in) throws HtmlChartPluginLoadException
@@ -376,7 +364,7 @@ public class HtmlChartPluginLoader
 	 * 
 	 * @param file
 	 *            插件文件夹、插件ZIP包
-	 * @return {@code null}表示目录结构不合法
+	 * @return {@code null}表示文件结构或内容不合法
 	 * @throws HtmlChartPluginLoadException
 	 */
 	public HtmlChartPlugin loadFile(File file) throws HtmlChartPluginLoadException
@@ -400,12 +388,32 @@ public class HtmlChartPluginLoader
 	 * <p>
 	 * 文件夹内的可以包含插件文件夹或者插件ZIP包。
 	 * </p>
+	 * <p>
+	 * 在加载异常的插件时将抛出异常。
+	 * </p>
 	 * 
 	 * @param directory
 	 * @return
 	 * @throws HtmlChartPluginLoadException
 	 */
 	public Set<HtmlChartPlugin> loadAll(File directory) throws HtmlChartPluginLoadException
+	{
+		return loadAll(directory, false);
+	}
+
+	/**
+	 * 从指定文件夹内加载多个{@linkplain HtmlChartPlugin}，没有，则返回空集合。
+	 * <p>
+	 * 文件夹内的可以包含插件文件夹或者插件ZIP包。
+	 * </p>
+	 * 
+	 * @param directory
+	 * @param ignoreInvalid
+	 *            是否忽略加载异常的插件，如果为{@code false}，则会在遇到时抛出异常
+	 * @return
+	 * @throws HtmlChartPluginLoadException
+	 */
+	public Set<HtmlChartPlugin> loadAll(File directory, boolean ignoreInvalid) throws HtmlChartPluginLoadException
 	{
 		if (!directory.isDirectory())
 			throw new IllegalArgumentException("[directory] must be directory");
@@ -416,7 +424,27 @@ public class HtmlChartPluginLoader
 
 		for (File child : children)
 		{
-			HtmlChartPlugin plugin = loadFile(child);
+			HtmlChartPlugin plugin = null;
+
+			if (ignoreInvalid)
+			{
+				try
+				{
+					plugin = loadFile(child);
+				}
+				catch (Exception e)
+				{
+					if (LOGGER.isWarnEnabled())
+						LOGGER.warn("Ignore load invalid chart plugin for file : " + child.getName());
+
+					plugin = null;
+				}
+			}
+			else
+			{
+				plugin = loadFile(child);
+			}
+
 			processLoadedPlugin(plugin);
 
 			if (plugin != null)
@@ -458,7 +486,7 @@ public class HtmlChartPluginLoader
 	 * 从指定ZIP加载单个{@linkplain HtmlChartPlugin}。
 	 * 
 	 * @param zip
-	 * @return {@code null}表示文件不合法
+	 * @return {@code null}表示文件结构或内容不合法
 	 * @throws HtmlChartPluginLoadException
 	 */
 	protected HtmlChartPlugin loadSingleForZip(File zip) throws HtmlChartPluginLoadException
@@ -511,7 +539,7 @@ public class HtmlChartPluginLoader
 	 * </p>
 	 * 
 	 * @param in
-	 * @return {@code null}表示文件不合法
+	 * @return {@code null}表示文件结构或内容不合法
 	 * @throws Exception
 	 */
 	protected HtmlChartPlugin loadSingleForZipInputStream(ZipInputStream in) throws Exception
@@ -578,7 +606,7 @@ public class HtmlChartPluginLoader
 	 * 从指定目录加载单个{@linkplain HtmlChartPlugin}。
 	 * 
 	 * @param directory
-	 * @return {@code null}表示文件不合法
+	 * @return {@code null}表示文件结构或内容不合法
 	 * @throws HtmlChartPluginLoadException
 	 */
 	protected HtmlChartPlugin loadSingleForDirectory(File directory) throws HtmlChartPluginLoadException
@@ -682,29 +710,44 @@ public class HtmlChartPluginLoader
 
 	protected HtmlChartPlugin checkValidPlugin(HtmlChartPlugin plugin)
 	{
-		if (StringUtil.isEmpty(plugin.getId()))
+		if (plugin == null)
+			return plugin;
+
+		// 旧版的校验逻辑，应保留
+		if (DashboardApiVersion.isV1(plugin.getApiVersion()))
 		{
-			if (LOGGER.isWarnEnabled())
-				LOGGER.warn("Ignore a chart plugin cause null id");
+			if (StringUtil.isEmpty(plugin.getId()))
+			{
+				if (LOGGER.isWarnEnabled())
+					LOGGER.warn("Ignore a chart plugin cause null id");
 
-			return null;
+				return null;
+			}
+
+			if (StringUtil.isEmpty(plugin.getNameLabel()))
+			{
+				if (LOGGER.isWarnEnabled())
+					LOGGER.warn("Ignore a chart plugin '" + plugin.getId() + "' cause null nameLabel");
+
+				return null;
+			}
 		}
-
-		if (StringUtil.isEmpty(plugin.getNameLabel()))
-		{
-			if (LOGGER.isWarnEnabled())
-				LOGGER.warn("Ignore a chart plugin '" + plugin.getId() + "' cause null nameLabel");
-
-			return null;
-		}
-
-		// 自v2版本起的插件规范才对ID有格式要求
-		if (DashboardApiVersion.isV2(plugin.getApiVersion()))
+		else
 		{
 			if (!this.chartPluginIdSpec.isValidId(plugin.getId()))
 			{
 				if (LOGGER.isWarnEnabled())
 					LOGGER.warn("Ignore a chart plugin '" + plugin.getId() + "' cause illegal id");
+
+				return null;
+			}
+
+			Label nameLabel = plugin.getNameLabel();
+
+			if (nameLabel == null || StringUtil.isBlank(nameLabel.getValue()))
+			{
+				if (LOGGER.isWarnEnabled())
+					LOGGER.warn("Ignore a chart plugin '" + plugin.getId() + "' cause blank nameLabel value");
 
 				return null;
 			}

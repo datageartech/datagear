@@ -62,7 +62,12 @@ public class JsonHtmlChartPluginPropertiesResolver<T extends HtmlChartPlugin>
 		T chartPlugin = getChartPlugin();
 
 		String apiVersion = convertToString(properties.get(JSON_PROPERTY_API_VERSION));
-		chartPlugin.setApiVersion(DashboardApiVersion.trimVersion(apiVersion));
+		apiVersion = DashboardApiVersion.trimVersion(apiVersion);
+
+		if (!DashboardApiVersion.isValidVersion(apiVersion))
+			throw new UnsupportedOperationException("Invalid chart plugin apiVersion : " + apiVersion);
+
+		chartPlugin.setApiVersion(apiVersion);
 
 		String use = convertToString(properties.get(JSON_PROPERTY_USE));
 		use = HtmlChartPluginUse.normalize(use);
