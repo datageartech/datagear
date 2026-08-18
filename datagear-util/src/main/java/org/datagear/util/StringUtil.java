@@ -52,13 +52,18 @@ public class StringUtil
 		if (s == null)
 			return true;
 
-		if (s.isEmpty())
+		int len = s.length();
+
+		if (len == 0)
 			return true;
 
-		if (s.trim().isEmpty())
-			return true;
+		for (int i = 0; i < len; i++)
+		{
+			if (!Character.isWhitespace(s.charAt(i)))
+				return false;
+		}
 
-		return false;
+		return true;
 	}
 
 	/**

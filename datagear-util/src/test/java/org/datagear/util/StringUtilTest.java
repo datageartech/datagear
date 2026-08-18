@@ -776,4 +776,67 @@ public class StringUtilTest
 			assertEquals("abc...", StringUtil.truncate(o, 3, "..."));
 		}
 	}
+
+	@Test
+	public void isEmptyTest()
+	{
+		{
+			String s = null;
+			assertTrue(StringUtil.isEmpty(s));
+		}
+
+		{
+			String s = "";
+			assertTrue(StringUtil.isEmpty(s));
+		}
+
+		{
+			String s = "a";
+			assertFalse(StringUtil.isEmpty(s));
+		}
+
+		{
+			String s = " ";
+			assertFalse(StringUtil.isEmpty(s));
+		}
+	}
+
+	@Test
+	public void isBlankTest()
+	{
+		{
+			String s = null;
+			assertTrue(StringUtil.isBlank(s));
+		}
+
+		{
+			String s = "";
+			assertTrue(StringUtil.isBlank(s));
+		}
+
+		{
+			String s = " ";
+			assertTrue(StringUtil.isBlank(s));
+		}
+
+		{
+			String s = " \t \r \n ";
+			assertTrue(StringUtil.isBlank(s));
+		}
+
+		{
+			String s = "\t\r\n";
+			assertTrue(StringUtil.isBlank(s));
+		}
+
+		{
+			String s = "a";
+			assertFalse(StringUtil.isBlank(s));
+		}
+
+		{
+			String s = "  a ";
+			assertFalse(StringUtil.isBlank(s));
+		}
+	}
 }
