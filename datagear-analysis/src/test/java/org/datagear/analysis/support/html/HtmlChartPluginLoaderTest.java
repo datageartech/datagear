@@ -136,6 +136,50 @@ public class HtmlChartPluginLoaderTest
 	}
 
 	@Test
+	public void loadSingleForDirectoryTest_API_1_0_no_invalid_id()
+	{
+		HtmlChartPluginLoader loader = new HtmlChartPluginLoader();
+
+		File directory = FileUtil.getFile(
+				"src/test/resources/org/datagear/analysis/support/html/htmlChartPluginLoaders/plugin11-6.1-api1.0-no-invalid-id");
+
+		Assert.assertTrue(loader.isHtmlChartPluginDirectory(directory));
+
+		HtmlChartPlugin plugin = loader.loadSingleForDirectory(directory);
+		Assert.assertNotNull(plugin);
+		Assert.assertEquals("plugin11-6.1-api1.0-no-invalid-id-///", plugin.getId());
+	}
+
+	@Test
+	public void loadSingleForDirectoryTest_invalid_id()
+	{
+		HtmlChartPluginLoader loader = new HtmlChartPluginLoader();
+
+		File directory = FileUtil
+				.getFile(
+						"src/test/resources/org/datagear/analysis/support/html/htmlChartPluginLoaders/plugin09-6.1-invalid-id");
+
+		Assert.assertTrue(loader.isHtmlChartPluginDirectory(directory));
+
+		HtmlChartPlugin plugin = loader.loadSingleForDirectory(directory);
+		Assert.assertNull(plugin);
+	}
+
+	@Test
+	public void loadSingleForZipTest_invalid_id()
+	{
+		HtmlChartPluginLoader loader = new HtmlChartPluginLoader();
+
+		File zip = FileUtil.getFile(
+				"src/test/resources/org/datagear/analysis/support/html/htmlChartPluginLoaders/plugin10-6.1-invalid-id.zip");
+
+		Assert.assertTrue(loader.isHtmlChartPluginZip(zip));
+
+		HtmlChartPlugin plugin = loader.loadSingleForZip(zip);
+		Assert.assertNull(plugin);
+	}
+
+	@Test
 	public void loadsTest()
 	{
 		HtmlChartPluginLoader loader = new HtmlChartPluginLoader();
@@ -148,7 +192,7 @@ public class HtmlChartPluginLoaderTest
 		List<HtmlChartPlugin> list = new ArrayList<>();
 		list.addAll(plugins);
 
-		Assert.assertEquals(8, list.size());
+		Assert.assertEquals(9, list.size());
 
 		Collections.sort(list, new Comparator<HtmlChartPlugin>()
 		{
@@ -314,7 +358,7 @@ public class HtmlChartPluginLoaderTest
 		List<HtmlChartPlugin> list = new ArrayList<>();
 		list.addAll(plugins);
 
-		Assert.assertEquals(8, list.size());
+		Assert.assertEquals(9, list.size());
 
 		for (HtmlChartPlugin plugin : plugins)
 		{

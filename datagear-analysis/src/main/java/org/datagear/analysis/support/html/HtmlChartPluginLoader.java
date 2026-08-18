@@ -31,6 +31,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.datagear.analysis.ChartPluginResource;
+import org.datagear.analysis.support.ChartPluginIdSpec;
 import org.datagear.analysis.support.FileChartPluginResource;
 import org.datagear.analysis.support.JsonChartPluginPropertiesResolver;
 import org.datagear.analysis.support.ZipEntryChartPluginResource;
@@ -38,6 +39,8 @@ import org.datagear.analysis.support.html.HtmlChartPluginJsDefResolver.JsDefCont
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@linkplain HtmlChartPlugin}加载器。
@@ -97,6 +100,8 @@ import org.datagear.util.StringUtil;
  */
 public class HtmlChartPluginLoader
 {
+	private static final Logger LOGGER = LoggerFactory.getLogger(HtmlChartPluginLoader.class);
+
 	/**
 	 * 插件JSON文件名
 	 */
@@ -134,6 +139,8 @@ public class HtmlChartPluginLoader
 	private HtmlRenderContextScriptObjectWriter renderContextScriptObjectWriter = HtmlRenderContextScriptObjectWriter.INSTANCE;
 
 	private HtmlChartScriptObjectWriter chartScriptObjectWriter = HtmlChartScriptObjectWriter.INSTANCE;
+
+	private ChartPluginIdSpec chartPluginIdSpec = new ChartPluginIdSpec();
 
 	private HtmlChartPluginLoadedProcessor loadedProcessor = null;
 
@@ -194,6 +201,16 @@ public class HtmlChartPluginLoader
 	public void setChartScriptObjectWriter(HtmlChartScriptObjectWriter chartScriptObjectWriter)
 	{
 		this.chartScriptObjectWriter = chartScriptObjectWriter;
+	}
+
+	public ChartPluginIdSpec getChartPluginIdSpec()
+	{
+		return chartPluginIdSpec;
+	}
+
+	public void setChartPluginIdSpec(ChartPluginIdSpec chartPluginIdSpec)
+	{
+		this.chartPluginIdSpec = chartPluginIdSpec;
 	}
 
 	public HtmlChartPluginLoadedProcessor getLoadedProcessor()
@@ -552,9 +569,7 @@ public class HtmlChartPluginLoader
 
 		// 设置为加载时间而不取文件上次修改时间，因为文件上次修改时间可能错乱
 		plugin.setLastModified(System.currentTimeMillis());
-
-		if (StringUtil.isEmpty(plugin.getId()) || StringUtil.isEmpty(plugin.getNameLabel()))
-			plugin = null;
+		plugin = checkValidPlugin(plugin);
 
 		return plugin;
 	}
@@ -612,9 +627,7 @@ public class HtmlChartPluginLoader
 
 		// 设置为加载时间而不取文件上次修改时间，因为文件上次修改时间可能错乱
 		plugin.setLastModified(System.currentTimeMillis());
-
-		if (StringUtil.isEmpty(plugin.getId()) || StringUtil.isEmpty(plugin.getNameLabel()))
-			plugin = null;
+		plugin = checkValidPlugin(plugin);
 
 		return plugin;
 	}
@@ -665,6 +678,39 @@ public class HtmlChartPluginLoader
 		plugin.setPluginWriter(getPluginScriptObjectWriter());
 		plugin.setRenderContextWriter(getRenderContextScriptObjectWriter());
 		plugin.setChartWriter(getChartScriptObjectWriter());
+	}
+
+	protected HtmlChartPlugin checkValidPlugin(HtmlChartPlugin plugin)
+	{
+		if (StringUtil.isEmpty(plugin.getId()))
+		{
+			if (LOGGER.isWarnEnabled())
+				LOGGER.warn("Ignore a chart plugin cause null id");
+
+			return null;
+		}
+
+		if (StringUtil.isEmpty(plugin.getNameLabel()))
+		{
+			if (LOGGER.isWarnEnabled())
+				LOGGER.warn("Ignore a chart plugin '" + plugin.getId() + "' cause null nameLabel");
+
+			return null;
+		}
+
+		// 自v2版本起的插件规范才对ID有格式要求
+		if (DashboardApiVersion.isV2(plugin.getApiVersion()))
+		{
+			if (!this.chartPluginIdSpec.isValidId(plugin.getId()))
+			{
+				if (LOGGER.isWarnEnabled())
+					LOGGER.warn("Ignore a chart plugin '" + plugin.getId() + "' cause illegal id");
+
+				return null;
+			}
+		}
+
+		return plugin;
 	}
 
 	protected void inflateChartPluginResources(HtmlChartPlugin plugin, File pluginFile) throws Exception
