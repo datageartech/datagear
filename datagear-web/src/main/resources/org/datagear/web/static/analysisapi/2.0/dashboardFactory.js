@@ -3942,9 +3942,9 @@ DF.msgOfResponse = function(response)
  *				  //必填，插件信息，对应plugin.json
  *				  plugin: { ... },
  *				  //可选，数据标记规范信息，对应plugin-datasignspec.json
- *				  dataSignSpec: ...,
+ *				  dataSignSpec: [ ... ]、{ ... },
  *				  //可选，配置表单信息，对应plugin-configform.json
- *				  configForm: ...,
+ *				  configForm: { ... },
  *				  //可选，渲染器信息，对应renderer.js
  *				  renderer: "..."、{ ... }
  *				}
@@ -3989,7 +3989,6 @@ DF.createForPluginDev = function(options)
 	
 	var dashboard = options.dashboard;
 	dashboard.id = (dashboard.id == null ? "chartPluginDev" : dashboard.id);
-	dashboard.name = (dashboard.name == null ? "chartPluginDev" : dashboard.name);
 	dashboard.charts = (dashboard.charts == null ? [] : dashboard.charts);
 	dashboard.renderContext = (dashboard.renderContext == null ? {} : dashboard.renderContext);
 	//org.datagear.analysis.support.html.DashboardApiVersion.V2
@@ -4131,6 +4130,7 @@ DF.normalizeConfigFormProperties = function(properties)
 			prop.array = false;
 		
 		DF.normalizeConfigFormProperties(prop.properties);
+		DF.normalizeConfigFormGroups(prop.groups);
 	}
 };
 
