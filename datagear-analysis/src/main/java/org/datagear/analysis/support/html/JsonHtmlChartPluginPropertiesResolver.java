@@ -19,6 +19,7 @@ package org.datagear.analysis.support.html;
 
 import java.util.Map;
 
+import org.datagear.analysis.support.ChartPluginFormatException;
 import org.datagear.analysis.support.JsonChartPluginPropertiesResolver;
 
 /**
@@ -65,7 +66,7 @@ public class JsonHtmlChartPluginPropertiesResolver<T extends HtmlChartPlugin>
 		apiVersion = DashboardApiVersion.trimVersion(apiVersion);
 
 		if (!DashboardApiVersion.isValidVersion(apiVersion))
-			throw new UnsupportedOperationException("Invalid chart plugin apiVersion : " + apiVersion);
+			throw new ChartPluginFormatException("Invalid apiVersion : " + apiVersion);
 
 		chartPlugin.setApiVersion(apiVersion);
 
