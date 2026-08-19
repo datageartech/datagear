@@ -25,6 +25,8 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
+import java.io.StringReader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -580,6 +582,130 @@ public class JsonChartPluginPropertiesResolverTest
 		{
 			DataSign dataSign = dataSigns.get(1);
 			assertEquals("value", dataSign.getName());
+		}
+	}
+
+	@Test
+	public void resolvePropertiesTest_Reader_Reader_Reader() throws IOException
+	{
+		{
+			Reader pluginReader = new StringReader(
+					"{" //
+							+ " id: 'test', nameLabel: 'aaa', " //
+							+ " dataSignSpec: { dataSigns: [ { name: 'name' }, { name: 'value' } ] }, " //
+							+ " configForm: { properties: [ { name: 'qqq' }, { name: 'rrr' } ] } "
+							+ " }");
+			Reader dataSignSpecIn = null;
+			Reader configFormIn = null;
+
+			TestChartPlugin chartPlugin = new TestChartPlugin();
+			JsonChartPluginPropertiesResolver<TestChartPlugin> resolver = new JsonChartPluginPropertiesResolver<TestChartPlugin>(
+					chartPlugin);
+			resolver.resolveProperties(pluginReader, dataSignSpecIn, configFormIn);
+
+			assertEquals("test", chartPlugin.getId());
+
+			DataSignSpec dataSignSpec = chartPlugin.getDataSignSpec();
+			List<DataSign> dataSigns = dataSignSpec.getDataSigns();
+			ChartPluginConfigForm configForm = chartPlugin.getConfigForm();
+			List<FormProperty> formProperties = configForm.getProperties();
+
+			assertEquals(2, dataSigns.size());
+			{
+				DataSign dataSign = dataSigns.get(0);
+				assertEquals("name", dataSign.getName());
+			}
+			{
+				DataSign dataSign = dataSigns.get(1);
+				assertEquals("value", dataSign.getName());
+			}
+
+			assertEquals(2, formProperties.size());
+			{
+				FormProperty p = formProperties.get(0);
+				assertEquals("qqq", p.getName());
+			}
+			{
+				FormProperty p = formProperties.get(1);
+				assertEquals("rrr", p.getName());
+			}
+		}
+
+		{
+			Reader pluginReader = new StringReader("{ id: 'test', nameLabel: 'aaa' }");
+			Reader dataSignSpecIn = new StringReader("{ dataSigns: [ { name: 'name' }, { name: 'value' } ] }");
+			Reader configFormIn = new StringReader("{ properties: [ { name: 'qqq' }, { name: 'rrr' } ] }");
+
+			TestChartPlugin chartPlugin = new TestChartPlugin();
+			JsonChartPluginPropertiesResolver<TestChartPlugin> resolver = new JsonChartPluginPropertiesResolver<TestChartPlugin>(
+					chartPlugin);
+			resolver.resolveProperties(pluginReader, dataSignSpecIn, configFormIn);
+
+			assertEquals("test", chartPlugin.getId());
+
+			DataSignSpec dataSignSpec = chartPlugin.getDataSignSpec();
+			List<DataSign> dataSigns = dataSignSpec.getDataSigns();
+			ChartPluginConfigForm configForm = chartPlugin.getConfigForm();
+			List<FormProperty> formProperties = configForm.getProperties();
+
+			assertEquals(2, dataSigns.size());
+			{
+				DataSign dataSign = dataSigns.get(0);
+				assertEquals("name", dataSign.getName());
+			}
+			{
+				DataSign dataSign = dataSigns.get(1);
+				assertEquals("value", dataSign.getName());
+			}
+
+			assertEquals(2, formProperties.size());
+			{
+				FormProperty p = formProperties.get(0);
+				assertEquals("qqq", p.getName());
+			}
+			{
+				FormProperty p = formProperties.get(1);
+				assertEquals("rrr", p.getName());
+			}
+		}
+
+		// dataSignSpecIn是数组
+		{
+			Reader pluginReader = new StringReader("{ id: 'test', nameLabel: 'aaa' }");
+			Reader dataSignSpecIn = new StringReader("[ { name: 'name' }, { name: 'value' } ]");
+			Reader configFormIn = new StringReader("{ properties: [ { name: 'qqq' }, { name: 'rrr' } ] }");
+
+			TestChartPlugin chartPlugin = new TestChartPlugin();
+			JsonChartPluginPropertiesResolver<TestChartPlugin> resolver = new JsonChartPluginPropertiesResolver<TestChartPlugin>(
+					chartPlugin);
+			resolver.resolveProperties(pluginReader, dataSignSpecIn, configFormIn);
+
+			assertEquals("test", chartPlugin.getId());
+
+			DataSignSpec dataSignSpec = chartPlugin.getDataSignSpec();
+			List<DataSign> dataSigns = dataSignSpec.getDataSigns();
+			ChartPluginConfigForm configForm = chartPlugin.getConfigForm();
+			List<FormProperty> formProperties = configForm.getProperties();
+
+			assertEquals(2, dataSigns.size());
+			{
+				DataSign dataSign = dataSigns.get(0);
+				assertEquals("name", dataSign.getName());
+			}
+			{
+				DataSign dataSign = dataSigns.get(1);
+				assertEquals("value", dataSign.getName());
+			}
+
+			assertEquals(2, formProperties.size());
+			{
+				FormProperty p = formProperties.get(0);
+				assertEquals("qqq", p.getName());
+			}
+			{
+				FormProperty p = formProperties.get(1);
+				assertEquals("rrr", p.getName());
+			}
 		}
 	}
 

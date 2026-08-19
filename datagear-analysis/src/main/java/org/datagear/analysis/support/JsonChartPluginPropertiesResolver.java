@@ -307,8 +307,8 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 
 		if (dataSignSpecIn != null)
 		{
-			Object dataSigns = JsonSupport.parseNonStardand(dataSignSpecIn, List.class);
-			properties.put(JSON_PROPERTY_DATA_SIGNS, dataSigns);
+			Object dataSignSpec = JsonSupport.parseNonStardand(dataSignSpecIn, Object.class);
+			properties.put(JSON_PROPERTY_DATA_SIGN_SPEC, dataSignSpec);
 		}
 
 		if (configFormIn != null)
