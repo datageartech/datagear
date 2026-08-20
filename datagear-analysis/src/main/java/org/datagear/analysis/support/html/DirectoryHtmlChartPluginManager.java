@@ -238,13 +238,21 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 
 		if (file.isDirectory())
 		{
-			HtmlChartPlugin myPlugin = this.htmlChartPluginLoader.load(file);
-
-			if (myPlugin != null)
+			if (this.htmlChartPluginLoader.isHtmlChartPluginDirectory(file))
 			{
-				myPlugin = registerForUpload(myPlugin, file);
-				if (myPlugin != null)
-					plugins.add(myPlugin);
+				try
+				{
+					HtmlChartPlugin plugin = this.htmlChartPluginLoader.loadDir(file);
+					plugin = registerForUpload(plugin, file);
+
+					if (plugin != null)
+						plugins.add(plugin);
+				}
+				catch (Exception e)
+				{
+					if (LOGGER.isErrorEnabled())
+						LOGGER.error("Load chart plugin from file '" + file.getName() + "' error", e);
+				}
 			}
 			else
 			{
@@ -258,13 +266,18 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		}
 		else if (this.htmlChartPluginLoader.isHtmlChartPluginZip(file))
 		{
-			HtmlChartPlugin myPlugin = this.htmlChartPluginLoader.loadZip(file);
-
-			if (myPlugin != null)
+			try
 			{
-				myPlugin = registerForUpload(myPlugin, file);
-				if (myPlugin != null)
-					plugins.add(myPlugin);
+				HtmlChartPlugin plugin = this.htmlChartPluginLoader.loadZip(file);
+				plugin = registerForUpload(plugin, file);
+
+				if (plugin != null)
+					plugins.add(plugin);
+			}
+			catch (Exception e)
+			{
+				if (LOGGER.isErrorEnabled())
+					LOGGER.error("Load chart plugin from file '" + file.getName() + "' error", e);
 			}
 		}
 		else if (FileUtil.isExtension(file, "zip"))
@@ -466,7 +479,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 
 						if (LOGGER.isDebugEnabled())
 							LOGGER.debug("Chart plugin file [" + fileCheckTime.getFileName()
-									+ "] is new, need load");
+									+ "] not loaded, load required");
 					}
 				}
 			}

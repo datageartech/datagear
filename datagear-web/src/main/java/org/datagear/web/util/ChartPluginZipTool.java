@@ -86,7 +86,7 @@ public class ChartPluginZipTool
 			if (!pluginLoader.isHtmlChartPluginDirectory(file))
 				continue;
 
-			HtmlChartPlugin plugin = this.pluginLoader.load(file);
+			HtmlChartPlugin plugin = this.pluginLoader.loadDir(file);
 
 			if (!file.getName().equals(plugin.getId()))
 				throw new IllegalArgumentException("Folder [" + file.getName() + "] must be same with its plugin id");
@@ -325,7 +325,7 @@ public class ChartPluginZipTool
 			if (!file.isDirectory())
 				continue;
 
-			HtmlChartPlugin plugin = pluginLoader.load(file);
+			HtmlChartPlugin plugin = pluginLoader.loadDir(file);
 
 			if (file.getName().equals(plugin.getId()))
 			{

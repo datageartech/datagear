@@ -169,6 +169,11 @@ public class DirectoryHtmlChartPluginManagerInitializer
 						HtmlChartPlugin plugin = htmlChartPluginLoader.loadZip(zin);
 						needRegister = this.directoryHtmlChartPluginManager.isRegisterable(plugin);
 					}
+					catch (Exception e)
+					{
+						if (LOGGER.isErrorEnabled())
+							LOGGER.error("Load chart plugin from file '" + resource.getFilename() + "' error", e);
+					}
 					finally
 					{
 						IOUtil.close(zin);
@@ -199,12 +204,12 @@ public class DirectoryHtmlChartPluginManagerInitializer
 		
 						if (LOGGER.isDebugEnabled())
 							LOGGER.debug(
-									"The built-in chart plugin file [" + name + "] changed, reload needed");
+									"Built-in chart plugin file [" + name + "] changed, upload required");
 					}
 					else
 					{
 						if (LOGGER.isDebugEnabled())
-							LOGGER.debug("The built-in chart plugin file [" + name + "] not change, reload ignored");
+							LOGGER.debug("Built-in chart plugin file [" + name + "] not change, upload ignored");
 					}
 				}
 			}
@@ -220,14 +225,14 @@ public class DirectoryHtmlChartPluginManagerInitializer
 
 			if (LOGGER.isInfoEnabled())
 			{
-				LOGGER.info("Reload the following " + plugins.size() + " built-in chart plugins :");
+				LOGGER.info("Upload the following " + plugins.size() + " built-in chart plugins :");
 				LOGGER.info(pluginIds.toString());
 			}
 		}
 		else
 		{
 			if (LOGGER.isInfoEnabled())
-				LOGGER.info("No built-in chart plugin need reload");
+				LOGGER.info("No built-in chart plugin need upload");
 		}
 	}
 

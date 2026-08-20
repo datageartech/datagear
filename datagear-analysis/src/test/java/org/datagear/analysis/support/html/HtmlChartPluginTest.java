@@ -116,7 +116,7 @@ public class HtmlChartPluginTest
 	public static HtmlChartPlugin createHtmlChartPlugin() throws Exception
 	{
 		File directory = FileUtil.getFile("src/test/resources/org/datagear/analysis/support/html/htmlChartPluginTest");
-		HtmlChartPlugin htmlChartPlugin = new HtmlChartPluginLoader().load(directory);
+		HtmlChartPlugin htmlChartPlugin = new HtmlChartPluginLoader().loadDir(directory);
 
 		return htmlChartPlugin;
 	}
@@ -125,7 +125,7 @@ public class HtmlChartPluginTest
 	{
 		File directory = FileUtil
 				.getFile("src/test/resources/org/datagear/analysis/support/html/htmlChartPluginTestRendererFile");
-		HtmlChartPlugin htmlChartPlugin = new HtmlChartPluginLoader().load(directory);
+		HtmlChartPlugin htmlChartPlugin = new HtmlChartPluginLoader().loadDir(directory);
 
 		return htmlChartPlugin;
 	}
@@ -134,7 +134,7 @@ public class HtmlChartPluginTest
 	{
 		File directory = FileUtil
 				.getFile("src/test/resources/org/datagear/analysis/support/html/htmlChartPluginTestOld");
-		HtmlChartPlugin htmlChartPlugin = new HtmlChartPluginLoader().load(directory);
+		HtmlChartPlugin htmlChartPlugin = new HtmlChartPluginLoader().loadDir(directory);
 
 		return htmlChartPlugin;
 	}

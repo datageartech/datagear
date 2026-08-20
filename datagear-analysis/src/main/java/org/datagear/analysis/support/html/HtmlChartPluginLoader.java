@@ -29,6 +29,7 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.support.ChartPluginIdSpec;
 import org.datagear.analysis.support.FileChartPluginResource;
@@ -272,7 +273,7 @@ public class HtmlChartPluginLoader
 	 * @return
 	 * @throws HtmlChartPluginLoadException
 	 */
-	protected boolean isHtmlChartPluginZip(ZipInputStream in) throws HtmlChartPluginLoadException
+	public boolean isHtmlChartPluginZip(ZipInputStream in) throws HtmlChartPluginLoadException
 	{
 		ZipEntry zipEntry = null;
 
@@ -303,14 +304,14 @@ public class HtmlChartPluginLoader
 	}
 
 	/**
-	 * 从指定目录加载单个{@linkplain HtmlChartPlugin}。
+	 * 从插件目录加载单个{@linkplain HtmlChartPlugin}。
 	 * 
 	 * @param directory
-	 * @return {@code null}表示文件结构或内容不合法
+	 * @return
 	 * @throws HtmlChartPluginLoadException
 	 * @throws JsonChartPluginPropertiesResolverException
 	 */
-	public HtmlChartPlugin load(File directory)
+	public HtmlChartPlugin loadDir(File directory)
 			throws HtmlChartPluginLoadException, JsonChartPluginPropertiesResolverException
 	{
 		HtmlChartPlugin plugin = loadSingleForDirectory(directory);
@@ -319,10 +320,10 @@ public class HtmlChartPluginLoader
 	}
 
 	/**
-	 * 从指定ZIP文件加载单个{@linkplain HtmlChartPlugin}。
+	 * 从插件ZIP文件加载单个{@linkplain HtmlChartPlugin}。
 	 * 
 	 * @param zip
-	 * @return {@code null}表示文件结构或内容不合法
+	 * @return
 	 * @throws HtmlChartPluginLoadException
 	 */
 	public HtmlChartPlugin loadZip(File zip) throws HtmlChartPluginLoadException
@@ -333,13 +334,13 @@ public class HtmlChartPluginLoader
 	}
 
 	/**
-	 * 从指定ZIP输入流加载单个{@linkplain HtmlChartPlugin}。
+	 * 从插件ZIP输入流加载单个{@linkplain HtmlChartPlugin}。
 	 * <p>
 	 * 注意：此方法不会初始化{@linkplain HtmlChartPlugin#getResources()}。
 	 * </p>
 	 * 
 	 * @param in
-	 * @return {@code null}表示文件结构或内容不合法
+	 * @return
 	 * @throws HtmlChartPluginLoadException
 	 * @throws JsonChartPluginPropertiesResolverException
 	 */
@@ -352,11 +353,11 @@ public class HtmlChartPluginLoader
 	}
 
 	/**
-	 * 从指定文件加载单个{@linkplain HtmlChartPlugin}。
+	 * 从插件文件（目录、zip）加载单个{@linkplain HtmlChartPlugin}。
 	 * 
 	 * @param file
 	 *            插件文件夹、插件ZIP包
-	 * @return {@code null}表示文件结构或内容不合法
+	 * @return
 	 * @throws HtmlChartPluginLoadException
 	 * @throws JsonChartPluginPropertiesResolverException
 	 */
@@ -370,7 +371,7 @@ public class HtmlChartPluginLoader
 		else if (isZipFile(file))
 			plugin = loadSingleForZip(file);
 		else
-			plugin = loadFileExt(file);
+			throw new HtmlChartPluginLoadException("Illegal chart plugin file");
 
 		processLoadedPlugin(plugin);
 
@@ -383,7 +384,7 @@ public class HtmlChartPluginLoader
 	 * 文件夹内的可以包含插件文件夹或者插件ZIP包。
 	 * </p>
 	 * <p>
-	 * 在加载异常的插件时将抛出异常。
+	 * 将忽略单个插件加载异常。
 	 * </p>
 	 * 
 	 * @param directory
@@ -394,7 +395,7 @@ public class HtmlChartPluginLoader
 	public Set<HtmlChartPlugin> loadAll(File directory)
 			throws HtmlChartPluginLoadException, JsonChartPluginPropertiesResolverException
 	{
-		return loadAll(directory, false);
+		return loadAll(directory, true);
 	}
 
 	/**
@@ -405,7 +406,7 @@ public class HtmlChartPluginLoader
 	 * 
 	 * @param directory
 	 * @param ignoreInvalid
-	 *            是否忽略加载异常的插件，如果为{@code false}，则会在遇到时抛出异常
+	 *            是否忽略加载异常的插件，如果为{@code false}，则会在遇到时中断并抛出
 	 * @return
 	 * @throws HtmlChartPluginLoadException
 	 * @throws JsonChartPluginPropertiesResolverException
@@ -464,24 +465,18 @@ public class HtmlChartPluginLoader
 		inflateChartPluginResources(plugin, pluginFile);
 	}
 
-	protected HtmlChartPlugin loadFileExt(File file) throws HtmlChartPluginLoadException
-	{
-		return null;
-	}
-
 	/**
 	 * 从指定ZIP加载单个{@linkplain HtmlChartPlugin}。
 	 * 
 	 * @param zip
-	 * @return {@code null}表示文件结构或内容不合法
+	 * @return
 	 * @throws HtmlChartPluginLoadException
 	 * @throws JsonChartPluginPropertiesResolverException
 	 */
 	protected HtmlChartPlugin loadSingleForZip(File zip)
 			throws HtmlChartPluginLoadException, JsonChartPluginPropertiesResolverException
 	{
-		HtmlChartPlugin plugin = createHtmlChartPlugin();
-
+		HtmlChartPlugin plugin = null;
 		ZipInputStream in = null;
 
 		try
@@ -498,8 +493,7 @@ public class HtmlChartPluginLoader
 			IOUtil.close(in);
 		}
 
-		if (plugin != null)
-			inflateChartPluginResources(plugin, zip);
+		inflateChartPluginResources(plugin, zip);
 
 		return plugin;
 	}
@@ -511,7 +505,7 @@ public class HtmlChartPluginLoader
 	 * </p>
 	 * 
 	 * @param in
-	 * @return {@code null}表示文件结构或内容不合法
+	 * @return
 	 * @throws HtmlChartPluginLoadException
 	 * @throws JsonChartPluginPropertiesResolverException
 	 */
@@ -558,8 +552,10 @@ public class HtmlChartPluginLoader
 				in.closeEntry();
 			}
 
-			if (pluginIn != null)
-				inflateChartPluginProperties(plugin, pluginIn, dataSignSpecIn, configFormIn, rendererIn);
+			if (pluginIn == null)
+				throw new HtmlChartPluginLoadException("Illegal chart plugin zip");
+
+			inflateChartPluginProperties(plugin, pluginIn, dataSignSpecIn, configFormIn, rendererIn);
 		}
 		catch (IOException e)
 		{
@@ -575,7 +571,7 @@ public class HtmlChartPluginLoader
 
 		// 设置为加载时间而不取文件上次修改时间，因为文件上次修改时间可能错乱
 		plugin.setLastModified(System.currentTimeMillis());
-		plugin = checkValidPlugin(plugin);
+		checkValidPlugin(plugin);
 
 		return plugin;
 	}
@@ -584,7 +580,7 @@ public class HtmlChartPluginLoader
 	 * 从指定目录加载单个{@linkplain HtmlChartPlugin}。
 	 * 
 	 * @param directory
-	 * @return {@code null}表示文件结构或内容不合法
+	 * @return
 	 * @throws HtmlChartPluginLoadException
 	 * @throws JsonChartPluginPropertiesResolverException
 	 */
@@ -594,7 +590,7 @@ public class HtmlChartPluginLoader
 		File pluginFile = FileUtil.getFile(directory, FILE_NAME_PLUGIN);
 
 		if (!pluginFile.exists())
-			return null;
+			throw new HtmlChartPluginLoadException("Illegal chart plugin directory");
 
 		HtmlChartPlugin plugin = createHtmlChartPlugin();
 
@@ -631,7 +627,7 @@ public class HtmlChartPluginLoader
 
 		// 设置为加载时间而不取文件上次修改时间，因为文件上次修改时间可能错乱
 		plugin.setLastModified(System.currentTimeMillis());
-		plugin = checkValidPlugin(plugin);
+		checkValidPlugin(plugin);
 
 		return plugin;
 	}
@@ -703,52 +699,33 @@ public class HtmlChartPluginLoader
 		plugin.setChartWriter(getChartScriptObjectWriter());
 	}
 
-	protected HtmlChartPlugin checkValidPlugin(HtmlChartPlugin plugin)
+	protected void checkValidPlugin(HtmlChartPlugin plugin) throws HtmlChartPluginLoadException
 	{
 		if (plugin == null)
-			return plugin;
+			return;
 
 		// 旧版的校验逻辑，应保留
 		if (DashboardApiVersion.isV1(plugin.getApiVersion()))
 		{
 			if (StringUtil.isEmpty(plugin.getId()))
-			{
-				if (LOGGER.isWarnEnabled())
-					LOGGER.warn("Ignore a chart plugin cause null id");
-
-				return null;
-			}
+				throw new HtmlChartPluginLoadException(ChartPlugin.PROPERTY_ID + " required");
 
 			if (StringUtil.isEmpty(plugin.getNameLabel()))
-			{
-				if (LOGGER.isWarnEnabled())
-					LOGGER.warn("Ignore a chart plugin '" + plugin.getId() + "' cause null nameLabel");
-
-				return null;
-			}
+				throw new HtmlChartPluginLoadException(ChartPlugin.PROPERTY_NAME_LABEL + " required");
 		}
 		else
 		{
-			if (!this.chartPluginIdSpec.isValidId(plugin.getId()))
-			{
-				if (LOGGER.isWarnEnabled())
-					LOGGER.warn("Ignore a chart plugin '" + plugin.getId() + "' cause illegal id");
+			if (StringUtil.isEmpty(plugin.getId()))
+				throw new HtmlChartPluginLoadException(ChartPlugin.PROPERTY_ID + " required");
 
-				return null;
-			}
+			if (!this.chartPluginIdSpec.isValidId(plugin.getId()))
+				throw new HtmlChartPluginLoadException(ChartPlugin.PROPERTY_ID + " illegal");
 
 			Label nameLabel = plugin.getNameLabel();
 
 			if (nameLabel == null || StringUtil.isBlank(nameLabel.getValue()))
-			{
-				if (LOGGER.isWarnEnabled())
-					LOGGER.warn("Ignore a chart plugin '" + plugin.getId() + "' cause blank nameLabel value");
-
-				return null;
-			}
+				throw new HtmlChartPluginLoadException(ChartPlugin.PROPERTY_NAME_LABEL + " required");
 		}
-
-		return plugin;
 	}
 
 	protected void inflateChartPluginResources(HtmlChartPlugin plugin, File pluginFile)

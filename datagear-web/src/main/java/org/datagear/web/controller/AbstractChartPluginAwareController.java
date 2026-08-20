@@ -136,7 +136,7 @@ public class AbstractChartPluginAwareController extends AbstractDataAnalysisCont
 	protected Set<HtmlChartPlugin> resolveHtmlChartPluginsThrow(File directory) throws HtmlChartPluginLoadException
 	{
 		HtmlChartPluginLoader loader = getDirectoryHtmlChartPluginManager().getHtmlChartPluginLoader();
-		return loader.loadAll(directory);
+		return loader.loadAll(directory, false);
 	}
 
 	protected HtmlChartPlugin getHtmlChartPlugin(String id, boolean nonNull)
