@@ -209,7 +209,7 @@ public class DashboardGlobalResController extends AbstractController implements 
 		String fileName = multipartFile.getOriginalFilename();
 		File file = FileUtil.getFile(tmpDirectory, fileName);
 
-		writeMultipartFile(multipartFile, file);
+		multipartFile.transferTo(file);
 
 		String uploadFilePath = FileUtil.getRelativePath(this.tempDirectory, file);
 

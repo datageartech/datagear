@@ -801,7 +801,7 @@ public class DataSetController extends AbstractDtbsSourceConnController
 		File tmpFile = FileUtil.generateUniqueFile(directory, FileUtil.getExtension(displayName));
 		String fileName = tmpFile.getName();
 
-		writeMultipartFile(multipartFile, tmpFile);
+		multipartFile.transferTo(tmpFile);
 
 		Map<String, Object> results = new HashMap<>();
 		results.put("fileName", fileName);
