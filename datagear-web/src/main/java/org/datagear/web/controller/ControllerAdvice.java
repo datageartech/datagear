@@ -28,6 +28,7 @@ import org.datagear.analysis.support.DataSetFieldExpEvaluatorParseException;
 import org.datagear.analysis.support.DataSetSourceParseException;
 import org.datagear.analysis.support.DataValueConvertionException;
 import org.datagear.analysis.support.HeaderContentNotNameValueObjArrayJsonException;
+import org.datagear.analysis.support.JsonChartPluginPropertiesResolverException;
 import org.datagear.analysis.support.ReadJsonDataPathException;
 import org.datagear.analysis.support.RequestContentNotNameValueObjArrayJsonException;
 import org.datagear.analysis.support.SqlDataSetConnectionException;
@@ -566,6 +567,16 @@ public class ControllerAdvice extends AbstractController
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public String handleAnalysisHtmlChartPluginLoadException(HttpServletRequest request, HttpServletResponse response,
 			HtmlChartPluginLoadException exception)
+	{
+		setOptMsgForThrowableMsgCode(request, exception, buildExceptionMsgCode(exception.getClass()),
+				getRootMessage(exception));
+		return getErrorView(request, response);
+	}
+
+	@ExceptionHandler(JsonChartPluginPropertiesResolverException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public String handleAnalysisJsonChartPluginPropertiesResolverException(HttpServletRequest request,
+			HttpServletResponse response, JsonChartPluginPropertiesResolverException exception)
 	{
 		setOptMsgForThrowableMsgCode(request, exception, buildExceptionMsgCode(exception.getClass()),
 				getRootMessage(exception));

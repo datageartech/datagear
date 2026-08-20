@@ -138,19 +138,30 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 			zipFileName += ".zip";
 
 		File zipFile = FileUtil.getFile(myTmpDirectory, zipFileName);
-
-		writeMultipartFile(multipartFile, zipFile);
-
-		String pluginFileName = FileUtil.getRelativePath(this.tempDirectory, myTmpDirectory);
-
-		// 如果ZIP里包含多个插件包，则应解压
+		boolean isPluginZip = false;
 		HtmlChartPluginLoader loader = getDirectoryHtmlChartPluginManager().getHtmlChartPluginLoader();
-		if (!loader.isHtmlChartPluginZip(zipFile))
+
+		ZipInputStream zin = null;
+		try
 		{
-			ZipInputStream zin = null;
+			zin = IOUtil.getZipInputStream(multipartFile.getInputStream());
+			isPluginZip = loader.isHtmlChartPluginZip(zin);
+		}
+		finally
+		{
+			IOUtil.close(zin);
+		}
+
+		if (isPluginZip)
+		{
+			multipartFile.transferTo(zipFile);
+		}
+		else
+		{
+			// 是包含多个插件包的zip
 			try
 			{
-				zin = IOUtil.getZipInputStream(zipFile);
+				zin = IOUtil.getZipInputStream(multipartFile.getInputStream());
 				IOUtil.unzip(zin, myTmpDirectory);
 			}
 			finally
@@ -159,6 +170,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 			}
 		}
 
+		String pluginFileName = FileUtil.getRelativePath(this.tempDirectory, myTmpDirectory);
 		List<HtmlChartPluginVo> pluginInfos = new ArrayList<>();
 
 		Set<HtmlChartPlugin> loadedPlugins = resolveHtmlChartPluginsThrow(myTmpDirectory);
