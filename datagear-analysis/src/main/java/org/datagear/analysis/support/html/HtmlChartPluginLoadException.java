@@ -27,9 +27,6 @@ public class HtmlChartPluginLoadException extends RuntimeException
 {
 	private static final long serialVersionUID = 1L;
 
-	/** 加载源 */
-	private String source = "";
-
 	public HtmlChartPluginLoadException()
 	{
 		super();
@@ -40,21 +37,9 @@ public class HtmlChartPluginLoadException extends RuntimeException
 		super(message);
 	}
 
-	public HtmlChartPluginLoadException(String message, String source)
-	{
-		super(message);
-		this.source = source;
-	}
-
 	public HtmlChartPluginLoadException(Throwable cause)
 	{
 		super(cause);
-	}
-
-	public HtmlChartPluginLoadException(Throwable cause, String source)
-	{
-		super(cause);
-		this.source = source;
 	}
 
 	public HtmlChartPluginLoadException(String message, Throwable cause)
@@ -62,19 +47,9 @@ public class HtmlChartPluginLoadException extends RuntimeException
 		super(message, cause);
 	}
 
-	public HtmlChartPluginLoadException(String message, Throwable cause, String source)
+	public HtmlChartPluginLoadException(String message, Throwable cause, boolean enableSuppression,
+			boolean writableStackTrace)
 	{
-		super(message, cause);
-		this.source = source;
-	}
-
-	public String getSource()
-	{
-		return source;
-	}
-
-	public void setSource(String source)
-	{
-		this.source = source;
+		super(message, cause, enableSuppression, writableStackTrace);
 	}
 }

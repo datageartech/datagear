@@ -568,7 +568,7 @@ public class ControllerAdvice extends AbstractController
 			HtmlChartPluginLoadException exception)
 	{
 		setOptMsgForThrowableMsgCode(request, exception, buildExceptionMsgCode(exception.getClass()),
-				exception.getSource(), getRootMessage(exception));
+				getRootMessage(exception));
 		return getErrorView(request, response);
 	}
 

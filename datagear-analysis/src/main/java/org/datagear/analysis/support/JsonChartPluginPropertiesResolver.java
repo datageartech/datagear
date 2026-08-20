@@ -190,9 +190,9 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 * 
 	 * @param properties
 	 * @return {@linkplain #getChartPlugin()}
-	 * @throws ChartPluginFormatException
+	 * @throws JsonChartPluginPropertiesResolverException
 	 */
-	public T resolveProperties(Map<String, ?> properties) throws ChartPluginFormatException
+	public T resolveProperties(Map<String, ?> properties) throws JsonChartPluginPropertiesResolverException
 	{
 		T chartPlugin = getChartPlugin();
 
@@ -241,10 +241,9 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 * 
 	 * @param pluginJson
 	 * @return {@linkplain #getChartPlugin()}
-	 * @throws IOException
-	 * @throws ChartPluginFormatException
+	 * @throws JsonChartPluginPropertiesResolverException
 	 */
-	public T resolveProperties(String pluginJson) throws IOException, ChartPluginFormatException
+	public T resolveProperties(String pluginJson) throws JsonChartPluginPropertiesResolverException
 	{
 		return resolveProperties(pluginJson, null, null);
 	}
@@ -258,11 +257,10 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 * @param configFormJson
 	 *            允许{@code null}
 	 * @return
-	 * @throws IOException
-	 * @throws ChartPluginFormatException
+	 * @throws JsonChartPluginPropertiesResolverException
 	 */
 	public T resolveProperties(String pluginJson, String dataSignSpecJson, String configFormJson)
-			throws IOException, ChartPluginFormatException
+			throws JsonChartPluginPropertiesResolverException
 	{
 		Reader pluginIn = new StringReader(pluginJson);
 		Reader dataSignSpecIn = (StringUtil.isEmpty(dataSignSpecJson) ? null : new StringReader(dataSignSpecJson));
@@ -285,10 +283,9 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 * 
 	 * @param pluginJsonIn
 	 * @return {@linkplain #getChartPlugin()}
-	 * @throws IOException
-	 * @throws ChartPluginFormatException
+	 * @throws JsonChartPluginPropertiesResolverException
 	 */
-	public T resolveProperties(Reader pluginJsonIn) throws IOException, ChartPluginFormatException
+	public T resolveProperties(Reader pluginJsonIn) throws JsonChartPluginPropertiesResolverException
 	{
 		return resolveProperties(pluginJsonIn, null, null);
 	}
@@ -302,24 +299,23 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 * @param configFormIn
 	 *            允许{@code null}
 	 * @return {@linkplain #getChartPlugin()}
-	 * @throws IOException
-	 * @throws ChartPluginFormatException
+	 * @throws JsonChartPluginPropertiesResolverException
 	 */
 	public T resolveProperties(Reader pluginJsonIn, Reader dataSignSpecIn, Reader configFormIn)
-			throws IOException, ChartPluginFormatException
+			throws JsonChartPluginPropertiesResolverException
 	{
 		@SuppressWarnings("unchecked")
-		Map<String, Object> properties = JsonSupport.parseNonStardand(pluginJsonIn, Map.class);
+		Map<String, Object> properties = parseJsonNonStardand(pluginJsonIn, Map.class);
 
 		if (dataSignSpecIn != null)
 		{
-			Object dataSignSpec = JsonSupport.parseNonStardand(dataSignSpecIn, Object.class);
+			Object dataSignSpec = parseJsonNonStardand(dataSignSpecIn, Object.class);
 			properties.put(JSON_PROPERTY_DATA_SIGN_SPEC, dataSignSpec);
 		}
 
 		if (configFormIn != null)
 		{
-			Object configForm = JsonSupport.parseNonStardand(configFormIn, Map.class);
+			Object configForm = parseJsonNonStardand(configFormIn, Map.class);
 			properties.put(JSON_PROPERTY_CONFIG_FORM, configForm);
 		}
 
@@ -332,11 +328,10 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 * @param pluginJsonIn
 	 * @param encoding
 	 * @return {@linkplain #getChartPlugin()}
-	 * @throws IOException
-	 * @throws ChartPluginFormatException
+	 * @throws JsonChartPluginPropertiesResolverException
 	 */
 	public T resolveProperties(InputStream pluginJsonIn, String encoding)
-			throws IOException, ChartPluginFormatException
+			throws JsonChartPluginPropertiesResolverException
 	{
 		return resolveProperties(pluginJsonIn, null, null, encoding);
 	}
@@ -351,15 +346,14 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 	 *            允许{@code null}
 	 * @param encoding
 	 * @return {@linkplain #getChartPlugin()}
-	 * @throws IOException
-	 * @throws ChartPluginFormatException
+	 * @throws JsonChartPluginPropertiesResolverException
 	 */
 	public T resolveProperties(InputStream pluginJsonIn, InputStream dataSignSpecIn, InputStream configFormIn,
-			String encoding) throws IOException, ChartPluginFormatException
+			String encoding) throws JsonChartPluginPropertiesResolverException
 	{
-		Reader pluginReader = IOUtil.getReader(pluginJsonIn, encoding);
-		Reader dataSignsReader = (dataSignSpecIn == null ? null : IOUtil.getReader(dataSignSpecIn, encoding));
-		Reader configFormReader = (configFormIn == null ? null : IOUtil.getReader(configFormIn, encoding));
+		Reader pluginReader = getReader(pluginJsonIn, encoding);
+		Reader dataSignsReader = (dataSignSpecIn == null ? null : getReader(dataSignSpecIn, encoding));
+		Reader configFormReader = (configFormIn == null ? null : getReader(configFormIn, encoding));
 		return resolveProperties(pluginReader, dataSignsReader, configFormReader);
 	}
 
@@ -408,8 +402,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			return icons;
 		}
 		else
-			throw new ChartPluginFormatException(
-					"Convert object of type [" + obj.getClass().getName() + "] to icon map unsupported");
+			throw new JsonChartPluginPropertiesResolverException("Illegal " + JSON_PROPERTY_ICONS + " value");
 	}
 
 	protected DataSignSpec convertToDataSignSpec(Object obj)
@@ -437,8 +430,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			return spec;
 		}
 		else
-			throw new ChartPluginFormatException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ DataSignSpec.class.getName() + "] unsupported");
+			throw new JsonChartPluginPropertiesResolverException("Illegal " + JSON_PROPERTY_DATA_SIGN_SPEC + " value");
 	}
 
 	/**
@@ -561,8 +553,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			return dataSign;
 		}
 		else
-			throw new ChartPluginFormatException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ DataSign.class.getName() + "] unsupported");
+			throw new JsonChartPluginPropertiesResolverException("Illegal " + DataSign.class.getSimpleName() + " value");
 	}
 
 	/**
@@ -610,8 +601,8 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			targets = targetList.toArray(new String[targetList.size()]);
 		}
 		else
-			throw new ChartPluginFormatException("Convert object of type [" + v.getClass().getName() + "] to ["
-					+ DataSign.class.getName() + ".targets] unsupported");
+			throw new JsonChartPluginPropertiesResolverException(
+					"Illegal " + DataSign.class.getSimpleName() + "." + DataSign.PROPERTY_TARGETS + " value");
 
 		return targets;
 	}
@@ -662,8 +653,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			form.setDefaultValue(map.get(Form.PROPERTY_DEFAULT_VALUE));
 		}
 		else
-			throw new ChartPluginFormatException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ ChartPluginConfigForm.class.getName() + "] unsupported");
+			throw new JsonChartPluginPropertiesResolverException("Illegal " + JSON_PROPERTY_CONFIG_FORM + " value");
 
 		return form;
 	}
@@ -751,7 +741,8 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			FormProperty prop = (FormProperty) obj;
 
 			if (StringUtil.isEmpty(prop.getName()))
-				throw new ChartPluginFormatException(FormProperty.class.getSimpleName() + ".name required");
+				throw new JsonChartPluginPropertiesResolverException(
+						FormProperty.class.getSimpleName() + "." + FormProperty.PROPERTY_NAME + " required");
 
 			return prop;
 		}
@@ -819,8 +810,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			return prop;
 		}
 		else
-			throw new ChartPluginFormatException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ FormProperty.class.getName() + "] unsupported");
+			throw new JsonChartPluginPropertiesResolverException("Illegal " + FormProperty.class.getSimpleName() + " value");
 	}
 
 	protected boolean convertToFormPropertyRequired(Object v)
@@ -918,8 +908,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			return group;
 		}
 		else
-			throw new ChartPluginFormatException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ FormPropertyGroup.class.getName() + "] unsupported");
+			throw new JsonChartPluginPropertiesResolverException("Illegal " + FormPropertyGroup.class.getSimpleName() + " value");
 	}
 
 	protected List<String> convertToFormPropertyGroupNames(Object obj)
@@ -955,8 +944,8 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			return convertToFormPropertyGroupNames(array);
 		}
 		else
-			throw new ChartPluginFormatException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ FormPropertyGroup.class.getName() + ".names] unsupported");
+			throw new JsonChartPluginPropertiesResolverException("Illegal " + FormPropertyGroup.class.getSimpleName() + "."
+					+ FormPropertyGroup.PROPERTY_NAMES + " value");
 	}
 
 	protected Group convertToInputFormPropertyGroupForV5_5_0(Object obj)
@@ -990,8 +979,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			return group;
 		}
 		else
-			throw new ChartPluginFormatException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ Group.class.getName() + "] unsupported");
+			throw new JsonChartPluginPropertiesResolverException("Illegal " + Group.class.getSimpleName() + " value");
 	}
 
 	/**
@@ -1123,8 +1111,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			return dsr;
 		}
 		else
-			throw new ChartPluginFormatException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ ChartPluginDataSetRange.class.getName() + "] unsupported");
+			throw new JsonChartPluginPropertiesResolverException("Illegal " + ChartPluginDataSetRange.class.getSimpleName() + " value");
 	}
 
 	protected Range convertToRange(Map<String, ?> map)
@@ -1185,8 +1172,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			return categoryInfos;
 		}
 		else
-			throw new ChartPluginFormatException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ ChartPluginCategoryInfo.class.getName() + "] list unsupported");
+			throw new JsonChartPluginPropertiesResolverException("Illegal " + JSON_PROPERTY_CATEGORY_INFOS + " value");
 	}
 
 	protected List<ChartPluginCategoryInfo> convertToCategoryInfosForV5_5_0(Object categoriesObj, Object categoryOrdersObj)
@@ -1268,8 +1254,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			return categoryInfo;
 		}
 		else
-			throw new ChartPluginFormatException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ ChartPluginCategoryInfo.class.getName() + "] unsupported");
+			throw new JsonChartPluginPropertiesResolverException("Illegal " + ChartPluginCategoryInfo.class.getSimpleName() + " value");
 	}
 
 	/**
@@ -1323,8 +1308,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			return categories;
 		}
 		else
-			throw new ChartPluginFormatException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ Category.class.getName() + "] list unsupported");
+			throw new JsonChartPluginPropertiesResolverException("Illegal " + Category.class.getSimpleName() + " list value");
 	}
 
 	protected List<Integer> convertToCategoryOrders(Object obj)
@@ -1384,8 +1368,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			return category;
 		}
 		else
-			throw new ChartPluginFormatException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ Category.class.getName() + "] unsupported");
+			throw new JsonChartPluginPropertiesResolverException("Illegal " + Category.class.getSimpleName() + " value");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1396,8 +1379,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 		else if (obj instanceof Map<?, ?>)
 			return (Map<String, ?>) obj;
 		else
-			throw new ChartPluginFormatException(
-					"Convert object of type [" + obj.getClass().getName() + "] to [additions] unsupported");
+			throw new JsonChartPluginPropertiesResolverException("Illegal additions value");
 	}
 
 	/**
@@ -1429,8 +1411,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			return null;
 		}
 		else
-			throw new ChartPluginFormatException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ enumType.getName() + "] unsupported");
+			throw new JsonChartPluginPropertiesResolverException("Illegal " + enumType.getName() + " value");
 	}
 
 	/**
@@ -1466,15 +1447,13 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			else if (localeValues instanceof Map<?, ?>)
 				label.setLocaleValues((Map<String, String>)localeValues);
 			else
-				throw new ChartPluginFormatException(
-						"Convert object of type [" + localeValues.getClass().getName() + "] to ["
-						+ Label.class.getName() + ".localeValues] unsupported");
+				throw new JsonChartPluginPropertiesResolverException(
+						"Illegal " + Label.class.getSimpleName() + "." + Label.PROPERTY_LOCALE_VALUES + " value");
 	
 			return label;
 		}
 		else
-			throw new ChartPluginFormatException("Convert object of type [" + obj.getClass().getName() + "] to ["
-					+ Label.class.getName() + "] unsupported");
+			throw new JsonChartPluginPropertiesResolverException("Illegal " + Label.class.getSimpleName() + " value");
 	}
 
 	/**
@@ -1496,8 +1475,7 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			return StringUtil.toBoolean(str);
 		}
 		else
-			throw new ChartPluginFormatException(
-					"Convert object [" + obj + "] to [" + boolean.class.getName() + "] unsupported");
+			throw new JsonChartPluginPropertiesResolverException("Illegal boolean value");
 	}
 
 	protected int convertToInt(Object obj, int defaultValue)
@@ -1529,6 +1507,30 @@ public class JsonChartPluginPropertiesResolver<T extends AbstractChartPlugin>
 			return (String) obj;
 		else
 			return obj.toString();
+	}
+
+	protected <T> T parseJsonNonStardand(Reader in, Class<T> type) throws JsonChartPluginPropertiesResolverException
+	{
+		try
+		{
+			return JsonSupport.parseNonStardand(in, type);
+		}
+		catch (IOException e)
+		{
+			throw new JsonChartPluginPropertiesResolverException(e);
+		}
+	}
+
+	protected Reader getReader(InputStream in, String encoding) throws JsonChartPluginPropertiesResolverException
+	{
+		try
+		{
+			return IOUtil.getReader(in, encoding);
+		}
+		catch (IOException e)
+		{
+			throw new JsonChartPluginPropertiesResolverException(e);
+		}
 	}
 
 	protected Label createLabel()

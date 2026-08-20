@@ -18,36 +18,36 @@
 package org.datagear.analysis.support;
 
 /**
- * 插件格式异常。
+ * {@linkplain JsonChartPluginPropertiesResolver}处理异常。
  * 
  * @author datagear@163.com
  *
  */
-public class ChartPluginFormatException extends RuntimeException
+public class JsonChartPluginPropertiesResolverException extends RuntimeException
 {
 	private static final long serialVersionUID = 1L;
 
-	public ChartPluginFormatException()
+	public JsonChartPluginPropertiesResolverException()
 	{
 		super();
 	}
 
-	public ChartPluginFormatException(String message)
+	public JsonChartPluginPropertiesResolverException(String message)
 	{
 		super(message);
 	}
 
-	public ChartPluginFormatException(Throwable cause)
+	public JsonChartPluginPropertiesResolverException(Throwable cause)
 	{
 		super(cause);
 	}
 
-	public ChartPluginFormatException(String message, Throwable cause)
+	public JsonChartPluginPropertiesResolverException(String message, Throwable cause)
 	{
 		super(message, cause);
 	}
 
-	public ChartPluginFormatException(String message, Throwable cause, boolean enableSuppression,
+	public JsonChartPluginPropertiesResolverException(String message, Throwable cause, boolean enableSuppression,
 			boolean writableStackTrace)
 	{
 		super(message, cause, enableSuppression, writableStackTrace);
