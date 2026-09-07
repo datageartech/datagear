@@ -4025,6 +4025,16 @@ DF.normalizeChartPlugin = function(plugin, pluginInfo)
 	if(plugin == null)
 		return;
 	
+	if(CF.isEmpty(plugin.id))
+		throw new Error("plugin id required");
+	
+	if(plugin.nameLabel == null)
+		throw new Error("plugin nameLabel required");
+	
+	////org.datagear.analysis.support.html.DashboardApiVersion.V2
+	if(plugin.apiVersion !== "2.0")
+		throw new Error("plugin apiVersion must be \"2.0\"");
+	
 	if(pluginInfo != null)
 	{
 		if(pluginInfo.dataSignSpec != null)
@@ -4075,6 +4085,10 @@ DF.normalizeDataSigns = function(dataSigns, parent)
 	for(let i=0; i<dataSigns.length; i++)
 	{
 		let dataSign = dataSigns[i];
+		
+		if(CF.isEmpty(dataSign.name))
+			throw new Error("plugin dataSignSpec.dataSigns[] name required");
+		
 		DF.normalizeLabeled(dataSign);
 		
 		if(CF.isEmpty(dataSign.fullname))
@@ -4120,6 +4134,9 @@ DF.normalizeConfigFormProperties = function(properties)
 	for(let i=0; i<properties.length; i++)
 	{
 		let prop = properties[i];
+		
+		if(CF.isEmpty(prop.name))
+			throw new Error("plugin configForm.properties[] name required");
 		
 		DF.normalizeLabeled(prop);
 		
