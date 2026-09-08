@@ -3455,10 +3455,13 @@ DE._trimInsertType = function(refEle, insertType)
 //注意：返回的图表元素中可能有还未渲染为图表的元素
 DE._getChartElements = function(ele)
 {
-	var eles = CF.elesWithWidgetId(ele).elements;
-	var localEles = DF.elesWithLocal(ele).elements;
+	var re = [];
 	
-	return eles.concat(localEles);
+	var eleInfos = DF.eleInfosWithWidgetOrLocal(ele);
+	for(let i=0; i<eleInfos.length; i++)
+		re.push(eleInfos[i].element);
+	
+	return re;
 };
 
 DE._selectedElements = function(root)

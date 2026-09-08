@@ -5755,42 +5755,6 @@ CF.isChartTagName = function(ele)
 };
 
 /**
- * 获取<div>元素自身或其子孙<div>元素中带有非空图表部件ID属性（"dg-chart-widget"）的全部元素。
- * 
- * @param ele HTML元素
- * @returns { elements: [ HTML元素, ... ], widgetIds: [ "...", ... ] }
- */
-CF.elesWithWidgetId = function(ele)
-{
-	var re = { elements: [], widgetIds: [] };
-	
-	if(ele == null)
-		return re;
-	
-	var widgetId = CF.elementWidgetId(ele);
-	
-	if(!CF.isEmpty(widgetId) && CF.isChartTagName(ele))
-	{
-		re.elements.push(ele);
-		re.widgetIds.push(widgetId);
-	}
-	
-	var children = CF.elesOfSelector(CF.CHART_TAG_NAME + "["+CF.elementAttrConst.WIDGET+"]", ele);
-	
-	children.forEach(function(child)
-	{
-		let childWidgetId = CF.elementWidgetId(child);
-		if(!CF.isEmpty(childWidgetId))
-		{
-			re.elements.push(child);
-			re.widgetIds.push(childWidgetId);
-		}
-	});
-	
-	return re;
-};
-
-/**
  * 获取当前在指定HTML元素上渲染的图表对象。
  * 
  * @param ele HTML元素、元素选择器字符串

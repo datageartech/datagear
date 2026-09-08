@@ -316,10 +316,17 @@ DF.Dashboard = function(root)
 		charts[i] = DF.createChart(charts[i], root.renderContext, this);
 	}
 	
-	var localCharts = DF.createLocalCharts(root.renderContext, this);
-	for(let i=0; i<localCharts.length; i++)
+	var eleInfos = DF.eleInfosWithWidgetOrLocal(document.body);
+	
+	for(let i=0; i<eleInfos.length; i++)
 	{
-		charts.push(localCharts[i]);
+		if(!eleInfos[i].local)
+			continue;
+		
+		let ele = eleInfos[i].element;
+		let chartRoot = DF.evalChartLocalValue(eleInfos[i].value);
+		let localChart = DF.createLocalChart(ele, chartRoot, root.renderContext, this);
+		charts.push(localChart);
 	}
 };
 
@@ -370,26 +377,6 @@ DF.stopHeartBeat = function()
 		clearInterval(DF._heartbeatIntervalId);
 		DF._heartbeatIntervalId = null;
 	}
-};
-
-//创建页面内的全部本地图表
-DF.createLocalCharts = function(renderContext, dashboard)
-{
-	var re = [];
-	
-	var elesWithLocal = DF.elesWithLocal(document.body, true);
-	var eles = elesWithLocal.elements;
-	var locals = elesWithLocal.locals;
-	
-	for(let i=0; i<eles.length; i++)
-	{
-		let ele = eles[i];
-		let chartRoot = locals[i];
-		let localChart = DF.createLocalChart(ele, chartRoot, renderContext, dashboard);
-		re.push(localChart);
-	}
-	
-	return re;
 };
 
 //创建本地图表
@@ -2802,11 +2789,11 @@ dashboardProto.loadUnsolvedCharts = function(elements, add)
 	
 	for(let i=0; i<elements.length; i++)
 	{
-		let eleWidgetIdInfo = CF.elesWithWidgetId(elements[i]);
-		for(let j=0; j<eleWidgetIdInfo.elements.length; j++)
+		let eleInfos = DF.eleInfosWithWidgetId(elements[i]);
+		for(let j=0; j<eleInfos.length; j++)
 		{
-			let ele = eleWidgetIdInfo.elements[j];
-			let widgetId = eleWidgetIdInfo.widgetIds[j];
+			let ele = eleInfos[j].element;
+			let widgetId = eleInfos[j].value;
 			
 			if(this._loadingChartElement(ele))
 				continue;
@@ -3142,13 +3129,12 @@ dashboardProto.createUnsolvedCharts = function(elements, add)
 	
 	for(let i=0; i<elements.length; i++)
 	{
-		let elesWithLocal = DF.elesWithLocal(elements[i]);
-		let eles = elesWithLocal.elements;
-		let locals = elesWithLocal.locals;
+		let eleInfos = DF.eleInfosWithLocal(elements[i]);
 		
-		for(let j=0; j<eles.length; j++)
+		for(let j=0; j<eleInfos.length; j++)
 		{
-			let ele = eles[j];
+			let ele = eleInfos[j].element;
+			let chartRoot = eleInfos[j].value;
 			
 			if(this.renderedChart(ele) != null)
 				continue;
@@ -3156,8 +3142,6 @@ dashboardProto.createUnsolvedCharts = function(elements, add)
 			//看板中可能存在对应此元素的已初始化但是未渲染的图表，这里也要排除
 			if(this.chart(ele) != null)
 				continue;
-			
-			let chartRoot = locals[j];
 			
 			if(!CF.isEmpty(chartRoot))
 				chartRoot = DF.evalChartLocalValue(chartRoot);
@@ -3727,7 +3711,7 @@ dashboardProto.chartsIn = function(element)
 	
 	var re = [];
 	
-	var eles = CF.elesOfSelector("[id]", element);
+	var eles = CF.elesOfSelector(CF.CHART_TAG_NAME + "[id]", element);
 	
 	eles.forEach((ele) =>
 	{
@@ -3754,52 +3738,110 @@ dashboardProto.chartsIn = function(element)
 //----------------------------------------
 
 /**
+ * 获取<div>元素自身或其子孙<div>元素中带有非空"dg-chart-widget"或"dg-chart-local"的全部元素。
+ * 
+ * @param ele HTML元素
+ * @returns [ { element: ..., value: "...", local: true/false }, ... ]
+ */
+DF.eleInfosWithWidgetOrLocal = function(ele, excludeWidget, excludeLocal)
+{
+	excludeWidget = (excludeWidget === undefined ? false : excludeWidget);
+	excludeLocal = (excludeLocal === undefined ? false : excludeLocal);
+	
+	var re = [];
+	
+	if(ele == null || (excludeWidget && excludeLocal))
+		return re;
+	
+	if(CF.isChartTagName(ele))
+		DF._appendWidgetOrLocalIf(re, ele, excludeWidget, excludeLocal);
+	
+	var descendants;
+	
+	if(excludeWidget && excludeLocal)
+		descendants = [];
+	else if(excludeWidget)
+		descendants = CF.elesOfSelector(CF.CHART_TAG_NAME + "["+elementAttrConst.LOCAL+"]", ele);
+	else if(excludeLocal)
+		descendants = CF.elesOfSelector(CF.CHART_TAG_NAME + "["+elementAttrConst.WIDGET+"]", ele);
+	else
+		descendants = CF.elesOfSelector(CF.CHART_TAG_NAME + "["+elementAttrConst.WIDGET+"]," + CF.CHART_TAG_NAME + "["+elementAttrConst.LOCAL+"]", ele);
+	
+	descendants.forEach(function(descendant)
+	{
+		DF._appendWidgetOrLocalIf(re, descendant, excludeWidget, excludeLocal);
+	});
+	
+	return re;
+};
+
+DF._appendWidgetOrLocalIf = function(eleInfos, divEle, excludeWidget, excludeLocal)
+{
+	if(divEle == null || (excludeWidget && excludeLocal))
+		return false;
+	
+	if(!excludeWidget)
+	{
+		var widgetVal = CF.elementWidgetId(divEle);
+		
+		if(!CF.isEmpty(widgetVal))
+		{
+			eleInfos.push({ element: divEle, value: widgetVal, local: false });
+			return true;
+		}
+	}
+	
+	if(!excludeLocal)
+	{
+		var local = DF.elementLocalAttr(divEle);
+		
+		if(!CF.isEmpty(local))
+		{
+			eleInfos.push({ element: divEle, value: local, local: true });
+			return true;
+		}
+	}
+	
+	return false;
+};
+
+/**
+ * 获取<div>元素自身或其子孙<div>元素中带有非空图表部件ID属性（"dg-chart-widget"）的全部元素。
+ * 
+ * @param ele HTML元素
+ * @returns [ { element: ..., value: "..." }, ... ]
+ */
+DF.eleInfosWithWidgetId = function(ele)
+{
+	return DF.eleInfosWithWidgetOrLocal(ele, false, true);
+};
+
+/**
  * 获取<div>元素自身或其子孙<div>元素中带有非空本地图表属性（"dg-chart-local"）的全部元素。
  * 
  * @param ele HTML元素
  * @param eval 可选，是否转换为对象，默认值为：false
- * @returns { elements: [ HTML元素, ... ], locals: [ ..., ... ] }
+ * @returns [ { element: ..., value: "..." }, ... ]
  */
-DF.elesWithLocal = function(ele, eval)
+DF.eleInfosWithLocal = function(ele, eval)
 {
 	eval = (eval === undefined ? false : eval);
 	
-	var re = { elements: [], locals: [] };
+	var eleInfos = DF.eleInfosWithWidgetOrLocal(ele, true, false);
 	
-	if(ele == null)
-		return re;
+	if(eleInfos.length == 0 || !eval)
+		return eleInfos;
 	
-	var local = DF.elementLocalAttr(ele);
+	var re = [];
 	
-	if(!CF.isEmpty(local) && CF.isChartTagName(ele))
+	for(let i=0; i<eleInfos.length; i++)
 	{
-		if(eval)
-			local = DF.evalChartLocalValue(local);
+		let eleInfo = eleInfos[i];
+		eleInfo.value = DF.evalChartLocalValue(eleInfo.value);
 		
-		if(local != null)
-		{
-			re.elements.push(ele);
-			re.locals.push(local);
-		}
+		if(eleInfo.value != null)
+			re.push(eleInfo);
 	}
-	
-	var children = CF.elesOfSelector(CF.CHART_TAG_NAME + "["+elementAttrConst.LOCAL+"]", ele);
-	
-	children.forEach(function(child)
-	{
-		let childLocal = DF.elementLocalAttr(child);
-		if(!CF.isEmpty(childLocal))
-		{
-			if(eval)
-				childLocal = DF.evalChartLocalValue(childLocal);
-			
-			if(childLocal != null)
-			{
-				re.elements.push(child);
-				re.locals.push(childLocal);
-			}
-		}
-	});
 	
 	return re;
 };
