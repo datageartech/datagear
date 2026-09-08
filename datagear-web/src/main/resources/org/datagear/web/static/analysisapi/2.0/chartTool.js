@@ -1896,7 +1896,7 @@ TOOL.unbindChartToolPanelEvent = function(chart)
 		CF.eleOff(chartEle, "mouseleave", mouseleaveHandler);
 	}
 	
-	var box = CF.eleOfSelector(".dg-chart-tool-box", chartEle);
+	var box = TOOL.getChartToolBox(chartEle);
 	
 	//box可能还未初始化，此时不应继续执行
 	if(box != null)
@@ -1906,6 +1906,12 @@ TOOL.unbindChartToolPanelEvent = function(chart)
 	}
 };
 
+TOOL.getChartToolBox = function(chartEle)
+{
+	//应从直接子元素中查找，以防止可能存在嵌套图表时逻辑混乱
+	return CF.eleOfSelector(":scope > .dg-chart-tool-box", chartEle);
+};
+
 TOOL.showChartToolBox = function(chart)
 {
 	var disableTool = chart.disableTool();
@@ -1913,7 +1919,7 @@ TOOL.showChartToolBox = function(chart)
 	var noNeedData = TOOL.isNoNeedDataTool(chart, disableTool);
 	
 	var chartEle = chart.element();
-	var boxEle = CF.eleOfSelector(".dg-chart-tool-box", chartEle);
+	var boxEle = TOOL.getChartToolBox(chartEle);
 	
 	if(boxEle == null)
 	{
@@ -2001,7 +2007,7 @@ TOOL.showChartToolBox = function(chart)
 TOOL.hideChartToolBox = function(chart)
 {
 	var chartEle = chart.element();
-	var boxEle = CF.eleOfSelector(".dg-chart-tool-box", chartEle);
+	var boxEle = TOOL.getChartToolBox(chartEle);
 	TOOL.eleHide(boxEle);
 };
 
@@ -2037,7 +2043,7 @@ TOOL.setChartToolBoxThemeStyle = function(chart, boxEle)
 		var css =
 		[
 			{
-				name: " .dg-chart-tool-box .dg-chart-tool-button",
+				name: " > .dg-chart-tool-box .dg-chart-tool-button",
 				value:
 				{
 					"color": color,
@@ -2046,14 +2052,14 @@ TOOL.setChartToolBoxThemeStyle = function(chart, boxEle)
 				}
 			},
 			{
-				name: " .dg-chart-tool-box .dg-chart-tool-button:hover",
+				name: " > .dg-chart-tool-box .dg-chart-tool-button:hover",
 				value:
 				{
 					"background-color": btnHoverBg
 				}
 			},
 			{
-				name: " .dg-chart-tool-panel",
+				name: " > .dg-chart-tool-box .dg-chart-tool-panel",
 				value:
 				{
 					"color": color,
@@ -2066,8 +2072,8 @@ TOOL.setChartToolBoxThemeStyle = function(chart, boxEle)
 			{
 				name:
 				[
-					" .dg-chart-tool-panel-head button",
-					" .dg-chart-tool-panel-foot button"
+					" > .dg-chart-tool-box .dg-chart-tool-panel-head button",
+					" > .dg-chart-tool-box .dg-chart-tool-panel-foot button"
 				],
 				value:
 				{
@@ -2079,8 +2085,8 @@ TOOL.setChartToolBoxThemeStyle = function(chart, boxEle)
 			{
 				name:
 				[
-					" .dg-chart-tool-panel-head button:hover",
-					" .dg-chart-tool-panel-foot button:hover"
+					" > .dg-chart-tool-box .dg-chart-tool-panel-head button:hover",
+					" > .dg-chart-tool-box .dg-chart-tool-panel-foot button:hover"
 				],
 				value:
 				{
@@ -2088,7 +2094,7 @@ TOOL.setChartToolBoxThemeStyle = function(chart, boxEle)
 				}
 			},
 			{
-				name: " .dg-chart-tool-panel .dg-datasetbind-section",
+				name: " > .dg-chart-tool-box .dg-chart-tool-panel .dg-datasetbind-section",
 				value:
 				{
 					"color": color,
@@ -2097,7 +2103,7 @@ TOOL.setChartToolBoxThemeStyle = function(chart, boxEle)
 				}
 			},
 			{
-				name: " .dg-chart-tool-panel .dg-datasetbind-section-head",
+				name: " > .dg-chart-tool-box .dg-chart-tool-panel .dg-datasetbind-section-head",
 				value:
 				{
 					"background-color": titleBg
@@ -2106,8 +2112,8 @@ TOOL.setChartToolBoxThemeStyle = function(chart, boxEle)
 			{
 				name:
 				[
-					" .dg-chart-tool-data-panel table.dg-chart-data-table tbody tr:hover",
-					" .dg-chart-tool-data-panel table.dg-chart-data-table tbody tr:hover td"
+					" > .dg-chart-tool-box .dg-chart-tool-data-panel table.dg-chart-data-table tbody tr:hover",
+					" > .dg-chart-tool-box .dg-chart-tool-data-panel table.dg-chart-data-table tbody tr:hover td"
 				],
 				value:
 				{
@@ -2349,7 +2355,10 @@ TOOL.closeChartToolParamPanel = function(chart)
  */
 TOOL.getChartToolParamPanel = function(chart)
 {
-	return CF.eleOfSelector(".dg-chart-tool-param-panel", chart.element());
+	var chartEle = chart.element();
+	var box = TOOL.getChartToolBox(chartEle);
+	
+	return CF.eleOfSelector(".dg-chart-tool-param-panel", box);
 };
 
 TOOL.isChartToolParamPanelClosed = function(chart)
@@ -2461,7 +2470,10 @@ TOOL.closeChartToolDataPanel = function(chart)
  */
 TOOL.getChartToolDataPanel = function(chart)
 {
-	return CF.eleOfSelector(".dg-chart-tool-data-panel", chart.element());
+	var chartEle = chart.element();
+	var box = TOOL.getChartToolBox(chartEle);
+	
+	return CF.eleOfSelector(".dg-chart-tool-data-panel", box);
 };
 
 TOOL.isChartToolDataPanelClosed = function(chart)
