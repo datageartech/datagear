@@ -888,6 +888,7 @@ DE.insertGridLayout = function(gridAttr, insertType, refEle)
 	}
 	
 	DE._insertElement(div, insertType, refEle, true);
+	DE._reRenderChartIfInsertInner(insertType, refEle);
 	
 	return div;
 };
@@ -935,6 +936,7 @@ DE.insertFlexLayout = function(flexAttr, insertType, refEle)
 	}
 	
 	DE._insertElement(div, insertType, refEle, true);
+	DE._reRenderChartIfInsertInner(insertType, refEle);
 	
 	return div;
 };
@@ -980,6 +982,7 @@ DE.insertResponsiveFlex = function(model, insertType, refEle)
 	}
 	
 	DE._insertElement(div, insertType, refEle, true);
+	DE._reRenderChartIfInsertInner(insertType, refEle);
 	
 	return div;
 };
@@ -1244,6 +1247,7 @@ DE.insertDiv = function(insertType, refEle)
 		CF.eleAttr(div, "style", styleStr);
 	
 	DE._insertElement(div, insertType, refEle, true);
+	DE._reRenderChartIfInsertInner(insertType, refEle);
 	
 	return div;
 };
@@ -1277,6 +1281,7 @@ DE.insertImage = function(imgAttr, insertType, refEle)
 	
 	DE._insertElement(img, insertType, refEle);
 	DE._setImageAttr(imgAttr, img);
+	DE._reRenderChartIfInsertInner(insertType, refEle);
 	
 	return img;
 };
@@ -1382,6 +1387,7 @@ DE.insertHyperlink = function(hyperlinkAttr, insertType, refEle)
 	
 	DE._insertElement(a, insertType, refEle);
 	DE._setHyperlinkAttr(hyperlinkAttr, a);
+	DE._reRenderChartIfInsertInner(insertType, refEle);
 	
 	return a;
 };
@@ -1489,6 +1495,7 @@ DE.insertVideo = function(videoAttr, insertType, refEle)
 	
 	DE._insertElement(ele, insertType, refEle);
 	DE._setVideoAttr(videoAttr, ele);
+	DE._reRenderChartIfInsertInner(insertType, refEle);
 	
 	return ele;
 };
@@ -1594,6 +1601,7 @@ DE.insertIframe = function(iframeAttr, insertType, refEle)
 	
 	DE._insertElement(ele, insertType, refEle);
 	DE._setIframeAttr(iframeAttr, ele);
+	DE._reRenderChartIfInsertInner(insertType, refEle);
 	
 	return ele;
 };
@@ -1704,6 +1712,7 @@ DE.insertHxtitle = function(model, insertType, refEle)
 	CF.eleHtml(ele, (model.content || ""));
 	
 	DE._insertElement(ele, insertType, refEle);
+	DE._reRenderChartIfInsertInner(insertType, refEle);
 	
 	return ele;
 };
@@ -1737,6 +1746,7 @@ DE.insertLabel = function(labelAttr, insertType, refEle)
 	CF.eleHtml(ele, (labelAttr.content || ""));
 	
 	DE._insertElement(ele, insertType, refEle);
+	DE._reRenderChartIfInsertInner(insertType, refEle);
 	
 	return ele;
 };
@@ -1807,14 +1817,17 @@ DE.checkInsertChart = function(insertType, refEle)
 	refEle = DE._currentElement(refEle);
 	insertType = DE._trimInsertType(refEle, insertType);
 	
-	//图表元素内部不允许再插入图表元素
-	if(DE.isChartElement(refEle) && (insertType == INSERT_TYPE_APPEND || insertType == INSERT_TYPE_PREPEND))
+	//在6.1.0之前版本，下面的逻辑限制图表元素内部不允许再插入图表元素，
+	//但这实际上限制了图表应用场景（比如一个轮播功能的图表，可以将插入其中的其他图表进行轮播）。
+	/*
+	if(DE._isInnerInsertType(insertType) && DE.isChartElement(refEle))
 	{
 		DE.tipInfo(i18n.insertInsideChartOnChartEleDenied);
 		return false;
 	}
-	else
-		return true;
+	*/
+	
+	return true;
 };
 
 //插入图表元素时的默认元素样式
@@ -1872,10 +1885,23 @@ DE.insertChart = function(chartWidgets, insertType, refEle)
 		eles.push(chartDiv);
 	}
 	
-	var loadChartsEle = (insertType == INSERT_TYPE_APPEND || insertType == INSERT_TYPE_PREPEND ? refEle : CF.eleOfParent(refEle));
+	DE._reRenderChartIfInsertInner(insertType, refEle);
+	
+	var loadChartsEle = (DE._isInnerInsertType(insertType) ? refEle : CF.eleOfParent(refEle));
 	DE._loadUnsolvedChartsInElement(loadChartsEle);
 	
 	return eles;
+};
+
+//如果refEle是图表元素、且是向其内部插入元素，则重绘父级图表
+DE._reRenderChartIfInsertInner = function(insertType, refEle)
+{
+	if(DE._isInnerInsertType(insertType) && DE.isChartElement(refEle))
+	{
+		let chart = DE.dashboard.renderedChart(refEle);
+		DE._reRenderChart(chart);
+	}
+	
 };
 
 /**
@@ -3418,6 +3444,11 @@ DE._isOnlyEmptyOrFormat = function(text)
 		return true;
 	
 	return false;
+};
+
+DE._isInnerInsertType = function(insertType)
+{
+	return (insertType == INSERT_TYPE_APPEND || insertType == INSERT_TYPE_PREPEND);
 };
 
 DE._getInsertParentElement = function(refEle, insertType)
