@@ -316,17 +316,10 @@ DF.Dashboard = function(root)
 		charts[i] = DF.createChart(charts[i], root.renderContext, this);
 	}
 	
-	var eleInfos = DF.eleInfosWithWidgetOrLocal(document.body);
-	
-	for(let i=0; i<eleInfos.length; i++)
+	var localCharts = DF.createLocalCharts(root.renderContext, this);
+	for(let i=0; i<localCharts.length; i++)
 	{
-		if(!eleInfos[i].local)
-			continue;
-		
-		let ele = eleInfos[i].element;
-		let chartRoot = DF.evalChartLocalValue(eleInfos[i].value);
-		let localChart = DF.createLocalChart(ele, chartRoot, root.renderContext, this);
-		charts.push(localChart);
+		charts.push(localCharts[i]);
 	}
 };
 
@@ -377,6 +370,23 @@ DF.stopHeartBeat = function()
 		clearInterval(DF._heartbeatIntervalId);
 		DF._heartbeatIntervalId = null;
 	}
+};
+
+//创建页面内的全部本地图表
+DF.createLocalCharts = function(renderContext, dashboard)
+{
+	var re = [];
+	
+	var eleInfos = DF.eleInfosWithLocal(document.body);
+	for(let i=0; i<eleInfos.length; i++)
+	{
+		let ele = eleInfos[i].element;
+		let chartRoot = DF.evalChartLocalValue(eleInfos[i].value);
+		let localChart = DF.createLocalChart(ele, chartRoot, renderContext, dashboard);
+		re.push(localChart);
+	}
+	
+	return re;
 };
 
 //创建本地图表
@@ -3711,6 +3721,7 @@ dashboardProto.chartsIn = function(element)
 	
 	var re = [];
 	
+	//只能通过id判断，否则可能查不到还未初始化的图表
 	var eles = CF.elesOfSelector(CF.CHART_TAG_NAME + "[id]", element);
 	
 	eles.forEach((ele) =>
