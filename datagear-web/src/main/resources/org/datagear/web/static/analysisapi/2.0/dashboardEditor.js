@@ -1901,7 +1901,6 @@ DE._reRenderChartIfInsertInner = function(insertType, refEle)
 		let chart = DE.dashboard.renderedChart(refEle);
 		DE._reRenderChart(chart);
 	}
-	
 };
 
 /**
@@ -2207,8 +2206,11 @@ DE.deleteElement = function(ele)
 	if(!DE.checkDeleteElement(ele))
 		return false;
 	
+	var delEleParent = CF.eleOfParent(ele);
+	
 	DE._preDeleteElement(ele);
 	DE._deleteElement(ele);
+	DE._reRenderChartForDeleteElement(delEleParent);
 	
 	return ele;
 };
@@ -2228,6 +2230,15 @@ DE._preDeleteElement = function(ele)
 		{
 			DE.selectParentElement(ele, false);
 		}
+	}
+};
+
+DE._reRenderChartForDeleteElement = function(delEleParent)
+{
+	if(DE.isChartElement(delEleParent))
+	{
+		let chart = DE.dashboard.renderedChart(delEleParent);
+		DE._reRenderChart(chart);
 	}
 };
 
