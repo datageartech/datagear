@@ -470,8 +470,9 @@ public abstract class AbstractController extends MessageSourceSupport
 	 * </p>
 	 * 
 	 * @param request
-	 * @param clazz
-	 * @param msgArgs 默认为{@code t.getMessage()}
+	 * @param t
+	 * @param msgArgs
+	 *            默认为{@code t.getMessage()}
 	 * @return
 	 */
 	protected OperationMessage setOptMsgForThrowable(HttpServletRequest request, Throwable t, Object... msgArgs)
@@ -482,11 +483,30 @@ public abstract class AbstractController extends MessageSourceSupport
 
 	/**
 	 * 为异常设置{@linkplain OperationMessage}。
+	 * <p>
+	 * 消息码参考{@linkplain #buildExceptionMsgCode(Class, boolean)}。
+	 * </p>
+	 * 
+	 * @param request
+	 * @param t
+	 * @param msgArgs
+	 *            默认为{@code t.getMessage()}
+	 * @return
+	 */
+	protected OperationMessage setOptMsgForThrowableFullname(HttpServletRequest request, Throwable t, Object... msgArgs)
+	{
+		String msgCode = buildExceptionMsgCode(t.getClass(), true);
+		return setOptMsgForThrowableMsgCode(request, t, msgCode, msgArgs);
+	}
+
+	/**
+	 * 为异常设置{@linkplain OperationMessage}。
 	 * 
 	 * @param request
 	 * @param t
 	 * @param msgCode
-	 * @param msgArgs 默认为{@code t.getMessage()}
+	 * @param msgArgs
+	 *            默认为{@code t.getMessage()}
 	 * @return
 	 */
 	protected OperationMessage setOptMsgForThrowableMsgCode(HttpServletRequest request, Throwable t, String msgCode, Object... msgArgs)

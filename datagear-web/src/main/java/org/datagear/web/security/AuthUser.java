@@ -18,6 +18,7 @@
 package org.datagear.web.security;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -58,8 +59,17 @@ public class AuthUser implements UserDetails
 
 	private static final long serialVersionUID = 1L;
 
-	private final User user;
-	private final Set<GrantedAuthority> authorities;
+	private User user;
+
+	private Set<GrantedAuthority> authorities = Collections.emptySet();
+
+	private boolean accountNonExpired = true;
+
+	private boolean accountNonLocked = true;
+
+	private boolean credentialsNonExpired = true;
+
+	private boolean enabled = true;
 
 	public AuthUser(User user)
 	{
@@ -104,10 +114,20 @@ public class AuthUser implements UserDetails
 		return user;
 	}
 
+	public void setUser(User user)
+	{
+		this.user = user;
+	}
+
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities()
 	{
 		return this.authorities;
+	}
+
+	public void setAuthorities(Set<GrantedAuthority> authorities)
+	{
+		this.authorities = authorities;
 	}
 
 	@Override
@@ -125,25 +145,45 @@ public class AuthUser implements UserDetails
 	@Override
 	public boolean isAccountNonExpired()
 	{
-		return true;
+		return this.accountNonExpired;
+	}
+
+	public void setAccountNonExpired(boolean accountNonExpired)
+	{
+		this.accountNonExpired = accountNonExpired;
 	}
 
 	@Override
 	public boolean isAccountNonLocked()
 	{
-		return true;
+		return this.accountNonLocked;
+	}
+
+	public void setAccountNonLocked(boolean accountNonLocked)
+	{
+		this.accountNonLocked = accountNonLocked;
 	}
 
 	@Override
 	public boolean isCredentialsNonExpired()
 	{
-		return true;
+		return this.credentialsNonExpired;
+	}
+
+	public void setCredentialsNonExpired(boolean credentialsNonExpired)
+	{
+		this.credentialsNonExpired = credentialsNonExpired;
 	}
 
 	@Override
 	public boolean isEnabled()
 	{
-		return true;
+		return this.enabled;
+	}
+
+	public void setEnabled(boolean enabled)
+	{
+		this.enabled = enabled;
 	}
 
 	@Override
