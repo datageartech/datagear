@@ -41,44 +41,44 @@
 			<i class="pi pi-angle-right text-color-secondary text-sm mx-1"></i>
 			<div class="text-color-secondary text-sm"><@spring.message code='module.sqlpad' /></div>
 		</div>
-		<div class="col-12 flex">
-			<div class="flex-grow-1 flex gap-1 flex-wrap">
-				<p-button type="button" class="px-4" @click="onExecute"
+		<div class="col-12 flex justify-content-between">
+			<div class="flex gap-1 flex-wrap align-items-center">
+				<p-button type="button" class="px-4 py-1" @click="onExecute"
 					:icon="pm.executionStatus == pm.executionStatusType.EXECUTING ? 'pi pi-pause' : 'pi pi-play'"
 					title="<@spring.message code='sqlpad.executeWithShortcut' />">
 				</p-button>
-				<p-button type="button" icon="pi pi-stop" class="p-button-secondary px-4" @click="onStop"
+				<p-button type="button" icon="pi pi-stop" class="p-button-secondary px-4 py-1 ml-3" @click="onStop"
 					title="<@spring.message code='stop' />">
 				</p-button>
-				<p-button type="button" icon="pi pi-check" class="px-4 ml-4"
+				<p-button type="button" icon="pi pi-check" class="px-4 py-1 ml-3"
 					@click="onCommit" :class="{'p-button-secondary': !pm.waitCommitOrRollback}"
 					title="<@spring.message code='commit' />">
 				</p-button>
-				<p-button type="button" icon="pi pi-undo" class="px-4"
+				<p-button type="button" icon="pi pi-undo" class="px-4 py-1"
 					@click="onRollback" :class="{'p-button-secondary': !pm.waitCommitOrRollback}"
 					title="<@spring.message code='rollback' />">
 				</p-button>
 				<span class="p-inputgroup inline-flex w-auto">
-					<p-inputtext v-model="fm.sqlDelimiter" class="ml-4" style="width:6rem;"
+					<p-inputtext v-model="fm.sqlDelimiter" class="py-1 ml-3" style="width:6rem;"
 						title="<@spring.message code='sqlpad.sqlDelimiter' />">
 					</p-inputtext>
-					<p-button type="button" icon="pi pi-flag" class="p-button-secondary px-4" @click="onDefineSqlDelimiter"
+					<p-button type="button" icon="pi pi-flag" class="p-button-secondary px-4 py-1" @click="onDefineSqlDelimiter"
 						title="<@spring.message code='sqlpad.insertSqlDelimiterDefine' />">
 					</p-button>
-					<p-button type="button" icon="pi pi-flag-fill" class="p-button-secondary px-4" @click="onInsertSqlDelimiter"
+					<p-button type="button" icon="pi pi-flag-fill" class="p-button-secondary px-4 py-1" @click="onInsertSqlDelimiter"
 						title="<@spring.message code='sqlpad.insertSqlDelimiter' />">
 					</p-button>
 				</span>
-				<p-button type="button" icon="pi pi-trash" class="p-button-secondary px-4 ml-4" @click="onClearSql"
+				<p-button type="button" icon="pi pi-trash" class="p-button-secondary px-4 py-1 ml-3" @click="onClearSql"
 					title="<@spring.message code='sqlpad.clearEditSql' />">
 				</p-button>
 			</div>
-			<div class="flex-grow-0 flex gap-1 flex-wrap justify-content-end">
-				<p-button type="button" icon="pi pi-history" class="p-button-secondary px-4"
+			<div class="flex gap-1 flex-wrap justify-content-end">
+				<p-button type="button" icon="pi pi-history" class="p-button-secondary px-4 py-1"
 					aria:haspopup="true" aria-controls="${pid}sqlHistoryPanel"
 					@click="onToggleSqlHistoryPanel" title="<@spring.message code='sqlHistory' />">
 				</p-button>
-				<p-button type="button" icon="pi pi-cog" class="p-button-secondary px-4"
+				<p-button type="button" icon="pi pi-cog" class="p-button-secondary px-4 py-1"
 					aria:haspopup="true" aria-controls="${pid}setPanelPanel"
 					@click="onToggleSetPanel" title="<@spring.message code='set' />">
 				</p-button>
