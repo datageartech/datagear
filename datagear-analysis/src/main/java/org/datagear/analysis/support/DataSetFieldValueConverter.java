@@ -191,24 +191,24 @@ public class DataSetFieldValueConverter extends DataValueConverter<DataSetField>
 		if (value == null && target != null)
 			value = target.getDefaultValue();
 
-		Object re = super.convert(value, target);
+		value = super.convert(value, target);
+
+		if (value == null || target == null || DataType.UNKNOWN.equals(target.getType()))
+			return value;
 
 		// 数组与非数组互转
-		if (re != null && target != null)
-		{
-			boolean likeArray = DataType.isLikeArray(re);
+		boolean likeArray = DataType.isLikeArray(value);
 
-			if(likeArray && !target.isArray())
-			{
-				re = DataType.getLikeArrayFirstEle(re);
-			}
-			else if (!likeArray && target.isArray())
-			{
-				re = DataType.wrapToLikeArray(re);
-			}
+		if (likeArray && !target.isArray())
+		{
+			value = DataType.getLikeArrayFirstEle(value);
+		}
+		else if (!likeArray && target.isArray())
+		{
+			value = DataType.wrapToLikeArray(value);
 		}
 
-		return re;
+		return value;
 	}
 
 	@Override
