@@ -585,6 +585,7 @@
 	overflow: hidden;
 	white-space: nowrap;
 	padding: 0.4rem;
+	text-align: left;
 }
 .dg-chart-tool-panel .dg-datasetbind-section-title{
 	font-weight: bold;
