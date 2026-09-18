@@ -243,4 +243,65 @@ public class AsteriskPatternMatcherTest
 			assertFalse(matcher.matches(pattern, "abcdef"));
 		}
 	}
+
+	@Test
+	public void test_regex_url_no_azAZ_encoded()
+	{
+		AsteriskPatternMatcher matcher = new AsteriskPatternMatcher(true);
+
+		// URL中a-z、A-Z字符的编码值
+		String pattern = "regex:^.*%(4[1-9A-Fa-f]|5[0-9Aa]|6[1-9A-Fa-f]|7[0-9Aa]).*$";
+
+		assertFalse(matcher.matches(pattern, "abc1"));
+		assertFalse(matcher.matches(pattern, "%00"));
+		assertFalse(matcher.matches(pattern, "%01"));
+		assertFalse(matcher.matches(pattern, "%10"));
+		assertFalse(matcher.matches(pattern, "%11"));
+		assertFalse(matcher.matches(pattern, "%20"));
+		assertFalse(matcher.matches(pattern, "%21"));
+		assertFalse(matcher.matches(pattern, "%30"));
+		assertFalse(matcher.matches(pattern, "%31"));
+		assertFalse(matcher.matches(pattern, "%40"));
+		assertFalse(matcher.matches(pattern, "%80"));
+
+		assertTrue(matcher.matches(pattern, "%41"));
+		assertTrue(matcher.matches(pattern, "%49"));
+		assertTrue(matcher.matches(pattern, "%4A"));
+		assertTrue(matcher.matches(pattern, "%4F"));
+		assertTrue(matcher.matches(pattern, "%4a"));
+		assertTrue(matcher.matches(pattern, "%4f"));
+
+		assertTrue(matcher.matches(pattern, "%50"));
+		assertTrue(matcher.matches(pattern, "%59"));
+		assertTrue(matcher.matches(pattern, "%5A"));
+		assertTrue(matcher.matches(pattern, "%5a"));
+		assertFalse(matcher.matches(pattern, "%5B"));
+		assertFalse(matcher.matches(pattern, "%5b"));
+
+		assertTrue(matcher.matches(pattern, "%61"));
+		assertTrue(matcher.matches(pattern, "%69"));
+		assertTrue(matcher.matches(pattern, "%6A"));
+		assertTrue(matcher.matches(pattern, "%6F"));
+		assertTrue(matcher.matches(pattern, "%6a"));
+		assertTrue(matcher.matches(pattern, "%6f"));
+
+		assertTrue(matcher.matches(pattern, "%70"));
+		assertTrue(matcher.matches(pattern, "%79"));
+		assertTrue(matcher.matches(pattern, "%7A"));
+		assertTrue(matcher.matches(pattern, "%7a"));
+		assertFalse(matcher.matches(pattern, "%7B"));
+		assertFalse(matcher.matches(pattern, "%7b"));
+
+		assertTrue(matcher.matches(pattern, "%50%51"));
+		assertTrue(matcher.matches(pattern, "abc_%50%51"));
+		assertTrue(matcher.matches(pattern, "%50%51_abc"));
+
+		assertTrue(matcher.matches(pattern, "%50_%51"));
+		assertTrue(matcher.matches(pattern, "abc_%50_%51"));
+		assertTrue(matcher.matches(pattern, "%50_%51_abc"));
+
+		assertFalse(matcher.matches(pattern, "%80%81"));
+		assertFalse(matcher.matches(pattern, "abc_%80%81"));
+		assertFalse(matcher.matches(pattern, "%80%81_abc"));
+	}
 }
