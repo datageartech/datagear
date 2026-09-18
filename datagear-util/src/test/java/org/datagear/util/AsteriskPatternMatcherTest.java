@@ -250,7 +250,7 @@ public class AsteriskPatternMatcherTest
 		AsteriskPatternMatcher matcher = new AsteriskPatternMatcher(true);
 
 		// URL中a-z、A-Z字符的编码值
-		String pattern = "regex:^.*%(4[1-9A-Fa-f]|5[0-9Aa]|6[1-9A-Fa-f]|7[0-9Aa]).*$";
+		String pattern = "regex:.*%(4[1-9A-Fa-f]|5[0-9Aa]|6[1-9A-Fa-f]|7[0-9Aa]).*";
 
 		assertFalse(matcher.matches(pattern, "abc1"));
 		assertFalse(matcher.matches(pattern, "%00"));
