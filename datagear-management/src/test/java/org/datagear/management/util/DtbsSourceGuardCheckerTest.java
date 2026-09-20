@@ -170,6 +170,29 @@ public class DtbsSourceGuardCheckerTest
 					new GuardEntity("jdbc:mysql://192.168.1.2:3306/test", "root",
 							Arrays.asList(new DtbsSourceProperty("secondProperty", "456")))));
 		}
+
+		// 正则表达式，禁止连接URL或者连接属性名里包含"A-Z"、"a-z"的以'%'开头的URL编码值
+		{
+			DtbsSourceGuard dtbsSourceGuard0 = new DtbsSourceGuard("1", "1",
+					"regex:.*%(4[1-9A-Fa-f]|5[0-9Aa]|6[1-9A-Fa-f]|7[0-9Aa]).*", false);
+
+			DtbsSourceGuard dtbsSourceGuard1 = new DtbsSourceGuard("2", "2", "*", false);
+			dtbsSourceGuard1.setPropertyPatterns(Arrays
+					.asList(new DtbsSourcePropertyPattern("regex:.*%(4[1-9A-Fa-f]|5[0-9Aa]|6[1-9A-Fa-f]|7[0-9Aa]).*")));
+
+			List<DtbsSourceGuard> dtbsSourceGuards = Arrays.asList(dtbsSourceGuard0, dtbsSourceGuard1);
+
+			assertFalse(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards,
+					new GuardEntity("jdbc:mysql://192.168.1.1:3306/test?%4a%70=true", "root", dtbsSourceProperties)));
+
+			assertFalse(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards,
+					new GuardEntity("jdbc:mysql://192.168.1.1:3306/test", "root",
+							Arrays.asList(new DtbsSourceProperty("allowLoadLocal%63nfile", "true")))));
+
+			assertTrue(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards,
+					new GuardEntity("jdbc:mysql://192.168.1.1:3306/test?az=true", "root", dtbsSourceProperties)));
+
+		}
 	}
 
 	@Test
