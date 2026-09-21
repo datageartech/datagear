@@ -69,6 +69,17 @@ public class DtbsSourceGuard extends AbstractStringIdEntity implements CreateTim
 	/** {@linkplain #propertyPatterns}的匹配类型 */
 	private String propertiesMatchMode = PROPERTIES_MATCH_MODE_ANY;
 
+	/**
+	 * 最终匹配结果表达式，通常是{@linkplain #pattern}、{@linkplain #userPattern}、{@linkplain #propertyPatterns}三者的逻辑计算表达式，比如：
+	 * {@code "(url || props) && user"}。
+	 * <p>
+	 * 注意，对于空值，最终匹配结果应符合{@code "(url && user && props)"}规则，用于兼容{@code 6.0.0}及以下版本。
+	 * </p>
+	 * 
+	 * @since 6.1.0
+	 */
+	private String evalExp = "";
+
 	/** 是否允许：true 允许；false 禁止 */
 	private boolean permitted = true;
 
@@ -183,6 +194,16 @@ public class DtbsSourceGuard extends AbstractStringIdEntity implements CreateTim
 	public void setPropertiesMatchMode(String propertiesMatchMode)
 	{
 		this.propertiesMatchMode = propertiesMatchMode;
+	}
+
+	public String getEvalExp()
+	{
+		return evalExp;
+	}
+
+	public void setEvalExp(String evalExp)
+	{
+		this.evalExp = evalExp;
 	}
 
 	public boolean isPermitted()

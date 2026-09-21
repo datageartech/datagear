@@ -18,13 +18,18 @@
 package org.datagear.management.util;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.datagear.management.domain.DtbsSourceGuard;
 import org.datagear.management.domain.DtbsSourceProperty;
 import org.datagear.management.domain.DtbsSourcePropertyPattern;
 import org.datagear.util.AsteriskPatternMatcher;
 import org.datagear.util.StringUtil;
+import org.datagear.util.spel.BaseSpelExpressionParser;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.Expression;
 
 /**
  * {@linkplain DtbsSourceGuard}校验类。
@@ -34,7 +39,57 @@ import org.datagear.util.StringUtil;
  */
 public class DtbsSourceGuardChecker
 {
+	/**
+	 * 匹配表达式的变量：URL。
+	 * <p>
+	 * 此变量表示{@linkplain DtbsSourceGuard#getPattern()}的匹配结果。
+	 * </p>
+	 * <p>
+	 * 注意：不要修改此值，因为可能已在系统录入使用。
+	 * </p>
+	 */
+	public static final String EVAL_EXP_VAR_URL = "url";
+
+	/**
+	 * 匹配表达式的变量：用户名。
+	 * <p>
+	 * 此变量表示{@linkplain DtbsSourceGuard#getUserPattern()}的匹配结果。
+	 * </p>
+	 * <p>
+	 * 注意：不要修改此值，因为可能已在系统录入使用。
+	 * </p>
+	 */
+	public static final String EVAL_EXP_VAR_USER = "user";
+
+	/**
+	 * 匹配表达式的变量：连接属性。
+	 * <p>
+	 * 此变量表示{@linkplain DtbsSourceGuard#getPropertyPatterns()}的匹配结果。
+	 * </p>
+	 * <p>
+	 * 注意：不要修改此值，因为可能已在系统录入使用。
+	 * </p>
+	 */
+	public static final String EVAL_EXP_VAR_PROPERTIES = "props";
+
+	/**
+	 * 默认最终匹配结果表达式。
+	 * <p>
+	 * 注意：不要修改此表达式逻辑规则，原因：
+	 * </p>
+	 * <p>
+	 * 1. 系统{@code 6.0.0}及之前版本没有此功能，这个规则是旧版的兼容规则；
+	 * </p>
+	 * <p>
+	 * 2. 这个规则更易于理解，符合常规认知。
+	 * </p>
+	 */
+	public static final String DEFAULT_EVAL_EXP = EVAL_EXP_VAR_URL + " && " + EVAL_EXP_VAR_USER + " && "
+			+ EVAL_EXP_VAR_PROPERTIES;
+	
 	private AsteriskPatternMatcher asteriskPatternMatcher = new AsteriskPatternMatcher(true);
+
+	private BaseSpelExpressionParser spelExpressionParser = BaseSpelExpressionParser.DEFAULT;
 
 	public DtbsSourceGuardChecker()
 	{
@@ -51,27 +106,40 @@ public class DtbsSourceGuardChecker
 		this.asteriskPatternMatcher = asteriskPatternMatcher;
 	}
 
+	public BaseSpelExpressionParser getSpelExpressionParser()
+	{
+		return spelExpressionParser;
+	}
+
+	public void setSpelExpressionParser(BaseSpelExpressionParser spelExpressionParser)
+	{
+		this.spelExpressionParser = spelExpressionParser;
+	}
+
 	/**
 	 * 是否准许。
 	 * 
 	 * @param dtbsSourceGuards
 	 * @param guardEntity
 	 * @return
+	 * @throws DtbsSourceGuardEvalExpException
 	 */
 	public boolean isPermitted(List<DtbsSourceGuard> dtbsSourceGuards, GuardEntity guardEntity)
+			throws DtbsSourceGuardEvalExpException
 	{
 		// 默认应为true，比如当没有定义任何DtbsSourceGuard时
 		boolean permitted = true;
+
+		EvaluationContext ctx = this.spelExpressionParser.readonlyMapSimplifyContext();
 
 		for (DtbsSourceGuard dtbsSourceGuard : dtbsSourceGuards)
 		{
 			if (!dtbsSourceGuard.isEnabled())
 				continue;
 
-			boolean matches = isUrlMatched(dtbsSourceGuard, guardEntity) && isUserMatched(dtbsSourceGuard, guardEntity)
-					&& isPropertiesMatched(dtbsSourceGuard, guardEntity);
+			boolean matched = evalMatched(dtbsSourceGuard, guardEntity, ctx);
 
-			if (matches)
+			if (matched)
 			{
 				permitted = dtbsSourceGuard.isPermitted();
 				break;
@@ -79,6 +147,44 @@ public class DtbsSourceGuardChecker
 		}
 
 		return permitted;
+	}
+
+	protected boolean evalMatched(DtbsSourceGuard dtbsSourceGuard, GuardEntity guardEntity, EvaluationContext ctx)
+			throws DtbsSourceGuardEvalExpException
+	{
+		boolean urlMatched = isUrlMatched(dtbsSourceGuard, guardEntity);
+		boolean userMatched = isUserMatched(dtbsSourceGuard, guardEntity);
+		boolean propertiesMatched = isPropertiesMatched(dtbsSourceGuard, guardEntity);
+
+		String evalExp = dtbsSourceGuard.getEvalExp();
+
+		if (StringUtil.isBlank(evalExp))
+			evalExp = DEFAULT_EVAL_EXP;
+
+		try
+		{
+			Expression exp = this.spelExpressionParser.parseExpression(evalExp);
+
+			Map<String, Object> data = new HashMap<>();
+			data.put(EVAL_EXP_VAR_URL, urlMatched);
+			data.put(EVAL_EXP_VAR_USER, userMatched);
+			data.put(EVAL_EXP_VAR_PROPERTIES, propertiesMatched);
+
+			Object matched = this.spelExpressionParser.getValue(exp, ctx, data);
+			
+			if (matched == null || !(matched instanceof Boolean))
+				throw new DtbsSourceGuardEvalExpException("Illegal expression");
+
+			return ((Boolean) matched).booleanValue();
+		}
+		catch (DtbsSourceGuardEvalExpException e)
+		{
+			throw e;
+		}
+		catch (Exception e)
+		{
+			throw new DtbsSourceGuardEvalExpException(e);
+		}
 	}
 
 	protected boolean isUrlMatched(DtbsSourceGuard dtbsSourceGuard, GuardEntity guardEntity)
