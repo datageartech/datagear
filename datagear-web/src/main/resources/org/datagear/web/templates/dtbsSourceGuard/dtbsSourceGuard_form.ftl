@@ -17,6 +17,7 @@
  *
 -->
 <#assign DtbsSourceGuard=statics['org.datagear.management.domain.DtbsSourceGuard']>
+<#assign DtbsSourceGuardChecker=statics['org.datagear.management.util.DtbsSourceGuardChecker']>
 <#include "../include/page_import.ftl">
 <#include "../include/html_doctype.ftl">
 <html>
@@ -120,6 +121,17 @@
 		        	<p-selectbutton id="${pid}emptyPropertyPatternsForAll" v-model="fm.emptyPropertyPatternsForAll" :options="pm.booleanOptions"
 		        		option-label="name" option-value="value" class="input w-full">
 		        	</p-selectbutton>
+		        </div>
+			</div>
+			<div class="field grid">
+				<label for="${pid}evalExp" class="field-label col-12 mb-2"
+					title="<@spring.message code='dtbsSourceGuard.evalExp.desc' />">
+					<@spring.message code='finalMatchExp' />
+				</label>
+		        <div class="field-input col-12">
+		        	<p-inputtext id="${pid}evalExp" v-model="fm.evalExp" type="text" class="input w-full"
+		        		name="evalExp" maxlength="200" placeholder="${DtbsSourceGuardChecker.DEFAULT_EVAL_EXP}">
+		        	</p-inputtext>
 		        </div>
 			</div>
 			<div class="field grid">

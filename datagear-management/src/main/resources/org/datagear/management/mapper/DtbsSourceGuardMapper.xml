@@ -6,15 +6,19 @@
 	<insert id="insert">
 		INSERT INTO DATAGEAR_SCHEMA_GUARD
 			(
-			SG_ID, SG_NAME, SG_PATTERN, SG_USER_PATTERN, SG_PROP_PATTERNS, SG_EMPTY_PPT_FA, SG_PROP_MATCH_MODE,
-			SG_PERMITTED, SG_PRIORITY, SG_ENABLED, SG_CREATE_TIME
+			SG_ID, SG_NAME, SG_PATTERN,
+			SG_USER_PATTERN, SG_PROP_PATTERNS,
+			SG_EMPTY_PPT_FA, SG_PROP_MATCH_MODE,
+			SG_EVAL_EXP, SG_PERMITTED, SG_PRIORITY,
+			SG_ENABLED, SG_CREATE_TIME
 			)
 		VALUES
 			(
 			#{entity.id}, #{entity.name}, #{entity.pattern},
 			#{entity.userPattern, jdbcType=VARCHAR}, #{entity.propertyPatternsJson, jdbcType=VARCHAR},
 			#{entity.emptyPropertyPatternsForAll, jdbcType=VARCHAR}, #{entity.propertiesMatchMode, jdbcType=VARCHAR},
-			#{entity.permitted, jdbcType=VARCHAR}, #{entity.priority}, #{entity.enabled, jdbcType=VARCHAR}, #{entity.createTime}
+			#{entity.evalExp, jdbcType=VARCHAR}, #{entity.permitted, jdbcType=VARCHAR}, #{entity.priority},
+			#{entity.enabled, jdbcType=VARCHAR}, #{entity.createTime}
 			)
 	</insert>
 	
@@ -26,6 +30,7 @@
 			SG_PROP_PATTERNS = #{entity.propertyPatternsJson, jdbcType=VARCHAR},
 			SG_EMPTY_PPT_FA = #{entity.emptyPropertyPatternsForAll, jdbcType=VARCHAR},
 			SG_PROP_MATCH_MODE = #{entity.propertiesMatchMode, jdbcType=VARCHAR},
+			SG_EVAL_EXP = #{entity.evalExp, jdbcType=VARCHAR},
 			SG_PERMITTED = #{entity.permitted, jdbcType=VARCHAR},
 			SG_PRIORITY = #{entity.priority},
 			SG_ENABLED = #{entity.enabled, jdbcType=VARCHAR}
@@ -95,6 +100,7 @@
 			A.SG_PROP_PATTERNS AS ${_iq_}propertyPatternsJson${_iq_},
 			A.SG_EMPTY_PPT_FA AS ${_iq_}emptyPropertyPatternsForAll${_iq_},
 			A.SG_PROP_MATCH_MODE AS ${_iq_}propertiesMatchMode${_iq_},
+			A.SG_EVAL_EXP AS ${_iq_}evalExp${_iq_},
 			A.SG_PERMITTED AS ${_iq_}permitted${_iq_},
 			A.SG_PRIORITY AS ${_iq_}priority${_iq_},
 			A.SG_ENABLED AS ${_iq_}enabled${_iq_},
