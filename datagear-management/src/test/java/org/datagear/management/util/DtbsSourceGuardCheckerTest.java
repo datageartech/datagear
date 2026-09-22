@@ -191,7 +191,50 @@ public class DtbsSourceGuardCheckerTest
 
 			assertTrue(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards,
 					new GuardEntity("jdbc:mysql://192.168.1.1:3306/test?az=true", "root", dtbsSourceProperties)));
+		}
 
+		// 最终匹配结果表达式
+		{
+			DtbsSourceGuard dtbsSourceGuard0 = new DtbsSourceGuard("1", "1", "*abc*", true);
+
+			DtbsSourceGuard dtbsSourceGuard1 = new DtbsSourceGuard("2", "2",
+					"regex:.*%(4[1-9A-Fa-f]|5[0-9Aa]|6[1-9A-Fa-f]|7[0-9Aa]).*", false);
+			dtbsSourceGuard1.setPropertyPatterns(Arrays
+					.asList(new DtbsSourcePropertyPattern("regex:.*%(4[1-9A-Fa-f]|5[0-9Aa]|6[1-9A-Fa-f]|7[0-9Aa]).*")));
+
+			{
+				dtbsSourceGuard1.setEvalExp("(url || props) && user");
+				List<DtbsSourceGuard> dtbsSourceGuards = Arrays.asList(dtbsSourceGuard0, dtbsSourceGuard1);
+
+				assertTrue(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards,
+						new GuardEntity("ggg-abc-def", "root", dtbsSourceProperties)));
+
+				assertFalse(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards, new GuardEntity("aaa-%51-bbb",
+						"root", Arrays.asList(new DtbsSourceProperty("aaa-bbb", "true")))));
+
+				assertFalse(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards, new GuardEntity("aaa-bbb", "root",
+						Arrays.asList(new DtbsSourceProperty("aaa-%51-bbb", "true")))));
+
+				assertFalse(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards, new GuardEntity("aaa-%51-bbb",
+						"root", Arrays.asList(new DtbsSourceProperty("aaa-%51-bbb", "true")))));
+			}
+
+			{
+				dtbsSourceGuard1.setEvalExp("url && props && user");
+				List<DtbsSourceGuard> dtbsSourceGuards = Arrays.asList(dtbsSourceGuard0, dtbsSourceGuard1);
+
+				assertTrue(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards,
+						new GuardEntity("ggg-abc-def", "root", dtbsSourceProperties)));
+
+				assertTrue(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards, new GuardEntity("aaa-%51-bbb",
+						"root", Arrays.asList(new DtbsSourceProperty("aaa-bbb", "true")))));
+
+				assertTrue(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards, new GuardEntity("aaa-bbb", "root",
+						Arrays.asList(new DtbsSourceProperty("aaa-%51-bbb", "true")))));
+
+				assertFalse(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards, new GuardEntity("aaa-%51-bbb",
+						"root", Arrays.asList(new DtbsSourceProperty("aaa-%51-bbb", "true")))));
+			}
 		}
 	}
 
