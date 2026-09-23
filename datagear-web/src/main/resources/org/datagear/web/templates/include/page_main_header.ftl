@@ -258,7 +258,7 @@ DetectResult detectNewVersionResult
 				},
 				{
 					label: "<@spring.message code='module.documentation' />",
-					url: "${Global.WEB_SITE}/documentation/",
+					url: "${Global.WEB_SITE}/docs/",
 					target: "_blank"
 				},
 				{
