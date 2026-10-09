@@ -23,7 +23,7 @@ DataGear是一款开源免费的数据可视化分析平台，自由制作任何
 	http://www.datagear.tech/quickstart/
 
 文档：
-	http://www.datagear.tech/documentation/
+	http://www.datagear.tech/docs/
 
 源码：
 	https://gitee.com/datagear/datagear
