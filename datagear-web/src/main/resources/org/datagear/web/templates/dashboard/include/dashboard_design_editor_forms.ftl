@@ -1357,6 +1357,9 @@ page_palette.ftl
 										class="help-target input w-full" name="width">
 									</p-inputtext>
 									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="auto">
+											auto
+										</p-button>
 										<p-button type="button" class="help-src p-button-secondary" help-value="25%">
 											25%
 										</p-button>
@@ -1368,9 +1371,6 @@ page_palette.ftl
 										</p-button>
 										<p-button type="button" class="help-src p-button-secondary" help-value="100%">
 											100%
-										</p-button>
-										<p-button type="button" class="help-src p-button-secondary" help-value="auto">
-											auto
 										</p-button>
 									</div>
 								</div>
@@ -1386,6 +1386,9 @@ page_palette.ftl
 										class="help-target input w-full" name="height">
 									</p-inputtext>
 									<div class="p-buttonset mt-1 text-sm">
+										<p-button type="button" class="help-src p-button-secondary" help-value="auto">
+											auto
+										</p-button>
 										<p-button type="button" class="help-src p-button-secondary" help-value="2rem">
 											2rem
 										</p-button>
@@ -1415,8 +1418,14 @@ page_palette.ftl
 										<p-button type="button" class="help-src p-button-secondary" help-value="100%">
 											100%
 										</p-button>
-										<p-button type="button" class="help-src p-button-secondary" help-value="auto">
-											auto
+										<p-button type="button" class="help-src p-button-secondary" help-value="20vh">
+											20vh
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="25vh">
+											25vh
+										</p-button>
+										<p-button type="button" class="help-src p-button-secondary" help-value="30vh">
+											30vh
 										</p-button>
 									</div>
 								</div>
