@@ -4,7 +4,7 @@
 
 1. 以当前分支新建版本标记，名称为：v[version]，描述为：version [version]；
 
-2. 切换到版本标记，执行maven构建命令：`mvn clean package` ；
+2. 切换到版本标记，执行maven构建命令：`mvn clean package install` ；
 
 3. 将刚才新建的标记推送到仓库保存；
 
