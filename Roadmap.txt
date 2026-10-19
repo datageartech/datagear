@@ -1,6 +1,6 @@
 下一版本：
 	
-	修复ChartPluginManagerJsFactory在删除插件后未及时同步的BUG；
+	ok 修复看板展示页面chartPluginManager.js在系统删除插件后未能正确同步的BUG；
 	
 待定：
 	

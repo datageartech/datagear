@@ -183,21 +183,25 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	 */
 	public Set<HtmlChartPlugin> upload(File file) throws IOException
 	{
-		Set<HtmlChartPlugin> ids = new HashSet<>();
+		Set<HtmlChartPlugin> plugins = new HashSet<>();
 
 		WriteLock writeLock = lock.writeLock();
 
 		try
 		{
 			writeLock.lock();
-			upload(file, ids, 0);
+
+			upload(file, plugins, 0);
+
+			if (!plugins.isEmpty())
+				updateLastModified();
 		}
 		finally
 		{
 			writeLock.unlock();
 		}
 
-		return ids;
+		return plugins;
 	}
 
 	/**
@@ -513,6 +517,8 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 				if (loadedPlugin != null)
 					loadedCount++;
 			}
+
+			updateLastModified();
 
 			if (LOGGER.isInfoEnabled())
 				LOGGER.info("Loaded " + loadedCount + " chart plugins");

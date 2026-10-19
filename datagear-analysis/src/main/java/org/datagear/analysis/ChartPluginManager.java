@@ -98,4 +98,11 @@ public interface ChartPluginManager
 	 * @return
 	 */
 	List<ChartPlugin> getAll(Comparator<ChartPlugin> comparator);
+
+	/**
+	 * 获取最新修改时间。
+	 * 
+	 * @return
+	 */
+	long getLastModified();
 }

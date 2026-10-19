@@ -160,7 +160,7 @@ public class ChartPluginManagerJsFactory implements CacheAware
 		List<HtmlChartPlugin> plugins = chartPluginManager.getAll(HtmlChartPlugin.class);
 		List<HtmlChartPlugin> filterPlugins = new ArrayList<>(plugins.size());
 		boolean apiVersionEmpty = StringUtil.isEmpty(apiVersion);
-		long lastModified = -1;
+		long lastModified = chartPluginManager.getLastModified();
 
 		if (plugins != null)
 		{
@@ -170,7 +170,6 @@ public class ChartPluginManagerJsFactory implements CacheAware
 					continue;
 
 				filterPlugins.add(plugin);
-				lastModified = Math.max(lastModified, plugin.getLastModified());
 			}
 		}
 		

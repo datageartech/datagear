@@ -45,6 +45,23 @@ public class ConcurrentChartPluginManager extends AbstractChartPluginManager
 	}
 
 	@Override
+	public boolean isRegisterable(ChartPlugin chartPlugin)
+	{
+		ReadLock readLock = this.lock.readLock();
+
+		try
+		{
+			readLock.lock();
+
+			return super.isRegisterable(chartPlugin);
+		}
+		finally
+		{
+			readLock.unlock();
+		}
+	}
+
+	@Override
 	public boolean register(ChartPlugin chartPlugin)
 	{
 		WriteLock writeLock = this.lock.writeLock();
@@ -52,7 +69,13 @@ public class ConcurrentChartPluginManager extends AbstractChartPluginManager
 		try
 		{
 			writeLock.lock();
-			return registerChartPlugin(chartPlugin, false);
+
+			boolean re = registerChartPlugin(chartPlugin, false);
+
+			if (re)
+				updateLastModified();
+
+			return re;
 		}
 		finally
 		{
@@ -69,7 +92,10 @@ public class ConcurrentChartPluginManager extends AbstractChartPluginManager
 		{
 			writeLock.lock();
 
-			return removeChartPlugins(ids);
+			ChartPlugin[] re = removeChartPlugins(ids);
+			updateLastModified();
+
+			return re;
 		}
 		finally
 		{
@@ -133,6 +159,22 @@ public class ConcurrentChartPluginManager extends AbstractChartPluginManager
 			readLock.lock();
 
 			return getAllChartPlugins(comparator);
+		}
+		finally
+		{
+			readLock.unlock();
+		}
+	}
+
+	@Override
+	public long getLastModified()
+	{
+		ReadLock readLock = this.lock.readLock();
+
+		try
+		{
+			readLock.lock();
+			return super.getLastModified();
 		}
 		finally
 		{

@@ -42,13 +42,21 @@ public class SimpleChartPluginManager extends AbstractChartPluginManager
 	@Override
 	public boolean register(ChartPlugin chartPlugin)
 	{
-		return registerChartPlugin(chartPlugin, false);
+		boolean re = registerChartPlugin(chartPlugin, false);
+
+		if (re)
+			updateLastModified();
+
+		return re;
 	}
 
 	@Override
 	public ChartPlugin[] remove(String... ids)
 	{
-		return removeChartPlugins(ids);
+		ChartPlugin[] re = removeChartPlugins(ids);
+		updateLastModified();
+
+		return re;
 	}
 
 	@Override

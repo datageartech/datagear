@@ -39,6 +39,8 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 {
 	private Map<String, ChartPlugin> chartPluginMap = new HashMap<>();
 
+	private long lastModified = System.currentTimeMillis();
+
 	public AbstractChartPluginManager()
 	{
 		super();
@@ -66,6 +68,22 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 		return canPut;
 	}
 
+	@Override
+	public long getLastModified()
+	{
+		return this.lastModified;
+	}
+
+	protected void setLastModified(long lastModified)
+	{
+		this.lastModified = lastModified;
+	}
+
+	protected void updateLastModified()
+	{
+		setLastModified(System.currentTimeMillis());
+	}
+
 	/**
 	 * 注册一个{@linkplain ChartPlugin}。
 	 * <p>
@@ -84,7 +102,9 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 		boolean canPut = (ignoreCheck ? true : canReplaceForSameId(chartPlugin, old));
 
 		if (canPut)
+		{
 			this.chartPluginMap.put(chartPlugin.getId(), chartPlugin);
+		}
 
 		return canPut;
 	}
