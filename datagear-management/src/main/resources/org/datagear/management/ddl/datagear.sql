@@ -712,3 +712,9 @@ VALUES('MYSQL_DISABLE_SOCKETFACT_1','jdbc:mysql:*socketFactory*','false',999,'tr
 
 INSERT INTO DATAGEAR_SCHEMA_GUARD (SG_ID,SG_PATTERN,SG_PERMITTED,SG_PRIORITY,SG_ENABLED,SG_CREATE_TIME,SG_NAME,SG_USER_PATTERN,SG_PROP_PATTERNS,SG_EMPTY_PPT_FA,SG_PROP_MATCH_MODE,SG_EVAL_EXP)
 VALUES('MYSQL_DISABLE_SOCKETFACT_2','jdbc:mysql:*','false',999,'true',CURRENT_TIMESTAMP,'MySQL禁用连接属性socketFactory','*','[{"namePattern":"socketFactory","valuePattern":"*"}]','true','ANY','');
+
+
+/*-----------------------------------------*/
+/*--version[6.1.1], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
+
