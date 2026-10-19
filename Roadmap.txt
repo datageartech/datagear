@@ -1,6 +1,6 @@
 下一版本：
 	
-	
+	修复ChartPluginManagerJsFactory在删除插件后未及时同步的BUG；
 	
 待定：
 	
