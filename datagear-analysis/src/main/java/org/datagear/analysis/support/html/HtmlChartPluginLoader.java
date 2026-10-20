@@ -569,8 +569,6 @@ public class HtmlChartPluginLoader
 			IOUtil.close(rendererIn);
 		}
 
-		// 设置为加载时间而不取文件上次修改时间，因为文件上次修改时间可能错乱
-		plugin.setLastModified(System.currentTimeMillis());
 		checkValidPlugin(plugin);
 
 		return plugin;
@@ -625,8 +623,6 @@ public class HtmlChartPluginLoader
 			IOUtil.close(rendererIn);
 		}
 
-		// 设置为加载时间而不取文件上次修改时间，因为文件上次修改时间可能错乱
-		plugin.setLastModified(System.currentTimeMillis());
 		checkValidPlugin(plugin);
 
 		return plugin;

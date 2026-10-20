@@ -147,20 +147,6 @@ public class HtmlChartPluginJson extends HtmlChartPlugin
 
 	@JsonIgnore
 	@Override
-	public long getLastModified()
-	{
-		return super.getLastModified();
-	}
-
-	@JsonIgnore
-	@Override
-	public void setLastModified(long lastModified)
-	{
-		super.setLastModified(lastModified);
-	}
-
-	@JsonIgnore
-	@Override
 	public String getNewLine()
 	{
 		return super.getNewLine();
