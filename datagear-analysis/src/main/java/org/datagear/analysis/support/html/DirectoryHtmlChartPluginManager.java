@@ -19,6 +19,7 @@ package org.datagear.analysis.support.html;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -209,7 +210,7 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 	 * 
 	 * @throws IOException
 	 */
-	public void download(ZipOutputStream out, String... ids) throws IOException
+	public void download(OutputStream out, String... ids) throws IOException
 	{
 		ReadLock readLock = this.lock.readLock();
 
@@ -217,17 +218,36 @@ public class DirectoryHtmlChartPluginManager extends ConcurrentChartPluginManage
 		{
 			readLock.lock();
 
-			File tmpDirectory = createTmpWorkDirectory();
+			File outputFile;
 
-			for (String id : ids)
+			if (ids.length == 1)
 			{
-				File pluginFile = getPluginFile(id);
+				outputFile = getPluginFile(ids[0]);
+			}
+			else
+			{
+				outputFile = createTmpWorkDirectory();
 
-				if (pluginFile.exists())
-					IOUtil.copyInto(pluginFile, tmpDirectory);
+				for (String id : ids)
+				{
+					File pluginFile = getPluginFile(id);
+
+					if (pluginFile.exists())
+						IOUtil.copyInto(pluginFile, outputFile);
+				}
 			}
 
-			IOUtil.writeFileToZipOutputStream(out, tmpDirectory, "");
+			if (outputFile.exists())
+			{
+				if (outputFile.isDirectory())
+				{
+					ZipOutputStream zout = IOUtil.getZipOutputStream(out);
+					IOUtil.writeFileToZipOutputStream(zout, outputFile, "");
+					zout.flush();
+				}
+				else
+					IOUtil.write(outputFile, out);
+			}
 		}
 		finally
 		{

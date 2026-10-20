@@ -18,6 +18,7 @@
 package org.datagear.web.controller;
 
 import java.io.File;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -26,7 +27,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -218,19 +218,20 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	public void download(HttpServletRequest request, HttpServletResponse response, Model model,
 			@RequestParam("id") String[] ids) throws Exception
 	{
-		setDownloadResponseHeader(request, response, "chartPlugins.zip");
+		String name = (ids.length == 1 ? WebUtils.encodeURL(ids[0]) : "chartPlugins") + ".zip";
+		setDownloadResponseHeader(request, response, name);
 		response.setContentType(CONTENT_TYPE_OCTET_STREAM);
 
-		ZipOutputStream zout = IOUtil.getZipOutputStream(response.getOutputStream());
+		OutputStream out = response.getOutputStream();
 
 		try
 		{
-			getDirectoryHtmlChartPluginManager().download(zout, ids);
+			getDirectoryHtmlChartPluginManager().download(out, ids);
 		}
 		finally
 		{
-			zout.flush();
-			zout.close();
+			out.flush();
+			out.close();
 		}
 	}
 
