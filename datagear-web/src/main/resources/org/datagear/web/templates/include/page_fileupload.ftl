@@ -36,7 +36,12 @@
 	po.uploadFileOnSelect = function(e)
 	{
 		var pm = po.vuePageModel();
-		pm.fileuploadInfo.name = (e.files && e.files[0] ? e.files[0].name : "");
+		var files = (e.files || []);
+		
+		if(files.length <= 1)
+			pm.fileuploadInfo.name = (e.files[0] ? e.files[0].name : "");
+		else
+			pm.fileuploadInfo.name = (e.files[0].name || "") + " ("+files.length+")";
 	};
 	
 	po.uploadFileOnProgress = function(e)

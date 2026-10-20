@@ -126,47 +126,50 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 	@RequestMapping(value = "/uploadFile", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public Map<String, Object> uploadFile(HttpServletRequest request, HttpServletResponse response,
-			@RequestParam("file") MultipartFile multipartFile) throws Exception
+			@RequestParam("file") MultipartFile[] multipartFiles) throws Exception
 	{
 		File myTmpDirectory = FileUtil.generateUniqueDirectory(this.tempDirectory);
 
-		String zipFileName = multipartFile.getOriginalFilename();
-		if (StringUtil.isEmpty(zipFileName))
-			zipFileName = "plugin.zip";
-
-		if (!FileUtil.isExtension(zipFileName, "zip"))
-			zipFileName += ".zip";
-
-		File zipFile = FileUtil.getFile(myTmpDirectory, zipFileName);
-		boolean isPluginZip = false;
-		HtmlChartPluginLoader loader = getDirectoryHtmlChartPluginManager().getHtmlChartPluginLoader();
-
-		ZipInputStream zin = null;
-		try
+		for (MultipartFile multipartFile : multipartFiles)
 		{
-			zin = IOUtil.getZipInputStream(multipartFile.getInputStream());
-			isPluginZip = loader.isHtmlChartPluginZip(zin);
-		}
-		finally
-		{
-			IOUtil.close(zin);
-		}
+			String zipFileName = multipartFile.getOriginalFilename();
+			if (StringUtil.isEmpty(zipFileName))
+				zipFileName = "plugin.zip";
 
-		if (isPluginZip)
-		{
-			multipartFile.transferTo(zipFile);
-		}
-		else
-		{
-			// 是包含多个插件包的zip
+			if (!FileUtil.isExtension(zipFileName, "zip"))
+				zipFileName += ".zip";
+
+			File zipFile = FileUtil.getFile(myTmpDirectory, zipFileName);
+			boolean isPluginZip = false;
+			HtmlChartPluginLoader loader = getDirectoryHtmlChartPluginManager().getHtmlChartPluginLoader();
+
+			ZipInputStream zin = null;
 			try
 			{
 				zin = IOUtil.getZipInputStream(multipartFile.getInputStream());
-				IOUtil.unzip(zin, myTmpDirectory);
+				isPluginZip = loader.isHtmlChartPluginZip(zin);
 			}
 			finally
 			{
 				IOUtil.close(zin);
+			}
+
+			if (isPluginZip)
+			{
+				multipartFile.transferTo(zipFile);
+			}
+			else
+			{
+				// 是包含多个插件包的zip
+				try
+				{
+					zin = IOUtil.getZipInputStream(multipartFile.getInputStream());
+					IOUtil.unzip(zin, myTmpDirectory);
+				}
+				finally
+				{
+					IOUtil.close(zin);
+				}
 			}
 		}
 
@@ -200,8 +203,15 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		File tmpFile = FileUtil.getFile(this.tempDirectory, pluginFileName);
 
 		Set<HtmlChartPlugin> uploads = getDirectoryHtmlChartPluginManager().upload(tmpFile);
+		int uploadCount = uploads.size();
 
-		return optSuccessResponseEntity(request, "chartPlugin.upload.finish", uploads.size());
+		if (uploadCount >= form.expectPluginCount)
+			return optSuccessResponseEntity(request, "chartPlugin.upload.success", uploadCount);
+		else if (uploadCount == 0)
+			return optFailResponseEntity(request, "chartPlugin.upload.error.0", form.expectPluginCount);
+		else
+			return optFailResponseEntity(request, "chartPlugin.upload.error.1", uploadCount,
+					form.expectPluginCount - uploadCount);
 	}
 
 	@RequestMapping("/download")
@@ -481,6 +491,7 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		private static final long serialVersionUID = 1L;
 
 		private String pluginFileName;
+		private int expectPluginCount = 0;
 
 		public saveUploadForm()
 		{
@@ -495,6 +506,16 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		public void setPluginFileName(String pluginFileName)
 		{
 			this.pluginFileName = pluginFileName;
+		}
+
+		public int getExpectPluginCount()
+		{
+			return expectPluginCount;
+		}
+
+		public void setExpectPluginCount(int expectPluginCount)
+		{
+			this.expectPluginCount = expectPluginCount;
 		}
 	}
 
