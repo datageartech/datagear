@@ -787,6 +787,7 @@ public class CoreConfigSupport implements ApplicationListener<ContextRefreshedEv
 		DirectoryHtmlChartPluginManager bean = new DirectoryHtmlChartPluginManager(this.chartPluginRootDirectory(),
 				this.htmlChartPluginLoader());
 		bean.setTmpDirectory(this.tempDirectory());
+		bean.setLastModifiedService(this.lastModifiedService());
 
 		return bean;
 	}

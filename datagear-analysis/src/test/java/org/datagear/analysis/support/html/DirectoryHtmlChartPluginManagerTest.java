@@ -33,6 +33,8 @@ import org.datagear.analysis.ChartPluginResource;
 import org.datagear.analysis.support.ZipEntryChartPluginResource;
 import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
+import org.datagear.util.LastModifiedService;
+import org.datagear.util.SimpleLastModifiedService;
 import org.junit.Test;
 
 /**
@@ -57,10 +59,12 @@ public class DirectoryHtmlChartPluginManagerTest
 		File uploadDirectory = FileUtil.getFile(root, "upload/", true);
 
 		HtmlChartPluginLoader htmlChartPluginLoader = new HtmlChartPluginLoader();
+		LastModifiedService lastModifiedService = new SimpleLastModifiedService();
 
 		DirectoryHtmlChartPluginManager directoryHtmlChartPluginManager = new DirectoryHtmlChartPluginManager(
 				managerDirectory, htmlChartPluginLoader);
 		directoryHtmlChartPluginManager.setTmpDirectory(tmpDirectory);
+		directoryHtmlChartPluginManager.setLastModifiedService(lastModifiedService);
 
 		FileUtil.clearDirectory(managerDirectory);
 		FileUtil.clearDirectory(uploadDirectory);
@@ -78,6 +82,10 @@ public class DirectoryHtmlChartPluginManagerTest
 		}
 
 		directoryHtmlChartPluginManager.init();
+
+		long lastModified1 = directoryHtmlChartPluginManager.getLastModified();
+		long lastModified2 = directoryHtmlChartPluginManager.getLastModified();
+		long lastModified3 = directoryHtmlChartPluginManager.getLastModified();
 
 		ChartPlugin plugin = directoryHtmlChartPluginManager.get("test");
 
@@ -108,6 +116,9 @@ public class DirectoryHtmlChartPluginManagerTest
 			assertEquals("plugin.json", resources.get(0).getName());
 			assertEquals(FileUtil.getFile(managerDirectory, "plugin.zip"),
 					((ZipEntryChartPluginResource) resources.get(0)).getZipFile());
+
+			lastModified2 = directoryHtmlChartPluginManager.getLastModified();
+			assertTrue(lastModified2 != lastModified1);
 		}
 
 		{
@@ -118,6 +129,10 @@ public class DirectoryHtmlChartPluginManagerTest
 
 			assertNotNull(plugin);
 			assertEquals("0.1.1", plugin.getVersion());
+
+			lastModified3 = directoryHtmlChartPluginManager.getLastModified();
+			assertTrue(lastModified3 != lastModified1);
+			assertTrue(lastModified3 == lastModified2);
 		}
 	}
 }

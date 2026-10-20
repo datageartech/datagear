@@ -39,8 +39,6 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 {
 	private Map<String, ChartPlugin> chartPluginMap = new HashMap<>();
 
-	private long lastModified = System.currentTimeMillis();
-
 	public AbstractChartPluginManager()
 	{
 		super();
@@ -66,22 +64,6 @@ public abstract class AbstractChartPluginManager implements ChartPluginManager
 		boolean canPut = canReplaceForSameId(chartPlugin, old);
 
 		return canPut;
-	}
-
-	@Override
-	public long getLastModified()
-	{
-		return this.lastModified;
-	}
-
-	protected void setLastModified(long lastModified)
-	{
-		this.lastModified = lastModified;
-	}
-
-	protected void updateLastModified()
-	{
-		setLastModified(System.currentTimeMillis());
 	}
 
 	/**

@@ -34,6 +34,8 @@ import org.datagear.analysis.ChartPluginManager;
  */
 public class SimpleChartPluginManager extends AbstractChartPluginManager
 {
+	private long lastModified = -1;
+
 	public SimpleChartPluginManager()
 	{
 		super();
@@ -87,5 +89,21 @@ public class SimpleChartPluginManager extends AbstractChartPluginManager
 	public List<ChartPlugin> getAll(Comparator<ChartPlugin> comparator)
 	{
 		return getAllChartPlugins(comparator);
+	}
+
+	@Override
+	public long getLastModified()
+	{
+		return lastModified;
+	}
+
+	public void setLastModified(long lastModified)
+	{
+		this.lastModified = lastModified;
+	}
+
+	protected void updateLastModified()
+	{
+		setLastModified(System.currentTimeMillis());
 	}
 }

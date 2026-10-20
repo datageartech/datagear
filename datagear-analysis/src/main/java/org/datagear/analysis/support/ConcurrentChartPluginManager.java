@@ -25,6 +25,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock.WriteLock;
 
 import org.datagear.analysis.ChartPlugin;
 import org.datagear.analysis.ChartPluginManager;
+import org.datagear.util.LastModifiedService;
 
 /**
  * 并发{@linkplain ChartPluginManager}。
@@ -39,9 +40,34 @@ public class ConcurrentChartPluginManager extends AbstractChartPluginManager
 {
 	protected ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
+	private LastModifiedService lastModifiedService = null;
+
+	private String lastModifiedName = null;
+
 	public ConcurrentChartPluginManager()
 	{
 		super();
+		setLastModifiedName(getClass().getName());
+	}
+
+	public LastModifiedService getLastModifiedService()
+	{
+		return lastModifiedService;
+	}
+
+	public void setLastModifiedService(LastModifiedService lastModifiedService)
+	{
+		this.lastModifiedService = lastModifiedService;
+	}
+
+	public String getLastModifiedName()
+	{
+		return lastModifiedName;
+	}
+
+	public void setLastModifiedName(String lastModifiedName)
+	{
+		this.lastModifiedName = lastModifiedName;
 	}
 
 	@Override
@@ -169,16 +195,22 @@ public class ConcurrentChartPluginManager extends AbstractChartPluginManager
 	@Override
 	public long getLastModified()
 	{
-		ReadLock readLock = this.lock.readLock();
+		if (this.lastModifiedService == null || this.lastModifiedName == null)
+			return LastModifiedService.LAST_MODIFIED_UNSET;
 
-		try
-		{
-			readLock.lock();
-			return super.getLastModified();
-		}
-		finally
-		{
-			readLock.unlock();
-		}
+		return this.lastModifiedService.getLastModified(this.lastModifiedName);
+	}
+
+	protected void setLastModified(long lastModified)
+	{
+		if (this.lastModifiedService == null || this.lastModifiedName == null)
+			return;
+
+		this.lastModifiedService.setLastModified(this.lastModifiedName, lastModified);
+	}
+
+	protected void updateLastModified()
+	{
+		setLastModified(System.currentTimeMillis());
 	}
 }
