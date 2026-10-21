@@ -55,9 +55,12 @@
 					<@spring.message code='preview' />
 				</label>
 		        <div class="field-input col-12 md:col-9">
-		        	<div id="${pid}preview" class="input p-component p-inputtext w-full overflow-auto" style="height:8rem;">
-		        		<p-chip v-for="p in pm.chartPlugins.plugins" :key="p.key" class="mb-2">
+		        	<div id="${pid}preview" class="input p-component p-inputtext w-full overflow-auto flex flex-wrap align-content-start gap-1" style="height:10rem;">
+		        		<p-chip v-for="p in pm.chartPlugins.plugins" :key="p.key">
 		        			<div v-html="formatChartPlugin(p)"></div>
+		        			<span class="px-1" v-if="p.uploadSuccess != null">
+		        				<i class="pi" :class="{ 'pi-check': (p.uploadSuccess === true), 'pi-times p-error': (p.uploadSuccess === false) }"></i>
+		        			</span>
 		        		</p-chip>
 		        	</div>
 		        </div>
@@ -93,7 +96,23 @@
 		pm.chartPlugins.plugins = cps;
 	};
 	
-	po.setupForm({ pluginFileName: "", expectPluginCount: 0 });
+	po.setupForm({ pluginFileName: "", expectPluginCount: 0 },
+	{
+		complete: function(xhr)
+		{
+			var om = $.getResponseJson(xhr);
+			var uploadIds = (om && om.data ? om.data : []);
+			var pm = po.vuePageModel();
+			var plugins = (pm.chartPlugins.plugins || []);
+			
+			for(var i=0; i<plugins.length; i++)
+			{
+				var plugin = plugins[i];
+				var success = ($.inArray(plugin.id, uploadIds) >= 0);
+				plugin.uploadSuccess = success;
+			}
+		}
+	});
 	
 	po.vuePageModel(
 	{

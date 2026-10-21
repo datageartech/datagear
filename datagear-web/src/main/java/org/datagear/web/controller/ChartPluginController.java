@@ -22,6 +22,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -205,13 +206,23 @@ public class ChartPluginController extends AbstractChartPluginAwareController
 		Set<HtmlChartPlugin> uploads = getDirectoryHtmlChartPluginManager().upload(tmpFile);
 		int uploadCount = uploads.size();
 
+		ResponseEntity<OperationMessage> responseEntity;
+
 		if (uploadCount >= form.expectPluginCount)
-			return optSuccessResponseEntity(request, "chartPlugin.upload.success", uploadCount);
+			responseEntity = optSuccessResponseEntity(request, "chartPlugin.upload.success", uploadCount);
 		else if (uploadCount == 0)
-			return optFailResponseEntity(request, "chartPlugin.upload.error.0", form.expectPluginCount);
+			responseEntity = optFailResponseEntity(request, "chartPlugin.upload.error.0", form.expectPluginCount);
 		else
-			return optFailResponseEntity(request, "chartPlugin.upload.error.1", uploadCount,
+			responseEntity = optFailResponseEntity(request, "chartPlugin.upload.error.1", uploadCount,
 					form.expectPluginCount - uploadCount);
+
+		Set<String> uploadIds = new HashSet<>();
+		for (HtmlChartPlugin plugin : uploads)
+			uploadIds.add(plugin.getId());
+
+		responseEntity.getBody().setData(uploadIds);
+
+		return responseEntity;
 	}
 
 	@RequestMapping("/download")
