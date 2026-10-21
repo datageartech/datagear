@@ -283,26 +283,27 @@ public class DriverEntityController extends AbstractController
 	@RequestMapping(value = "/uploadDriverFile", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public Map<String, Object> uploadDriverFile(HttpServletRequest request, @RequestParam("id") String id,
-			@RequestParam("file") MultipartFile multipartFile) throws Exception
+			@RequestParam("file") MultipartFile[] multipartFiles) throws Exception
 	{
 		FileInfo[] fileInfos;
 		List<String> driverClassNames = new ArrayList<>();
-
-		String originalFilename = multipartFile.getOriginalFilename();
-
 		DriverEntity driverEntity = this.driverEntityManager.get(id);
 
 		if (driverEntity != null)
 		{
-			InputStream in = multipartFile.getInputStream();
+			for (MultipartFile multipartFile : multipartFiles)
+			{
+				String originalFilename = multipartFile.getOriginalFilename();
+				InputStream in = multipartFile.getInputStream();
 
-			try
-			{
-				this.driverEntityManager.addDriverLibrary(driverEntity, originalFilename, in);
-			}
-			finally
-			{
-				IOUtil.close(in);
+				try
+				{
+					this.driverEntityManager.addDriverLibrary(driverEntity, originalFilename, in);
+				}
+				finally
+				{
+					IOUtil.close(in);
+				}
 			}
 
 			List<DriverLibraryInfo> driverLibraryInfos = this.driverEntityManager.getDriverLibraryInfos(driverEntity);
@@ -311,11 +312,15 @@ public class DriverEntityController extends AbstractController
 		else
 		{
 			File directory = getTempDriverLibraryDirectoryNotNull(id);
-			File tempFile = getTempDriverLibraryFile(directory, originalFilename);
 
-			multipartFile.transferTo(tempFile);
+			for (MultipartFile multipartFile : multipartFiles)
+			{
+				String originalFilename = multipartFile.getOriginalFilename();
+				File tempFile = getTempDriverLibraryFile(directory, originalFilename);
+				multipartFile.transferTo(tempFile);
 
-			resolveDriverClassNames(tempFile, driverClassNames);
+				resolveDriverClassNames(tempFile, driverClassNames);
+			}
 
 			fileInfos = FileUtil.getFileInfos(directory);
 		}
