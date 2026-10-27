@@ -1,6 +1,7 @@
 下一版本：
 	
-	
+	Excel/CSV/JSON文件数据集支持上传和管理多个文件；
+	ConcurrentChartPluginManager的读取接口内部应首先根据最新更新事件刷新数据；
 	
 待定：
 	
@@ -22,18 +23,6 @@
 	定时邮件报告；
 	项目（包括数据集、图表、看板）导入/导出功能；
 	服务端文件数据集支持${DG_LATEST_FILE}内置参数，用于读取最新文件；（暂不实现，因为无法支持子目录，用处不大）
-	图表渲染器renderer.js扩展可选的图表联动支持函数：
-		{
-			eventTypes: [ "series.click", { value: "...", description: "" }, ... ]、function(){ return [...]; },,
-			eventDataNames: function(eventTypeObj)
-			{
-				return [ "...", { value: "...", description: "" }, ... ];
-			}
-			eventDataValue: function(event, name)
-			{
-				return ...;
-			}
-		}
 	
 待研究：
 	
