@@ -1,6 +1,6 @@
 下一版本：
 	
-	ok 修复看板展示页面chartPluginManager.js在系统删除插件后未能正确同步的BUG；
+	
 	
 待定：
 	
