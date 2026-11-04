@@ -1,7 +1,7 @@
 下一版本：
 	
 	Excel/CSV/JSON文件数据集支持上传和管理多个文件；
-	ConcurrentChartPluginManager的读取接口内部应首先根据最新更新事件刷新数据；
+	ConcurrentChartPluginManager的读取接口内部应首先根据最新更新时间刷新数据；
 	在看板里可以直接引入数据集，无需新建图表记录；
 	
 待定：
