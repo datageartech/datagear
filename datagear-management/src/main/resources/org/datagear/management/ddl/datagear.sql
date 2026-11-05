@@ -718,3 +718,9 @@ VALUES('MYSQL_DISABLE_SOCKETFACT_2','jdbc:mysql:*','false',999,'true',CURRENT_TI
 /*--version[6.1.1], DO NOT EDIT THIS LINE!*/
 /*-----------------------------------------*/
 
+
+
+/*-----------------------------------------*/
+/*--version[6.2.0], DO NOT EDIT THIS LINE!*/
+/*-----------------------------------------*/
+
