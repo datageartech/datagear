@@ -27,10 +27,13 @@ import java.io.File;
  */
 public class FileResolvedInfo
 {
-	/** 文件 */
-	private File file;
+	/** 文件统一资源标识 */
+	private String uri;
 
-	/** 已解析模板 */
+	/** 最新修改时间 */
+	private long lastModified;
+
+	/** 已解析的模板内容 */
 	private String resolvedTemplate = "";
 
 	public FileResolvedInfo()
@@ -38,27 +41,47 @@ public class FileResolvedInfo
 		super();
 	}
 
-	public FileResolvedInfo(File file)
+	public FileResolvedInfo(String uri, long lastModified)
+	{
+		this(uri, lastModified, "");
+	}
+
+	public FileResolvedInfo(String uri, long lastModified, String resolvedTemplate)
 	{
 		super();
-		this.file = file;
+		this.uri = uri;
+		this.lastModified = lastModified;
+		this.resolvedTemplate = resolvedTemplate;
+	}
+
+	public FileResolvedInfo(File file)
+	{
+		this(file, "");
 	}
 
 	public FileResolvedInfo(File file, String resolvedTemplate)
 	{
-		super();
-		this.file = file;
-		this.resolvedTemplate = resolvedTemplate;
+		this(file.getAbsolutePath(), file.lastModified(), resolvedTemplate);
 	}
 
-	public File getFile()
+	public String getUri()
 	{
-		return file;
+		return uri;
 	}
 
-	public void setFile(File file)
+	public void setUri(String uri)
 	{
-		this.file = file;
+		this.uri = uri;
+	}
+
+	public long getLastModified()
+	{
+		return lastModified;
+	}
+
+	public void setLastModified(long lastModified)
+	{
+		this.lastModified = lastModified;
 	}
 
 	public String getResolvedTemplate()

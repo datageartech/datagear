@@ -17,7 +17,6 @@
 
 package org.datagear.analysis.support;
 
-import java.io.File;
 import java.util.List;
 
 import org.datagear.analysis.DataSetField;
@@ -58,13 +57,11 @@ public abstract class AbstractExcelFileDataSet extends AbstractExcelDataSet<Exce
 	protected ExcelFileDataSetResource getResource(DataSetQuery query) throws Throwable
 	{
 		FileResolvedInfo fileInfo = getExcelFile(query);
-		File file = fileInfo.getFile();
-		
 		String sheetName = resolveTemplateSheetName(query);
 		
 		return new ExcelFileDataSetResource(fileInfo.getResolvedTemplate(), sheetName, getSheetIndex(), getNameRow(),
-				getDataRowExp(), getDataColumnExp(), (isForceXls() ? true : isXls(file)), file.getAbsolutePath(),
-				file.lastModified());
+				getDataRowExp(), getDataColumnExp(), (isForceXls() ? true : isXls(fileInfo.getUri())), fileInfo.getUri(),
+				fileInfo.getLastModified());
 	}
 
 	protected String resolveTemplateSheetName(DataSetQuery query)
@@ -95,12 +92,12 @@ public abstract class AbstractExcelFileDataSet extends AbstractExcelDataSet<Exce
 	/**
 	 * 给定Excel文件是否是老版本的{@code .xls}文件。
 	 * 
-	 * @param file
+	 * @param fileName
 	 * @return
 	 */
-	protected boolean isXls(File file)
+	protected boolean isXls(String fileName)
 	{
-		return FileUtil.isExtension(file, EXTENSION_XLS);
+		return FileUtil.isExtension(fileName, EXTENSION_XLS);
 	}
 
 	/**

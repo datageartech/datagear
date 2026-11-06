@@ -160,7 +160,6 @@ public interface DirectoryFileDataSetEntity extends DataSetEntity
 		{
 			// 服务器端文件名允许参数化
 			String fileName = resolveTemplateFileName(getDataSetResFileName(), query);
-
 			File directory = FileUtil.getDirectory(getFileSource().getDirectory(), false);
 			file = FileUtil.getFile(directory, fileName, false);
 

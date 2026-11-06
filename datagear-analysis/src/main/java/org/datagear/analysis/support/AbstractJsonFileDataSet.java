@@ -17,7 +17,6 @@
 
 package org.datagear.analysis.support;
 
-import java.io.File;
 import java.util.List;
 
 import org.datagear.analysis.DataSetField;
@@ -67,10 +66,9 @@ public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet<JsonFi
 	protected JsonFileDataSetResource getResource(DataSetQuery query) throws Throwable
 	{
 		FileResolvedInfo fileInfo = getJsonFile(query);
-		File file = fileInfo.getFile();
 
 		return new JsonFileDataSetResource(fileInfo.getResolvedTemplate(), getResultJsonRule(),
-				getEncoding(), file.getAbsolutePath(), file.lastModified());
+				getEncoding(), fileInfo.getUri(), fileInfo.getLastModified());
 	}
 
 	/**

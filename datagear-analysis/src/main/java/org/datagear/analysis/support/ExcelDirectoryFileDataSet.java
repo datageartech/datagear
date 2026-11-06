@@ -93,7 +93,7 @@ public class ExcelDirectoryFileDataSet extends AbstractExcelFileDataSet
 	@Override
 	protected FileResolvedInfo getExcelFile(DataSetQuery query) throws DataSetException
 	{
-		File excelFile = FileUtil.getFile(this.directory, this.fileName);
-		return new FileResolvedInfo(excelFile, this.fileName);
+		File file = FileUtil.getFile(this.directory, this.fileName);
+		return new FileResolvedInfo(file, this.fileName);
 	}
 }

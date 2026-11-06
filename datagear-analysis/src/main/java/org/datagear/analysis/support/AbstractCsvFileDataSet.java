@@ -17,7 +17,6 @@
 
 package org.datagear.analysis.support;
 
-import java.io.File;
 import java.util.List;
 
 import org.datagear.analysis.DataSetField;
@@ -68,10 +67,9 @@ public abstract class AbstractCsvFileDataSet extends AbstractCsvDataSet<CsvFileD
 			throws Throwable
 	{
 		FileResolvedInfo fileInfo = getCsvFile(query);
-		File file = fileInfo.getFile();
 
 		return new CsvFileDataSetResource(fileInfo.getResolvedTemplate(), getNameRow(), getEncoding(),
-				file.getAbsolutePath(), file.lastModified());
+				fileInfo.getUri(), fileInfo.getLastModified());
 	}
 
 	/**
