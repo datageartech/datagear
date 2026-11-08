@@ -20,9 +20,9 @@ package org.datagear.analysis.support;
 import java.io.File;
 import java.util.List;
 
-import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
+import org.datagear.analysis.support.datasetres.ExcelFileDataSetResource;
 
 /**
  * 简单Excel数据集。
@@ -33,7 +33,7 @@ import org.datagear.analysis.DataSetQuery;
  * @author datagear@163.com
  *
  */
-public class SimpleExcelDataSet extends AbstractExcelFileDataSet
+public class SimpleExcelDataSet extends AbstractExcelFileDataSet<ExcelFileDataSetResource>
 {
 	private static final long serialVersionUID = 1L;
 
@@ -58,8 +58,9 @@ public class SimpleExcelDataSet extends AbstractExcelFileDataSet
 	}
 
 	@Override
-	protected FileResolvedInfo getExcelFile(DataSetQuery query) throws DataSetException
+	protected ExcelFileDataSetResource getResource(DataSetQuery query) throws Throwable
 	{
-		return new FileResolvedInfo(this.file);
+		String sheetName = getSheetName();
+		return toExcelFileDataSetResource("", this.file, sheetName);
 	}
 }

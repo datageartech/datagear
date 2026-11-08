@@ -20,9 +20,9 @@ package org.datagear.analysis.support;
 import java.io.File;
 import java.util.List;
 
-import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
+import org.datagear.analysis.support.datasetres.JsonFileDataSetResource;
 
 /**
  * 简单JSON文件数据集。
@@ -33,7 +33,7 @@ import org.datagear.analysis.DataSetQuery;
  * @author datagear@163.com
  *
  */
-public class SimpleJsonFileDataSet extends AbstractJsonFileDataSet
+public class SimpleJsonFileDataSet extends AbstractJsonFileDataSet<JsonFileDataSetResource>
 {
 	private static final long serialVersionUID = 1L;
 
@@ -68,8 +68,8 @@ public class SimpleJsonFileDataSet extends AbstractJsonFileDataSet
 	}
 
 	@Override
-	protected FileResolvedInfo getJsonFile(DataSetQuery query) throws DataSetException
+	protected JsonFileDataSetResource getResource(DataSetQuery query) throws Throwable
 	{
-		return new FileResolvedInfo(this.file);
+		return toJsonFileDataSetResource("", this.file);
 	}
 }

@@ -23,6 +23,7 @@ import java.util.List;
 import org.datagear.analysis.DataSet;
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
+import org.datagear.analysis.support.datasetres.CsvFileDataSetResource;
 import org.datagear.util.FileUtil;
 
 /**
@@ -34,7 +35,7 @@ import org.datagear.util.FileUtil;
  * @author datagear@163.com
  *
  */
-public class CsvDirectoryFileDataSet extends AbstractCsvFileDataSet
+public class CsvDirectoryFileDataSet extends AbstractCsvFileDataSet<CsvFileDataSetResource>
 {
 	private static final long serialVersionUID = 1L;
 
@@ -85,9 +86,9 @@ public class CsvDirectoryFileDataSet extends AbstractCsvFileDataSet
 	}
 
 	@Override
-	protected FileResolvedInfo getCsvFile(DataSetQuery query) throws Throwable
+	protected CsvFileDataSetResource getResource(DataSetQuery query) throws Throwable
 	{
 		File file = FileUtil.getFile(this.directory, this.fileName);
-		return new FileResolvedInfo(file, this.fileName);
+		return toCsvFileDataSetResource("", file);
 	}
 }

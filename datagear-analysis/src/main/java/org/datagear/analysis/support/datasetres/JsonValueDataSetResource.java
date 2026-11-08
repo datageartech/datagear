@@ -17,10 +17,7 @@
 
 package org.datagear.analysis.support.datasetres;
 
-import java.io.Reader;
-
 import org.datagear.analysis.support.ResultJsonRule;
-import org.datagear.util.IOUtil;
 
 /**
  * JSON文本值数据集资源。
@@ -40,12 +37,6 @@ public class JsonValueDataSetResource extends JsonDataSetResource
 	public JsonValueDataSetResource(String resolvedTemplate, ResultJsonRule resultJsonRule)
 	{
 		super(resolvedTemplate, resultJsonRule);
-	}
-
-	@Override
-	public Reader getReader() throws Throwable
-	{
-		return IOUtil.getReader(super.getResolvedTemplate());
 	}
 
 	@Override
@@ -75,6 +66,7 @@ public class JsonValueDataSetResource extends JsonDataSetResource
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [resultJsonRule=" + getResultJsonRule() + "]";
+		return getClass().getSimpleName() + " [resolvedTemplate="
+				+ getResolvedTemplate() + ", resultJsonRule=" + getResultJsonRule() + "]";
 	}
 }

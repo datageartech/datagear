@@ -25,7 +25,8 @@ import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.AbstractExcelFileDataSet;
 import org.datagear.analysis.support.ExcelDirectoryFileDataSet;
-import org.datagear.analysis.support.FileResolvedInfo;
+import org.datagear.analysis.support.datasetres.ExcelFileDataSetResource;
+import org.datagear.util.FileUtil;
 import org.springframework.beans.BeanUtils;
 
 /**
@@ -34,7 +35,8 @@ import org.springframework.beans.BeanUtils;
  * @author datagear@163.com
  *
  */
-public class ExcelDataSetEntity extends AbstractExcelFileDataSet implements DirectoryFileDataSetEntity, CloneableEntity
+public class ExcelDataSetEntity extends AbstractExcelFileDataSet<ExcelFileDataSetResource>
+		implements DirectoryFileDataSetEntity, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -233,9 +235,25 @@ public class ExcelDataSetEntity extends AbstractExcelFileDataSet implements Dire
 	}
 
 	@Override
-	protected FileResolvedInfo getExcelFile(DataSetQuery query) throws Throwable
+	protected ExcelFileDataSetResource getResource(DataSetQuery query) throws Throwable
 	{
-		return getFileForDataSetQuery(query);
+		String sheetName = resolveTemplateSheetName(query);
+
+		if (FILE_SOURCE_TYPE_UPLOAD.equals(getFileSourceType()))
+		{
+			File file = FileUtil.getFile(getDirectory(), getFileName());
+			return toExcelFileDataSetResource(sheetName, file, sheetName);
+		}
+		else if (FILE_SOURCE_TYPE_SERVER.equals(getFileSourceType()))
+		{
+			// 服务器端文件名允许参数化
+			String fileName = resolveTemplateFileName(getDataSetResFileName(), query);
+			File directory = FileUtil.getDirectory(getFileSource().getDirectory(), false);
+			File file = FileUtil.getFile(directory, fileName, false);
+			return toExcelFileDataSetResource("name: " + fileName + "\n" + "sheet: " + sheetName, file, sheetName);
+		}
+		else
+			throw new IllegalStateException("Unknown file source type :" + getFileSourceType());
 	}
 
 	@Override

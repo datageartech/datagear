@@ -17,11 +17,13 @@
 
 package org.datagear.analysis.support;
 
+import java.io.File;
+import java.io.Reader;
 import java.util.List;
 
 import org.datagear.analysis.DataSetField;
-import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.datasetres.CsvFileDataSetResource;
+import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 
 /**
@@ -30,7 +32,7 @@ import org.datagear.util.IOUtil;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractCsvFileDataSet extends AbstractCsvDataSet<CsvFileDataSetResource>
+public abstract class AbstractCsvFileDataSet<T extends CsvFileDataSetResource> extends AbstractCsvDataSet<T>
 {
 	private static final long serialVersionUID = 1L;
 
@@ -63,21 +65,23 @@ public abstract class AbstractCsvFileDataSet extends AbstractCsvDataSet<CsvFileD
 	}
 
 	@Override
-	protected CsvFileDataSetResource getResource(DataSetQuery query)
-			throws Throwable
+	protected Reader getResourceReader(CsvFileDataSetResource resource) throws Throwable
 	{
-		FileResolvedInfo fileInfo = getCsvFile(query);
-
-		return new CsvFileDataSetResource(fileInfo.getResolvedTemplate(), getNameRow(), getEncoding(),
-				fileInfo.getUri(), fileInfo.getLastModified());
+		File file = FileUtil.getFile(resource.getAbsolutePath());
+		return IOUtil.getReader(file, resource.getEncoding());
 	}
 
 	/**
-	 * 获取CSV文件。
+	 * 创建{@linkplain CsvFileDataSetResource}实例。
 	 * 
-	 * @param query
+	 * @param resolvedTemplate
+	 * @param file
 	 * @return
-	 * @throws Throwable
 	 */
-	protected abstract FileResolvedInfo getCsvFile(DataSetQuery query) throws Throwable;
+	protected CsvFileDataSetResource toCsvFileDataSetResource(String resolvedTemplate, File file)
+	{
+		CsvFileDataSetResource res = new CsvFileDataSetResource(resolvedTemplate, getNameRow(), file.getAbsolutePath(),
+				getEncoding(), file.lastModified());
+		return res;
+	}
 }

@@ -17,12 +17,14 @@
 
 package org.datagear.analysis.support;
 
+import java.io.Reader;
 import java.util.List;
 
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.datasetres.CsvValueDataSetResource;
+import org.datagear.util.IOUtil;
 
 /**
  * CSV值数据集。
@@ -90,5 +92,11 @@ public class CsvValueDataSet extends AbstractCsvDataSet<CsvValueDataSetResource>
 	{
 		String csv = resolveTemplateCsv(this.value, query);
 		return new CsvValueDataSetResource(csv, getNameRow());
+	}
+
+	@Override
+	protected Reader getResourceReader(CsvValueDataSetResource resource) throws Throwable
+	{
+		return IOUtil.getReader(resource.getResolvedTemplate());
 	}
 }

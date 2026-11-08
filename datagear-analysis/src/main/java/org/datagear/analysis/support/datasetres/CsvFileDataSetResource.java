@@ -17,11 +17,6 @@
 
 package org.datagear.analysis.support.datasetres;
 
-import java.io.File;
-import java.io.Reader;
-
-import org.datagear.util.FileUtil;
-
 /**
  * CSV文件数据集资源。
  * 
@@ -32,9 +27,9 @@ public class CsvFileDataSetResource extends CsvDataSetResource
 {
 	private static final long serialVersionUID = 1L;
 
-	private String encoding;
+	private String absolutePath;
 
-	private String filePath;
+	private String encoding;
 
 	private long lastModified;
 
@@ -44,12 +39,22 @@ public class CsvFileDataSetResource extends CsvDataSetResource
 	}
 
 	public CsvFileDataSetResource(String resolvedTemplate, int nameRow,
-			String encoding, String filePath, long lastModified)
+			String absolutePath, String encoding, long lastModified)
 	{
 		super(resolvedTemplate, nameRow);
+		this.absolutePath = absolutePath;
 		this.encoding = encoding;
-		this.filePath = filePath;
 		this.lastModified = lastModified;
+	}
+
+	public String getAbsolutePath()
+	{
+		return absolutePath;
+	}
+
+	public void setAbsolutePath(String absolutePath)
+	{
+		this.absolutePath = absolutePath;
 	}
 
 	public String getEncoding()
@@ -60,16 +65,6 @@ public class CsvFileDataSetResource extends CsvDataSetResource
 	public void setEncoding(String encoding)
 	{
 		this.encoding = encoding;
-	}
-
-	public String getFilePath()
-	{
-		return filePath;
-	}
-
-	public void setFilePath(String filePath)
-	{
-		this.filePath = filePath;
 	}
 
 	public long getLastModified()
@@ -89,19 +84,12 @@ public class CsvFileDataSetResource extends CsvDataSetResource
 	}
 
 	@Override
-	public Reader getReader() throws Throwable
-	{
-		File file = FileUtil.getFile(this.filePath);
-		return getReader(file, this.encoding);
-	}
-
-	@Override
 	public int hashCode()
 	{
 		final int prime = 31;
 		int result = super.hashCode();
+		result = prime * result + ((absolutePath == null) ? 0 : absolutePath.hashCode());
 		result = prime * result + ((encoding == null) ? 0 : encoding.hashCode());
-		result = prime * result + ((filePath == null) ? 0 : filePath.hashCode());
 		result = prime * result + (int) (lastModified ^ (lastModified >>> 32));
 		return result;
 	}
@@ -116,19 +104,19 @@ public class CsvFileDataSetResource extends CsvDataSetResource
 		if (getClass() != obj.getClass())
 			return false;
 		CsvFileDataSetResource other = (CsvFileDataSetResource) obj;
+		if (absolutePath == null)
+		{
+			if (other.absolutePath != null)
+				return false;
+		}
+		else if (!absolutePath.equals(other.absolutePath))
+			return false;
 		if (encoding == null)
 		{
 			if (other.encoding != null)
 				return false;
 		}
 		else if (!encoding.equals(other.encoding))
-			return false;
-		if (filePath == null)
-		{
-			if (other.filePath != null)
-				return false;
-		}
-		else if (!filePath.equals(other.filePath))
 			return false;
 		if (lastModified != other.lastModified)
 			return false;
@@ -138,8 +126,8 @@ public class CsvFileDataSetResource extends CsvDataSetResource
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [encoding=" + encoding + ", filePath=" + filePath + ", lastModified="
-				+ lastModified + ", nameRow=" + getNameRow() + ", resolvedTemplate="
+		return getClass().getSimpleName() + " [absolutePath=" + absolutePath + ", encoding=" + encoding
+				+ ", lastModified=" + lastModified + ", nameRow=" + getNameRow() + ", resolvedTemplate="
 				+ getResolvedTemplate() + "]";
 	}
 }

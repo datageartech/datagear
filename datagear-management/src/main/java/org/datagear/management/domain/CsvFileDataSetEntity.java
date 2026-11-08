@@ -25,7 +25,8 @@ import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.AbstractCsvFileDataSet;
 import org.datagear.analysis.support.CsvDirectoryFileDataSet;
-import org.datagear.analysis.support.FileResolvedInfo;
+import org.datagear.analysis.support.datasetres.CsvFileDataSetResource;
+import org.datagear.util.FileUtil;
 import org.springframework.beans.BeanUtils;
 
 /**
@@ -34,7 +35,8 @@ import org.springframework.beans.BeanUtils;
  * @author datagear@163.com
  *
  */
-public class CsvFileDataSetEntity extends AbstractCsvFileDataSet implements DirectoryFileDataSetEntity, CloneableEntity
+public class CsvFileDataSetEntity extends AbstractCsvFileDataSet<CsvFileDataSetResource>
+		implements DirectoryFileDataSetEntity, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -233,9 +235,23 @@ public class CsvFileDataSetEntity extends AbstractCsvFileDataSet implements Dire
 	}
 
 	@Override
-	protected FileResolvedInfo getCsvFile(DataSetQuery query) throws Throwable
+	protected CsvFileDataSetResource getResource(DataSetQuery query) throws Throwable
 	{
-		return getFileForDataSetQuery(query);
+		if (FILE_SOURCE_TYPE_UPLOAD.equals(getFileSourceType()))
+		{
+			File file = FileUtil.getFile(getDirectory(), getFileName());
+			return toCsvFileDataSetResource("", file);
+		}
+		else if (FILE_SOURCE_TYPE_SERVER.equals(getFileSourceType()))
+		{
+			// 服务器端文件名允许参数化
+			String fileName = resolveTemplateFileName(getDataSetResFileName(), query);
+			File directory = FileUtil.getDirectory(getFileSource().getDirectory(), false);
+			File file = FileUtil.getFile(directory, fileName, false);
+			return toCsvFileDataSetResource(fileName, file);
+		}
+		else
+			throw new IllegalStateException("Unknown file source type :" + getFileSourceType());
 	}
 
 	@Override

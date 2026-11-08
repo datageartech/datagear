@@ -17,11 +17,7 @@
 
 package org.datagear.analysis.support.datasetres;
 
-import java.io.File;
-import java.io.Reader;
-
 import org.datagear.analysis.support.ResultJsonRule;
-import org.datagear.util.FileUtil;
 
 /**
  * JSON文件数据集资源。
@@ -33,9 +29,9 @@ public class JsonFileDataSetResource extends JsonDataSetResource
 {
 	private static final long serialVersionUID = 1L;
 
-	private String encoding;
+	private String absolutePath;
 
-	private String filePath;
+	private String encoding;
 
 	private long lastModified;
 
@@ -45,17 +41,32 @@ public class JsonFileDataSetResource extends JsonDataSetResource
 	}
 
 	public JsonFileDataSetResource(String resolvedTemplate, ResultJsonRule resultJsonRule,
-			String encoding, String filePath, long lastModified)
+			String absolutePath, String encoding, long lastModified)
 	{
 		super(resolvedTemplate, resultJsonRule);
-		this.filePath = filePath;
-		this.lastModified = lastModified;
+		this.absolutePath = absolutePath;
 		this.encoding = encoding;
+		this.lastModified = lastModified;
 	}
 
-	public String getFilePath()
+	public String getAbsolutePath()
 	{
-		return filePath;
+		return absolutePath;
+	}
+
+	public void setAbsolutePath(String absolutePath)
+	{
+		this.absolutePath = absolutePath;
+	}
+
+	public String getEncoding()
+	{
+		return encoding;
+	}
+
+	public void setEncoding(String encoding)
+	{
+		this.encoding = encoding;
 	}
 
 	public long getLastModified()
@@ -63,9 +74,9 @@ public class JsonFileDataSetResource extends JsonDataSetResource
 		return lastModified;
 	}
 
-	public String getEncoding()
+	public void setLastModified(long lastModified)
 	{
-		return encoding;
+		this.lastModified = lastModified;
 	}
 
 	@Override
@@ -75,19 +86,12 @@ public class JsonFileDataSetResource extends JsonDataSetResource
 	}
 
 	@Override
-	public Reader getReader() throws Throwable
-	{
-		File file = FileUtil.getFile(this.filePath);
-		return getReader(file, this.encoding);
-	}
-
-	@Override
 	public int hashCode()
 	{
 		final int prime = 31;
 		int result = super.hashCode();
+		result = prime * result + ((absolutePath == null) ? 0 : absolutePath.hashCode());
 		result = prime * result + ((encoding == null) ? 0 : encoding.hashCode());
-		result = prime * result + ((filePath == null) ? 0 : filePath.hashCode());
 		result = prime * result + (int) (lastModified ^ (lastModified >>> 32));
 		return result;
 	}
@@ -102,19 +106,19 @@ public class JsonFileDataSetResource extends JsonDataSetResource
 		if (getClass() != obj.getClass())
 			return false;
 		JsonFileDataSetResource other = (JsonFileDataSetResource) obj;
+		if (absolutePath == null)
+		{
+			if (other.absolutePath != null)
+				return false;
+		}
+		else if (!absolutePath.equals(other.absolutePath))
+			return false;
 		if (encoding == null)
 		{
 			if (other.encoding != null)
 				return false;
 		}
 		else if (!encoding.equals(other.encoding))
-			return false;
-		if (filePath == null)
-		{
-			if (other.filePath != null)
-				return false;
-		}
-		else if (!filePath.equals(other.filePath))
 			return false;
 		if (lastModified != other.lastModified)
 			return false;
@@ -124,8 +128,8 @@ public class JsonFileDataSetResource extends JsonDataSetResource
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [encoding=" + encoding + ", filePath=" + filePath + ", lastModified="
-				+ lastModified + ", resultJsonRule=" + getResultJsonRule() + ", resolvedTemplate="
+		return getClass().getSimpleName() + " [absolutePath=" + absolutePath + ", encoding=" + encoding
+				+ ", lastModified=" + lastModified + ", resultJsonRule=" + getResultJsonRule() + ", resolvedTemplate="
 				+ getResolvedTemplate() + "]";
 	}
 }

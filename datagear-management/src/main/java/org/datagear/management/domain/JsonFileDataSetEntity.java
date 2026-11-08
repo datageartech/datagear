@@ -25,9 +25,10 @@ import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.ResultJsonRuleUtil;
 import org.datagear.analysis.support.AbstractJsonFileDataSet;
-import org.datagear.analysis.support.FileResolvedInfo;
 import org.datagear.analysis.support.JsonDirectoryFileDataSet;
 import org.datagear.analysis.support.ResultJsonRule;
+import org.datagear.analysis.support.datasetres.JsonFileDataSetResource;
+import org.datagear.util.FileUtil;
 import org.springframework.beans.BeanUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -38,7 +39,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @author datagear@163.com
  *
  */
-public class JsonFileDataSetEntity extends AbstractJsonFileDataSet
+public class JsonFileDataSetEntity extends AbstractJsonFileDataSet<JsonFileDataSetResource>
 		implements DirectoryFileDataSetEntity, CloneableEntity, ResultJsonRuleAwareSplitEntity
 {
 	private static final long serialVersionUID = 1L;
@@ -279,9 +280,23 @@ public class JsonFileDataSetEntity extends AbstractJsonFileDataSet
 	}
 
 	@Override
-	protected FileResolvedInfo getJsonFile(DataSetQuery query) throws Throwable
+	protected JsonFileDataSetResource getResource(DataSetQuery query) throws Throwable
 	{
-		return getFileForDataSetQuery(query);
+		if (FILE_SOURCE_TYPE_UPLOAD.equals(getFileSourceType()))
+		{
+			File file = FileUtil.getFile(getDirectory(), getFileName());
+			return toJsonFileDataSetResource("", file);
+		}
+		else if (FILE_SOURCE_TYPE_SERVER.equals(getFileSourceType()))
+		{
+			// 服务器端文件名允许参数化
+			String fileName = resolveTemplateFileName(getDataSetResFileName(), query);
+			File directory = FileUtil.getDirectory(getFileSource().getDirectory(), false);
+			File file = FileUtil.getFile(directory, fileName, false);
+			return toJsonFileDataSetResource(fileName, file);
+		}
+		else
+			throw new IllegalStateException("Unknown file source type :" + getFileSourceType());
 	}
 
 	@Override

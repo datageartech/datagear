@@ -21,8 +21,6 @@ import java.io.File;
 
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.AbstractDataSet;
-import org.datagear.analysis.support.FileResolvedInfo;
-import org.datagear.util.FileUtil;
 
 /**
  * 目录内文件数据集实体。
@@ -138,34 +136,4 @@ public interface DirectoryFileDataSetEntity extends DataSetEntity
 	 * @return
 	 */
 	String resolveTemplateFileName(String fileName, DataSetQuery query);
-
-	/**
-	 * 获取文件。
-	 * 
-	 * @param query
-	 * @return
-	 * @throws Throwable
-	 */
-	default FileResolvedInfo getFileForDataSetQuery(DataSetQuery query) throws Throwable
-	{
-		File file = null;
-
-		if (FILE_SOURCE_TYPE_UPLOAD.equals(getFileSourceType()))
-		{
-			file = FileUtil.getFile(getDirectory(), getFileName());
-
-			return new FileResolvedInfo(file);
-		}
-		else if (FILE_SOURCE_TYPE_SERVER.equals(getFileSourceType()))
-		{
-			// 服务器端文件名允许参数化
-			String fileName = resolveTemplateFileName(getDataSetResFileName(), query);
-			File directory = FileUtil.getDirectory(getFileSource().getDirectory(), false);
-			file = FileUtil.getFile(directory, fileName, false);
-
-			return new FileResolvedInfo(file, fileName);
-		}
-		else
-			throw new IllegalStateException("Unknown file source type :" + getFileSourceType());
-	}
 }

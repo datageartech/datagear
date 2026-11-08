@@ -266,7 +266,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 
 		try
 		{
-			in = resource.getInputStream();
+			in = getResourceInputStream(resource);
 			poifs = new POIFSFileSystem(in);
 			wb = new HSSFWorkbook(poifs.getRoot(), true);
 			Sheet sheet = resource.getDataSheet(wb);
@@ -300,7 +300,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 
 		try
 		{
-			in = resource.getInputStream();
+			in = getResourceInputStream(resource);
 			pkg = OPCPackage.open(in);
 			wb = new XSSFWorkbook(pkg);
 			Sheet sheet = resource.getDataSheet(wb);
@@ -319,6 +319,15 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 		}
 	}
 	
+	/**
+	 * 获取资源输入流。
+	 * 
+	 * @param resource
+	 * @return
+	 * @throws Throwable
+	 */
+	protected abstract InputStream getResourceInputStream(T resource) throws Throwable;
+
 	/**
 	 * 解析sheet数据。
 	 * 

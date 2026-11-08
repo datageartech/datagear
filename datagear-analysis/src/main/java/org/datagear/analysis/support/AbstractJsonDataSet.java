@@ -83,8 +83,7 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 
 		try
 		{
-			reader = resource.getReader();
-
+			reader = getResourceReader(resource);
 			DataSetResult result = resolveSourceResult(resource, reader);
 			List<DataSetField> fields = null;
 
@@ -98,6 +97,15 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 			IOUtil.close(reader);
 		}
 	}
+
+	/**
+	 * 获取资源输入流。
+	 * 
+	 * @param resource
+	 * @return
+	 * @throws Throwable
+	 */
+	protected abstract Reader getResourceReader(T resource) throws Throwable;
 
 	/**
 	 * 解析JSON源结果。

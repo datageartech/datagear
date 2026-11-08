@@ -283,6 +283,8 @@ public class DataSetResultWrapper implements ResultJsonRuleAware
 	protected static class InternalJsonDataSet extends AbstractJsonDataSet<InternalJsonDataSetResource>
 	{
 		private static final long serialVersionUID = 1L;
+
+		private static final Reader PLACEHOLDER_READER = new StringReader("");
 		
 		private final Object data;
 
@@ -316,6 +318,12 @@ public class DataSetResultWrapper implements ResultJsonRuleAware
 		}
 
 		@Override
+		protected Reader getResourceReader(InternalJsonDataSetResource resource) throws Throwable
+		{
+			return PLACEHOLDER_READER;
+		}
+
+		@Override
 		protected void checkRequiredParamValues(DataSetQuery query) throws DataSetParamValueRequiredException
 		{
 			// 无需校验参数，此方法应什么也不做
@@ -327,17 +335,9 @@ public class DataSetResultWrapper implements ResultJsonRuleAware
 	{
 		private static final long serialVersionUID = 1L;
 
-		private static final Reader PLACEHOLDER_READER = new StringReader("");
-
 		public InternalJsonDataSetResource(ResultJsonRule resultJsonRule)
 		{
 			super("", resultJsonRule);
-		}
-
-		@Override
-		public Reader getReader() throws Throwable
-		{
-			return PLACEHOLDER_READER;
 		}
 
 		@Override

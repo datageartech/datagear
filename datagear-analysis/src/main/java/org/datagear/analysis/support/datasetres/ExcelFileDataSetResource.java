@@ -17,11 +17,6 @@
 
 package org.datagear.analysis.support.datasetres;
 
-import java.io.File;
-import java.io.InputStream;
-
-import org.datagear.util.FileUtil;
-
 /**
  * Excel文件数据集资源。
  * 
@@ -32,7 +27,7 @@ public class ExcelFileDataSetResource extends ExcelDataSetResource
 {
 	private static final long serialVersionUID = 1L;
 
-	private String filePath;
+	private String absolutePath;
 
 	private long lastModified;
 
@@ -42,21 +37,21 @@ public class ExcelFileDataSetResource extends ExcelDataSetResource
 	}
 
 	public ExcelFileDataSetResource(String resolvedTemplate, String sheetName, int sheetIndex, int nameRow, String dataRowExp,
-			String dataColumnExp, boolean xls, String filePath, long lastModified)
+			String dataColumnExp, boolean xls, String absolutePath, long lastModified)
 	{
 		super(resolvedTemplate, sheetName, sheetIndex, nameRow, dataRowExp, dataColumnExp, xls);
-		this.filePath = filePath;
+		this.absolutePath = absolutePath;
 		this.lastModified = lastModified;
 	}
 
-	public String getFilePath()
+	public String getAbsolutePath()
 	{
-		return filePath;
+		return absolutePath;
 	}
 
-	public void setFilePath(String filePath)
+	public void setAbsolutePath(String absolutePath)
 	{
-		this.filePath = filePath;
+		this.absolutePath = absolutePath;
 	}
 
 	public long getLastModified()
@@ -76,18 +71,11 @@ public class ExcelFileDataSetResource extends ExcelDataSetResource
 	}
 
 	@Override
-	public InputStream getInputStream() throws Throwable
-	{
-		File file = FileUtil.getFile(this.filePath);
-		return getInputStream(file);
-	}
-
-	@Override
 	public int hashCode()
 	{
 		final int prime = 31;
 		int result = super.hashCode();
-		result = prime * result + ((filePath == null) ? 0 : filePath.hashCode());
+		result = prime * result + ((absolutePath == null) ? 0 : absolutePath.hashCode());
 		result = prime * result + (int) (lastModified ^ (lastModified >>> 32));
 		return result;
 	}
@@ -102,12 +90,12 @@ public class ExcelFileDataSetResource extends ExcelDataSetResource
 		if (getClass() != obj.getClass())
 			return false;
 		ExcelFileDataSetResource other = (ExcelFileDataSetResource) obj;
-		if (filePath == null)
+		if (absolutePath == null)
 		{
-			if (other.filePath != null)
+			if (other.absolutePath != null)
 				return false;
 		}
-		else if (!filePath.equals(other.filePath))
+		else if (!absolutePath.equals(other.absolutePath))
 			return false;
 		if (lastModified != other.lastModified)
 			return false;
@@ -117,7 +105,7 @@ public class ExcelFileDataSetResource extends ExcelDataSetResource
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [filePath=" + filePath + ", lastModified=" + lastModified
+		return getClass().getSimpleName() + " [absolutePath=" + absolutePath + ", lastModified=" + lastModified
 				+ ", sheetName=" + getSheetName() + ", sheetIndex=" + getSheetIndex() + ", nameRow=" + getNameRow()
 				+ ", dataRowExp=" + getDataRowExp() + ", dataColumnExp=" + getDataColumnExp() + ", xls=" + isXls()
 				+ ", resolvedTemplate=" + getResolvedTemplate() + "]";

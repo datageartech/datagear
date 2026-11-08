@@ -17,12 +17,15 @@
 
 package org.datagear.analysis.support;
 
+import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.datasetres.ExcelFileDataSetResource;
 import org.datagear.util.FileUtil;
+import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
 
 /**
@@ -34,7 +37,7 @@ import org.datagear.util.StringUtil;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractExcelFileDataSet extends AbstractExcelDataSet<ExcelFileDataSetResource>
+public abstract class AbstractExcelFileDataSet<T extends ExcelFileDataSetResource> extends AbstractExcelDataSet<T>
 {
 	private static final long serialVersionUID = 1L;
 
@@ -54,14 +57,26 @@ public abstract class AbstractExcelFileDataSet extends AbstractExcelDataSet<Exce
 	}
 
 	@Override
-	protected ExcelFileDataSetResource getResource(DataSetQuery query) throws Throwable
+	protected InputStream getResourceInputStream(T resource) throws Throwable
 	{
-		FileResolvedInfo fileInfo = getExcelFile(query);
-		String sheetName = resolveTemplateSheetName(query);
-		
-		return new ExcelFileDataSetResource(fileInfo.getResolvedTemplate(), sheetName, getSheetIndex(), getNameRow(),
-				getDataRowExp(), getDataColumnExp(), (isForceXls() ? true : isXls(fileInfo.getUri())), fileInfo.getUri(),
-				fileInfo.getLastModified());
+		File file = FileUtil.getFile(resource.getAbsolutePath());
+		return IOUtil.getInputStream(file);
+	}
+
+	/**
+	 * 创建{@linkplain ExcelFileDataSetResource}实例。
+	 * 
+	 * @param resolvedTemplate
+	 * @param file
+	 * @param sheetName
+	 * @return
+	 */
+	protected ExcelFileDataSetResource toExcelFileDataSetResource(String resolvedTemplate, File file, String sheetName)
+	{
+		ExcelFileDataSetResource res = new ExcelFileDataSetResource(resolvedTemplate, sheetName, getSheetIndex(),
+				getNameRow(), getDataRowExp(), getDataColumnExp(), (isForceXls() ? true : isXls(file.getName())),
+				file.getAbsolutePath(), file.lastModified());
+		return res;
 	}
 
 	protected String resolveTemplateSheetName(DataSetQuery query)
@@ -99,13 +114,4 @@ public abstract class AbstractExcelFileDataSet extends AbstractExcelDataSet<Exce
 	{
 		return FileUtil.isExtension(fileName, EXTENSION_XLS);
 	}
-
-	/**
-	 * 获取Excel文件。
-	 * 
-	 * @param query
-	 * @return
-	 * @throws Throwable
-	 */
-	protected abstract FileResolvedInfo getExcelFile(DataSetQuery query) throws Throwable;
 }

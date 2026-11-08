@@ -106,7 +106,7 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 
 		try
 		{
-			reader = resource.getReader();
+			reader = getResourceReader(resource);
 
 			CSVParser csvParser = buildCSVParser(reader);
 			List<CSVRecord> csvRecords = csvParser.getRecords();
@@ -126,6 +126,15 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 			IOUtil.close(reader);
 		}
 	}
+
+	/**
+	 * 获取资源输入流。
+	 * 
+	 * @param resource
+	 * @return
+	 * @throws Throwable
+	 */
+	protected abstract Reader getResourceReader(T resource) throws Throwable;
 
 	/**
 	 * 解析字段名。

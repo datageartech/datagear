@@ -17,10 +17,6 @@
 
 package org.datagear.analysis.support.datasetres;
 
-import java.io.Reader;
-
-import org.datagear.util.IOUtil;
-
 /**
  * CSV文本数据集资源。
  * 
@@ -45,12 +41,6 @@ public class CsvValueDataSetResource extends CsvDataSetResource
 	public boolean isIdempotent()
 	{
 		return true;
-	}
-
-	@Override
-	public Reader getReader() throws Throwable
-	{
-		return IOUtil.getReader(super.getResolvedTemplate());
 	}
 
 	@Override

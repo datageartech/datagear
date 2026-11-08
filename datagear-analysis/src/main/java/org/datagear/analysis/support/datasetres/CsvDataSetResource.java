@@ -17,8 +17,6 @@
 
 package org.datagear.analysis.support.datasetres;
 
-import java.io.Reader;
-
 /**
  * CSV数据集资源。
  * 
@@ -76,17 +74,6 @@ public abstract class CsvDataSetResource extends DataSetResource
 	{
 		return ((rowIndex + 1) > this.nameRow);
 	}
-
-	/**
-	 * 获取CSV输入流。
-	 * <p>
-	 * 输入流应该在此方法内创建，而不应该在实例内创建，因为采用缓存后不会每次都调用此方法。
-	 * </p>
-	 * 
-	 * @return
-	 * @throws Throwable
-	 */
-	public abstract Reader getReader() throws Throwable;
 
 	@Override
 	public int hashCode()

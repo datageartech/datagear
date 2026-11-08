@@ -100,6 +100,12 @@ public class JsonHttpResultHandler extends AbstractHttpResultHandler
 		{
 			return new HttpResponseJsonDataSetResource("", getResultJsonRule(), this.responseJsonReader);
 		}
+
+		@Override
+		protected Reader getResourceReader(HttpResponseJsonDataSetResource resource) throws Throwable
+		{
+			return resource.getJsonReader();
+		}
 	}
 
 	protected static class HttpResponseJsonDataSetResource extends JsonDataSetResource
@@ -130,12 +136,6 @@ public class JsonHttpResultHandler extends AbstractHttpResultHandler
 		{
 			// 这里应始终返回false
 			return false;
-		}
-
-		@Override
-		public Reader getReader() throws Throwable
-		{
-			return this.jsonReader;
 		}
 	}
 }

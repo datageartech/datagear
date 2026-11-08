@@ -21,9 +21,9 @@ import java.io.File;
 import java.util.List;
 
 import org.datagear.analysis.DataSet;
-import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
+import org.datagear.analysis.support.datasetres.ExcelFileDataSetResource;
 import org.datagear.util.FileUtil;
 
 /**
@@ -35,7 +35,7 @@ import org.datagear.util.FileUtil;
  * @author datagear@163.com
  *
  */
-public class ExcelDirectoryFileDataSet extends AbstractExcelFileDataSet
+public class ExcelDirectoryFileDataSet extends AbstractExcelFileDataSet<ExcelFileDataSetResource>
 {
 	private static final long serialVersionUID = 1L;
 
@@ -91,9 +91,10 @@ public class ExcelDirectoryFileDataSet extends AbstractExcelFileDataSet
 	}
 
 	@Override
-	protected FileResolvedInfo getExcelFile(DataSetQuery query) throws DataSetException
+	protected ExcelFileDataSetResource getResource(DataSetQuery query) throws Throwable
 	{
 		File file = FileUtil.getFile(this.directory, this.fileName);
-		return new FileResolvedInfo(file, this.fileName);
+		String sheetName = getSheetName();
+		return toExcelFileDataSetResource("", file, sheetName);
 	}
 }

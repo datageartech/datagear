@@ -28,7 +28,7 @@ import org.datagear.util.cache.CommonCacheKey;
 /**
  * 数据集资源。
  * <p>
- * {@linkplain AbstractResolvableResourceDataSet}使用此类实现数据集结果数据缓存。
+ * {@linkplain AbstractResolvableResourceDataSet}使用此类作为资源缓存主键，实现数据集结果数据缓存。
  * </p>
  * <p>
  * 如果子类的{@linkplain #isIdempotent()}为{@code true}，那么必须重写{@linkplain #hashCode()}、{@linkplain #equals(Object)}方法。

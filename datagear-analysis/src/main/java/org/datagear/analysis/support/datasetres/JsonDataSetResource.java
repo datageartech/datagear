@@ -17,8 +17,6 @@
 
 package org.datagear.analysis.support.datasetres;
 
-import java.io.Reader;
-
 import org.datagear.analysis.support.ResultJsonRule;
 
 /**
@@ -58,17 +56,6 @@ public abstract class JsonDataSetResource extends DataSetResource
 	{
 		this.resultJsonRule = resultJsonRule;
 	}
-
-	/**
-	 * 获取JSON输入流。
-	 * <p>
-	 * 输入流应该在此方法内创建，而不应该在实例内创建，因为采用缓存后不会每次都调用此方法。
-	 * </p>
-	 * 
-	 * @return
-	 * @throws Throwable
-	 */
-	public abstract Reader getReader() throws Throwable;
 
 	@Override
 	public int hashCode()

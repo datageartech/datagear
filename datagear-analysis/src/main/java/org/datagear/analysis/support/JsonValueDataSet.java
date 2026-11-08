@@ -17,12 +17,14 @@
 
 package org.datagear.analysis.support;
 
+import java.io.Reader;
 import java.util.List;
 
 import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.datasetres.JsonValueDataSetResource;
+import org.datagear.util.IOUtil;
 
 /**
  * JSON字符串值数据集。
@@ -78,5 +80,11 @@ public class JsonValueDataSet extends AbstractJsonDataSet<JsonValueDataSetResour
 	{
 		String json = resolveTemplateJson(this.value, query);
 		return new JsonValueDataSetResource(json, getResultJsonRule());
+	}
+
+	@Override
+	protected Reader getResourceReader(JsonValueDataSetResource resource) throws Throwable
+	{
+		return IOUtil.getReader(resource.getResolvedTemplate());
 	}
 }

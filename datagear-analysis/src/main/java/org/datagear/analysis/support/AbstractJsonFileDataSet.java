@@ -17,11 +17,13 @@
 
 package org.datagear.analysis.support;
 
+import java.io.File;
+import java.io.Reader;
 import java.util.List;
 
 import org.datagear.analysis.DataSetField;
-import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.support.datasetres.JsonFileDataSetResource;
+import org.datagear.util.FileUtil;
 import org.datagear.util.IOUtil;
 
 /**
@@ -30,7 +32,7 @@ import org.datagear.util.IOUtil;
  * @author datagear@163.com
  *
  */
-public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet<JsonFileDataSetResource>
+public abstract class AbstractJsonFileDataSet<T extends JsonFileDataSetResource> extends AbstractJsonDataSet<T>
 {
 	private static final long serialVersionUID = 1L;
 
@@ -63,20 +65,23 @@ public abstract class AbstractJsonFileDataSet extends AbstractJsonDataSet<JsonFi
 	}
 
 	@Override
-	protected JsonFileDataSetResource getResource(DataSetQuery query) throws Throwable
+	protected Reader getResourceReader(T resource) throws Throwable
 	{
-		FileResolvedInfo fileInfo = getJsonFile(query);
-
-		return new JsonFileDataSetResource(fileInfo.getResolvedTemplate(), getResultJsonRule(),
-				getEncoding(), fileInfo.getUri(), fileInfo.getLastModified());
+		File file = FileUtil.getFile(resource.getAbsolutePath());
+		return IOUtil.getReader(file, resource.getEncoding());
 	}
 
 	/**
-	 * 获取JSON文件。
+	 * 创建{@linkplain JsonFileDataSetResource}实例。
 	 * 
-	 * @param query
+	 * @param resolvedTemplate
+	 * @param file
 	 * @return
-	 * @throws Throwable
 	 */
-	protected abstract FileResolvedInfo getJsonFile(DataSetQuery query) throws Throwable;
+	protected JsonFileDataSetResource toJsonFileDataSetResource(String resolvedTemplate, File file)
+	{
+		JsonFileDataSetResource res = new JsonFileDataSetResource(resolvedTemplate, getResultJsonRule(),
+				file.getAbsolutePath(), getEncoding(), file.lastModified());
+		return res;
+	}
 }

@@ -21,9 +21,9 @@ import java.io.File;
 import java.util.List;
 
 import org.datagear.analysis.DataSet;
-import org.datagear.analysis.DataSetException;
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
+import org.datagear.analysis.support.datasetres.JsonFileDataSetResource;
 import org.datagear.util.FileUtil;
 
 /**
@@ -35,7 +35,7 @@ import org.datagear.util.FileUtil;
  * @author datagear@163.com
  *
  */
-public class JsonDirectoryFileDataSet extends AbstractJsonFileDataSet
+public class JsonDirectoryFileDataSet extends AbstractJsonFileDataSet<JsonFileDataSetResource>
 {
 	private static final long serialVersionUID = 1L;
 
@@ -86,9 +86,9 @@ public class JsonDirectoryFileDataSet extends AbstractJsonFileDataSet
 	}
 
 	@Override
-	protected FileResolvedInfo getJsonFile(DataSetQuery query) throws DataSetException
+	protected JsonFileDataSetResource getResource(DataSetQuery query) throws Throwable
 	{
 		File file = FileUtil.getFile(this.directory, this.fileName);
-		return new FileResolvedInfo(file, this.fileName);
+		return toJsonFileDataSetResource("", file);
 	}
 }

@@ -22,6 +22,7 @@ import java.util.List;
 
 import org.datagear.analysis.DataSetField;
 import org.datagear.analysis.DataSetQuery;
+import org.datagear.analysis.support.datasetres.CsvFileDataSetResource;
 
 /**
  * 简单CSV文件数据集。
@@ -32,7 +33,7 @@ import org.datagear.analysis.DataSetQuery;
  * @author datagear@163.com
  *
  */
-public class SimpleCsvFileDataSet extends AbstractCsvFileDataSet
+public class SimpleCsvFileDataSet extends AbstractCsvFileDataSet<CsvFileDataSetResource>
 {
 	private static final long serialVersionUID = 1L;
 
@@ -67,8 +68,8 @@ public class SimpleCsvFileDataSet extends AbstractCsvFileDataSet
 	}
 
 	@Override
-	protected FileResolvedInfo getCsvFile(DataSetQuery query) throws Throwable
+	protected CsvFileDataSetResource getResource(DataSetQuery query) throws Throwable
 	{
-		return new FileResolvedInfo(this.file);
+		return toCsvFileDataSetResource("", this.file);
 	}
 }

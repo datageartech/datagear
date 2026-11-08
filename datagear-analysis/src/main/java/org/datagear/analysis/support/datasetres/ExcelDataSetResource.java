@@ -17,7 +17,6 @@
 
 package org.datagear.analysis.support.datasetres;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -136,14 +135,6 @@ public abstract class ExcelDataSetResource extends DataSetResource
 		return sheet;
 	}
 	
-	/**
-	 * 获取Excel输入流。
-	 * 
-	 * @return
-	 * @throws Throwable
-	 */
-	public abstract InputStream getInputStream() throws Throwable;
-
 	/**
 	 * 是否名称行。
 	 * 
