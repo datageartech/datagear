@@ -47,10 +47,10 @@ public class FileSource extends AbstractStringIdEntity
 	/** 描述 */
 	private String description = "";
 
-	/** 此模式的创建用户 */
+	/** 创建用户 */
 	private User createUser;
 
-	/** 此模式的创建时间 */
+	/** 创建时间 */
 	private Date createTime = null;
 
 	/** 权限 */
