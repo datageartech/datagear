@@ -153,7 +153,7 @@ public class FileSourceController extends AbstractController
 
 	protected void setViewPageAttr(HttpServletRequest request, Model model, User user, FileSource entity)
 	{
-		boolean isShowDirectory = isShowDirectory(request, user);
+		boolean isShowDirectory = isShowDirectory(request, user, entity);
 		setIsShowDirectory(request, model, isShowDirectory);
 		
 		if(!isShowDirectory)
@@ -261,7 +261,7 @@ public class FileSourceController extends AbstractController
 		model.addAttribute("isShowDirectory", isShowDirectory);
 	}
 
-	protected boolean isShowDirectory(HttpServletRequest request, User user)
+	protected boolean isShowDirectory(HttpServletRequest request, User user, FileSource entity)
 	{
 		return user.isAdmin();
 	}
