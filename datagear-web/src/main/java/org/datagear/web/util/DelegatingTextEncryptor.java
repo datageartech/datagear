@@ -160,6 +160,9 @@ public class DelegatingTextEncryptor implements TextEncryptor
 	 * <p>
 	 * 对于{@code null}，将直接返回{@code null}；对于{@code ""}，将直接返回{@code ""}。
 	 * </p>
+	 * <p>
+	 * 注意：对于不识别的加密类型，将直接返回原始值。
+	 * </p>
 	 */
 	@Override
 	public String decrypt(String password)
@@ -180,7 +183,10 @@ public class DelegatingTextEncryptor implements TextEncryptor
 			password = password.substring(ENCRYPT_TYPE_PREFIX_STD.length());
 		}
 		else
-			throw new UnsupportedOperationException("Unsupported decryption");
+		{
+			// 没有任何加密类型标识的，应直接返回原始值
+			return password;
+		}
 
 		if (this.safeDecrypt)
 		{

@@ -64,6 +64,17 @@ public class DelegatingTextEncryptorTest
 			assertEquals(password, decrypt0);
 			assertEquals(password, decrypt1);
 		}
+
+		{
+			String encrypt = password;
+
+			String decrypt0 = encryptorNoop.decrypt(encrypt);
+			String decrypt1 = encryptorStd.decrypt(encrypt);
+
+			assertEquals(password, encrypt);
+			assertEquals(password, decrypt0);
+			assertEquals(password, decrypt1);
+		}
 	}
 
 	@Test
