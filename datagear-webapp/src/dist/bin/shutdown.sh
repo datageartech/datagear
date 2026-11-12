@@ -42,7 +42,7 @@ readAppPID
 
 if [ $DG_APP_PID -ne 0 ]; then
 	echo "$DG_ECHO_PREFIX stopping... (PID=$DG_APP_PID)"
-	kill -9 $DG_APP_PID
+	kill -15 $DG_APP_PID
 	if [ $? -eq 0 ]; then
 		echo "$DG_ECHO_PREFIX stop OK"
 	else
