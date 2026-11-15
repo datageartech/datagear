@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.management.domain.DtbsSourceGuard;
-import org.datagear.management.domain.DtbsSourceProperty;
 import org.datagear.management.domain.DtbsSourcePropertyPattern;
 import org.datagear.util.AsteriskPatternMatcher;
 import org.datagear.util.StringUtil;
@@ -120,6 +119,21 @@ public class DtbsSourceGuardChecker
 	 * 是否准许。
 	 * 
 	 * @param dtbsSourceGuards
+	 * @param guardEntityOrigin
+	 * @return
+	 * @throws DtbsSourceGuardEvalExpException
+	 */
+	public boolean isPermitted(List<DtbsSourceGuard> dtbsSourceGuards, GuardEntityOrigin guardEntityOrigin)
+			throws DtbsSourceGuardEvalExpException
+	{
+		GuardEntity guardEntity = guardEntityOrigin.toGuardEntity();
+		return isPermitted(dtbsSourceGuards, guardEntity);
+	}
+
+	/**
+	 * 是否准许。
+	 * 
+	 * @param dtbsSourceGuards
 	 * @param guardEntity
 	 * @return
 	 * @throws DtbsSourceGuardEvalExpException
@@ -210,7 +224,7 @@ public class DtbsSourceGuardChecker
 		List<DtbsSourcePropertyPattern> patterns = (dtbsSourceGuard.getPropertyPatterns() == null
 				? Collections.emptyList()
 				: dtbsSourceGuard.getPropertyPatterns());
-		List<DtbsSourceProperty> properties = (guardEntity.getProperties() == null ? Collections.emptyList()
+		List<GuardProperty> properties = (guardEntity.getProperties() == null ? Collections.emptyList()
 				: guardEntity.getProperties());
 
 		if (patterns.isEmpty())
@@ -240,10 +254,10 @@ public class DtbsSourceGuardChecker
 
 				boolean myMatches = false;
 
-				for (DtbsSourceProperty p : properties)
+				for (GuardProperty p : properties)
 				{
 					if (this.asteriskPatternMatcher.matches(namePattern, p.getName())
-							&& this.asteriskPatternMatcher.matches(valuePattern, p.getValue()))
+							&& this.asteriskPatternMatcher.matches(valuePattern, stringOfValue(p)))
 					{
 						myMatches = true;
 						break;
@@ -268,10 +282,10 @@ public class DtbsSourceGuardChecker
 
 				boolean myMatches = false;
 
-				for (DtbsSourceProperty p : properties)
+				for (GuardProperty p : properties)
 				{
 					if (this.asteriskPatternMatcher.matches(namePattern, p.getName())
-							&& this.asteriskPatternMatcher.matches(valuePattern, p.getValue()))
+							&& this.asteriskPatternMatcher.matches(valuePattern, stringOfValue(p)))
 					{
 						myMatches = true;
 						break;
@@ -288,5 +302,21 @@ public class DtbsSourceGuardChecker
 		{
 			return false;
 		}
+	}
+
+	protected String stringOfValue(GuardProperty guardProperty)
+	{
+		if (guardProperty == null)
+			return null;
+
+		Object value = guardProperty.getValue();
+
+		if (value == null)
+			return null;
+
+		if (value instanceof String)
+			return (String) value;
+		
+		return value.toString();
 	}
 }

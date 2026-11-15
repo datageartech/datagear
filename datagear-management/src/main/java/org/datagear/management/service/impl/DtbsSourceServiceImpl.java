@@ -28,7 +28,6 @@ import org.datagear.management.service.DtbsSourceGuardService;
 import org.datagear.management.service.DtbsSourceService;
 import org.datagear.management.service.PermissionDeniedException;
 import org.datagear.management.service.UserService;
-import org.datagear.management.util.GuardEntity;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.util.StringUtil;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -223,7 +222,7 @@ public class DtbsSourceServiceImpl extends AbstractMybatisDataPermissionEntitySe
 	 */
 	protected void checkSaveUrlPermission(User user, DtbsSource dtbsSource) throws SaveDtbsSourcePermissionDeniedException
 	{
-		if (this.dtbsSourceGuardService.isPermitted(user, new GuardEntity(dtbsSource)))
+		if (this.dtbsSourceGuardService.isPermitted(user, dtbsSource))
 			return;
 
 		throw new SaveDtbsSourcePermissionDeniedException();

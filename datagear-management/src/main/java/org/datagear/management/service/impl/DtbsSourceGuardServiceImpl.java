@@ -28,6 +28,7 @@ import org.datagear.management.domain.User;
 import org.datagear.management.service.DtbsSourceGuardService;
 import org.datagear.management.util.DtbsSourceGuardChecker;
 import org.datagear.management.util.GuardEntity;
+import org.datagear.management.util.GuardEntityOrigin;
 import org.datagear.management.util.Query;
 import org.datagear.management.util.dialect.MbSqlDialect;
 import org.datagear.util.LastModifiedService;
@@ -93,6 +94,12 @@ public class DtbsSourceGuardServiceImpl extends AbstractMybatisEntityService<Str
 	}
 
 	@Override
+	public boolean isPermitted(GuardEntityOrigin guardEntityOrigin)
+	{
+		return isPermitted(guardEntityOrigin.toGuardEntity());
+	}
+
+	@Override
 	public boolean isPermitted(GuardEntity guardEntity)
 	{
 		if (this.lastModifiedService.isModified(LAST_MODIFIED_NAME, this._dtbsSourceGuardsLastModified))
@@ -114,6 +121,12 @@ public class DtbsSourceGuardServiceImpl extends AbstractMybatisEntityService<Str
 			return true;
 
 		return this.isPermitted(guardEntity);
+	}
+
+	@Override
+	public boolean isPermitted(User user, GuardEntityOrigin guardEntityOrigin)
+	{
+		return isPermitted(user, guardEntityOrigin.toGuardEntity());
 	}
 
 	@Override

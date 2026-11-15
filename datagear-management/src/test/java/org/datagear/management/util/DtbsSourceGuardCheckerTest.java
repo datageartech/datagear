@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.datagear.management.domain.DtbsSourceGuard;
-import org.datagear.management.domain.DtbsSourceProperty;
 import org.datagear.management.domain.DtbsSourcePropertyPattern;
 import org.junit.Test;
 
@@ -39,9 +38,8 @@ public class DtbsSourceGuardCheckerTest
 {
 	private DtbsSourceGuardChecker dtbsSourceGuardChecker = new DtbsSourceGuardChecker();
 
-	private List<DtbsSourceProperty> dtbsSourceProperties = Arrays.asList(
-			new DtbsSourceProperty("firstProperty", "123"),
-			new DtbsSourceProperty("secondProperty", "456"));
+	private List<GuardProperty> dtbsSourceProperties = Arrays.asList(new GuardProperty("firstProperty", "123"),
+			new GuardProperty("secondProperty", "456"));
 
 	@Test
 	public void isPermittedTest()
@@ -168,7 +166,7 @@ public class DtbsSourceGuardCheckerTest
 
 			assertTrue(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards,
 					new GuardEntity("jdbc:mysql://192.168.1.2:3306/test", "root",
-							Arrays.asList(new DtbsSourceProperty("secondProperty", "456")))));
+							Arrays.asList(new GuardProperty("secondProperty", "456")))));
 		}
 
 		// 正则表达式，禁止连接URL或者连接属性名里包含"A-Z"、"a-z"的以'%'开头的URL编码值
@@ -187,7 +185,7 @@ public class DtbsSourceGuardCheckerTest
 
 			assertFalse(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards,
 					new GuardEntity("jdbc:mysql://192.168.1.1:3306/test", "root",
-							Arrays.asList(new DtbsSourceProperty("allowLoadLocal%63nfile", "true")))));
+							Arrays.asList(new GuardProperty("allowLoadLocal%63nfile", "true")))));
 
 			assertTrue(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards,
 					new GuardEntity("jdbc:mysql://192.168.1.1:3306/test?az=true", "root", dtbsSourceProperties)));
@@ -210,13 +208,13 @@ public class DtbsSourceGuardCheckerTest
 						new GuardEntity("ggg-abc-def", "root", dtbsSourceProperties)));
 
 				assertFalse(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards, new GuardEntity("aaa-%51-bbb",
-						"root", Arrays.asList(new DtbsSourceProperty("aaa-bbb", "true")))));
+						"root", Arrays.asList(new GuardProperty("aaa-bbb", "true")))));
 
 				assertFalse(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards, new GuardEntity("aaa-bbb", "root",
-						Arrays.asList(new DtbsSourceProperty("aaa-%51-bbb", "true")))));
+						Arrays.asList(new GuardProperty("aaa-%51-bbb", "true")))));
 
 				assertFalse(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards, new GuardEntity("aaa-%51-bbb",
-						"root", Arrays.asList(new DtbsSourceProperty("aaa-%51-bbb", "true")))));
+						"root", Arrays.asList(new GuardProperty("aaa-%51-bbb", "true")))));
 			}
 
 			{
@@ -227,13 +225,13 @@ public class DtbsSourceGuardCheckerTest
 						new GuardEntity("ggg-abc-def", "root", dtbsSourceProperties)));
 
 				assertTrue(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards, new GuardEntity("aaa-%51-bbb",
-						"root", Arrays.asList(new DtbsSourceProperty("aaa-bbb", "true")))));
+						"root", Arrays.asList(new GuardProperty("aaa-bbb", "true")))));
 
 				assertTrue(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards, new GuardEntity("aaa-bbb", "root",
-						Arrays.asList(new DtbsSourceProperty("aaa-%51-bbb", "true")))));
+						Arrays.asList(new GuardProperty("aaa-%51-bbb", "true")))));
 
 				assertFalse(this.dtbsSourceGuardChecker.isPermitted(dtbsSourceGuards, new GuardEntity("aaa-%51-bbb",
-						"root", Arrays.asList(new DtbsSourceProperty("aaa-%51-bbb", "true")))));
+						"root", Arrays.asList(new GuardProperty("aaa-%51-bbb", "true")))));
 			}
 		}
 	}
@@ -383,11 +381,11 @@ public class DtbsSourceGuardCheckerTest
 
 			assertTrue(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard,
 					new GuardEntity("", "",
-							Arrays.asList(new DtbsSourceProperty("firstProperty", "123"),
-									new DtbsSourceProperty("werwerw23", "123")))));
+							Arrays.asList(new GuardProperty("firstProperty", "123"),
+									new GuardProperty("werwerw23", "123")))));
 
 			assertTrue(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard, new GuardEntity("", "dg", Arrays
-					.asList(new DtbsSourceProperty("secondsProperty", "123"), new DtbsSourceProperty("werwerw23", "123")))));
+					.asList(new GuardProperty("secondsProperty", "123"), new GuardProperty("werwerw23", "123")))));
 		}
 		{
 			DtbsSourceGuard dtbsSourceGuard = new DtbsSourceGuard("1", "1", "*", "*", true);
@@ -400,7 +398,7 @@ public class DtbsSourceGuardCheckerTest
 
 			assertTrue(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard,
 					new GuardEntity("", "",
-							Arrays.asList(new DtbsSourceProperty("firstProperty", "123")))));
+							Arrays.asList(new GuardProperty("firstProperty", "123")))));
 		}
 
 		// 匹配所有属性名
@@ -414,10 +412,10 @@ public class DtbsSourceGuardCheckerTest
 					new GuardEntity("", "", dtbsSourceProperties)));
 
 			assertFalse(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard,
-					new GuardEntity("", "", Arrays.asList(new DtbsSourceProperty("firstProperty", "123")))));
+					new GuardEntity("", "", Arrays.asList(new GuardProperty("firstProperty", "123")))));
 
 			assertFalse(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard,
-					new GuardEntity("", "", Arrays.asList(new DtbsSourceProperty("secondProperty", "123")))));
+					new GuardEntity("", "", Arrays.asList(new GuardProperty("secondProperty", "123")))));
 		}
 
 		// 匹配属性名、属性值
@@ -427,13 +425,13 @@ public class DtbsSourceGuardCheckerTest
 					Arrays.asList(new DtbsSourcePropertyPattern("*first*", "root")));
 
 			assertTrue(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard,
-					new GuardEntity("", "", Arrays.asList(new DtbsSourceProperty("firstProperty", "root")))));
+					new GuardEntity("", "", Arrays.asList(new GuardProperty("firstProperty", "root")))));
 
 			assertFalse(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard,
 					new GuardEntity("", "", dtbsSourceProperties)));
 
 			assertFalse(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard,
-					new GuardEntity("", "", Arrays.asList(new DtbsSourceProperty("firstProperty", "123")))));
+					new GuardEntity("", "", Arrays.asList(new GuardProperty("firstProperty", "123")))));
 		}
 	}
 }
