@@ -31,7 +31,7 @@ import org.datagear.connection.DriverEntityManager;
 import org.datagear.management.domain.DtbsSource;
 import org.datagear.management.domain.User;
 import org.datagear.management.service.DtbsSourceGuardService;
-import org.datagear.management.service.impl.SaveDtbsSourcePermissionDeniedException;
+import org.datagear.management.service.impl.SaveDeniedByGuardException;
 import org.datagear.management.util.PagingQuery;
 import org.datagear.meta.Database;
 import org.datagear.meta.SimpleTable;
@@ -278,7 +278,7 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 		User user = getCurrentUser();
 
 		if (!this.dtbsSourceGuardService.isPermitted(user, entity))
-			throw new SaveDtbsSourcePermissionDeniedException();
+			throw new SaveDeniedByGuardException();
 
 		// 用户选定驱动程序时
 		if (!isEmpty(entity.getDriverEntity()) && !isEmpty(entity.getDriverEntity().getId()))

@@ -126,14 +126,14 @@ public class DtbsSourceServiceImpl extends AbstractMybatisDataPermissionEntitySe
 	@Override
 	public void add(User user, DtbsSource entity) throws PermissionDeniedException
 	{
-		checkSaveUrlPermission(user, entity);
+		checkSavePermission(user, entity);
 		super.add(user, entity);
 	}
 
 	@Override
 	public boolean update(User user, DtbsSource entity) throws PermissionDeniedException
 	{
-		checkSaveUrlPermission(user, entity);
+		checkSavePermission(user, entity);
 		return super.update(user, entity);
 	}
 
@@ -214,18 +214,18 @@ public class DtbsSourceServiceImpl extends AbstractMybatisDataPermissionEntitySe
 	}
 
 	/**
-	 * 校验用户是否有权保存指定URL的{@linkplain DtbsSource}。
+	 * 校验用户是否有权保存指定{@linkplain DtbsSource}。
 	 * 
 	 * @param user
 	 * @param url
-	 * @throws SaveDtbsSourcePermissionDeniedException
+	 * @throws SaveDeniedByGuardException
 	 */
-	protected void checkSaveUrlPermission(User user, DtbsSource dtbsSource) throws SaveDtbsSourcePermissionDeniedException
+	protected void checkSavePermission(User user, DtbsSource dtbsSource) throws SaveDeniedByGuardException
 	{
 		if (this.dtbsSourceGuardService.isPermitted(user, dtbsSource))
 			return;
 
-		throw new SaveDtbsSourcePermissionDeniedException();
+		throw new SaveDeniedByGuardException();
 	}
 
 	@Override

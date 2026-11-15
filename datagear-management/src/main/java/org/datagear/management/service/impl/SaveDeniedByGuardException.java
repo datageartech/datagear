@@ -17,35 +17,34 @@
 
 package org.datagear.management.service.impl;
 
-import org.datagear.management.domain.DtbsSource;
 import org.datagear.management.service.PermissionDeniedException;
 
 /**
- * 无权保存{@linkplain DtbsSource}异常。
+ * 保存因为系统防护功能被拒绝异常。
  * 
  * @author datagear@163.com
  *
  */
-public class SaveDtbsSourcePermissionDeniedException extends PermissionDeniedException
+public class SaveDeniedByGuardException extends PermissionDeniedException
 {
 	private static final long serialVersionUID = 1L;
 
-	public SaveDtbsSourcePermissionDeniedException()
+	public SaveDeniedByGuardException()
 	{
 		super();
 	}
 
-	public SaveDtbsSourcePermissionDeniedException(String message)
+	public SaveDeniedByGuardException(String message)
 	{
 		super(message);
 	}
 
-	public SaveDtbsSourcePermissionDeniedException(Throwable cause)
+	public SaveDeniedByGuardException(Throwable cause)
 	{
 		super(cause);
 	}
 
-	public SaveDtbsSourcePermissionDeniedException(String message, Throwable cause)
+	public SaveDeniedByGuardException(String message, Throwable cause)
 	{
 		super(message, cause);
 	}

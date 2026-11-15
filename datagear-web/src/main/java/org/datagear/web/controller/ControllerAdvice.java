@@ -49,7 +49,7 @@ import org.datagear.connection.URLNotAcceptedException;
 import org.datagear.connection.UnsupportedGetConnectionException;
 import org.datagear.management.service.DeleteBuiltinRoleDeniedException;
 import org.datagear.management.service.PermissionDeniedException;
-import org.datagear.management.service.impl.SaveDtbsSourcePermissionDeniedException;
+import org.datagear.management.service.impl.SaveDeniedByGuardException;
 import org.datagear.management.util.RefPermissionDeniedException;
 import org.datagear.meta.resolver.DBMetaResolverException;
 import org.datagear.meta.resolver.TableNotFoundException;
@@ -583,10 +583,10 @@ public class ControllerAdvice extends AbstractController
 		return getErrorView(request, response);
 	}
 
-	@ExceptionHandler(SaveDtbsSourcePermissionDeniedException.class)
+	@ExceptionHandler(SaveDeniedByGuardException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public String handleServiceSaveDtbsSourcePermissionDeniedException(HttpServletRequest request,
-			HttpServletResponse response, SaveDtbsSourcePermissionDeniedException exception)
+	public String handleServiceSaveDeniedByGuardException(HttpServletRequest request,
+			HttpServletResponse response, SaveDeniedByGuardException exception)
 	{
 		setOptMsgForThrowable(request, exception);
 		return getErrorView(request, response);
