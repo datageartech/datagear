@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
- * 防护属性。
+ * 防护数据源属性。
  * 
  * @author datagear@163.com
  *

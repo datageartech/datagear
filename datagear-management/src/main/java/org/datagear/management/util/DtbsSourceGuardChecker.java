@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.datagear.management.domain.DtbsSourceGuard;
-import org.datagear.management.domain.DtbsSourcePropertyPattern;
+import org.datagear.management.domain.GuardPropertyPattern;
 import org.datagear.util.AsteriskPatternMatcher;
 import org.datagear.util.StringUtil;
 import org.datagear.util.spel.BaseSpelExpressionParser;
@@ -221,7 +221,7 @@ public class DtbsSourceGuardChecker
 
 	protected boolean isPropertiesMatched(DtbsSourceGuard dtbsSourceGuard, GuardEntity guardEntity)
 	{
-		List<DtbsSourcePropertyPattern> patterns = (dtbsSourceGuard.getPropertyPatterns() == null
+		List<GuardPropertyPattern> patterns = (dtbsSourceGuard.getPropertyPatterns() == null
 				? Collections.emptyList()
 				: dtbsSourceGuard.getPropertyPatterns());
 		List<GuardProperty> properties = (guardEntity.getProperties() == null ? Collections.emptyList()
@@ -244,7 +244,7 @@ public class DtbsSourceGuardChecker
 
 		if (DtbsSourceGuard.PROPERTIES_MATCH_MODE_ANY.equalsIgnoreCase(pmm))
 		{
-			for (DtbsSourcePropertyPattern pattern : patterns)
+			for (GuardPropertyPattern pattern : patterns)
 			{
 				String namePattern = (StringUtil.isEmpty(pattern.getNamePattern()) ? AsteriskPatternMatcher.ALL_PATTERN
 						: pattern.getNamePattern());
@@ -272,7 +272,7 @@ public class DtbsSourceGuardChecker
 		}
 		else if (DtbsSourceGuard.PROPERTIES_MATCH_MODE_ALL.equalsIgnoreCase(pmm))
 		{
-			for (DtbsSourcePropertyPattern pattern : patterns)
+			for (GuardPropertyPattern pattern : patterns)
 			{
 				String namePattern = (StringUtil.isEmpty(pattern.getNamePattern()) ? AsteriskPatternMatcher.ALL_PATTERN
 						: pattern.getNamePattern());

@@ -25,7 +25,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.datagear.management.domain.DtbsSourceGuard;
-import org.datagear.management.domain.DtbsSourcePropertyPattern;
+import org.datagear.management.domain.GuardPropertyPattern;
 import org.junit.Test;
 
 /**
@@ -121,7 +121,7 @@ public class DtbsSourceGuardCheckerTest
 		// 仅禁止指定URL、且包含指定属性名
 		{
 			DtbsSourceGuard dtbsSourceGuard0 = new DtbsSourceGuard("1", "1", "*192.168.1.1*", false);
-			dtbsSourceGuard0.setPropertyPatterns(Arrays.asList(new DtbsSourcePropertyPattern("*first*")));
+			dtbsSourceGuard0.setPropertyPatterns(Arrays.asList(new GuardPropertyPattern("*first*")));
 
 			List<DtbsSourceGuard> dtbsSourceGuards = Arrays.asList( //
 					dtbsSourceGuard0, //
@@ -145,7 +145,7 @@ public class DtbsSourceGuardCheckerTest
 			DtbsSourceGuard dtbsSourceGuard0 = new DtbsSourceGuard("1", "1", "*192.168.1.1*", false);
 
 			DtbsSourceGuard dtbsSourceGuard1 = new DtbsSourceGuard("2", "2", "*", false);
-			dtbsSourceGuard1.setPropertyPatterns(Arrays.asList(new DtbsSourcePropertyPattern("*first*")));
+			dtbsSourceGuard1.setPropertyPatterns(Arrays.asList(new GuardPropertyPattern("*first*")));
 
 			List<DtbsSourceGuard> dtbsSourceGuards = Arrays.asList( //
 					dtbsSourceGuard0, //
@@ -176,7 +176,7 @@ public class DtbsSourceGuardCheckerTest
 
 			DtbsSourceGuard dtbsSourceGuard1 = new DtbsSourceGuard("2", "2", "*", false);
 			dtbsSourceGuard1.setPropertyPatterns(Arrays
-					.asList(new DtbsSourcePropertyPattern("regex:.*%(4[1-9A-Fa-f]|5[0-9Aa]|6[1-9A-Fa-f]|7[0-9Aa]).*")));
+					.asList(new GuardPropertyPattern("regex:.*%(4[1-9A-Fa-f]|5[0-9Aa]|6[1-9A-Fa-f]|7[0-9Aa]).*")));
 
 			List<DtbsSourceGuard> dtbsSourceGuards = Arrays.asList(dtbsSourceGuard0, dtbsSourceGuard1);
 
@@ -198,7 +198,7 @@ public class DtbsSourceGuardCheckerTest
 			DtbsSourceGuard dtbsSourceGuard1 = new DtbsSourceGuard("2", "2",
 					"regex:.*%(4[1-9A-Fa-f]|5[0-9Aa]|6[1-9A-Fa-f]|7[0-9Aa]).*", false);
 			dtbsSourceGuard1.setPropertyPatterns(Arrays
-					.asList(new DtbsSourcePropertyPattern("regex:.*%(4[1-9A-Fa-f]|5[0-9Aa]|6[1-9A-Fa-f]|7[0-9Aa]).*")));
+					.asList(new GuardPropertyPattern("regex:.*%(4[1-9A-Fa-f]|5[0-9Aa]|6[1-9A-Fa-f]|7[0-9Aa]).*")));
 
 			{
 				dtbsSourceGuard1.setEvalExp("(url || props) && user");
@@ -364,7 +364,7 @@ public class DtbsSourceGuardCheckerTest
 		// 目标属性列表为空
 		{
 			DtbsSourceGuard dtbsSourceGuard = new DtbsSourceGuard("1", "1", "*", "*", true);
-			dtbsSourceGuard.setPropertyPatterns(Arrays.asList(new DtbsSourcePropertyPattern("*first*")));
+			dtbsSourceGuard.setPropertyPatterns(Arrays.asList(new GuardPropertyPattern("*first*")));
 
 			assertFalse(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard,
 					new GuardEntity("", "")));
@@ -374,7 +374,7 @@ public class DtbsSourceGuardCheckerTest
 		{
 			DtbsSourceGuard dtbsSourceGuard = new DtbsSourceGuard("1", "1", "*", "*", true);
 			dtbsSourceGuard.setPropertyPatterns(
-					Arrays.asList(new DtbsSourcePropertyPattern("*first*"), new DtbsSourcePropertyPattern("*second*")));
+					Arrays.asList(new GuardPropertyPattern("*first*"), new GuardPropertyPattern("*second*")));
 
 			assertTrue(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard,
 					new GuardEntity("", "", dtbsSourceProperties)));
@@ -390,7 +390,7 @@ public class DtbsSourceGuardCheckerTest
 		{
 			DtbsSourceGuard dtbsSourceGuard = new DtbsSourceGuard("1", "1", "*", "*", true);
 			dtbsSourceGuard.setPropertyPatterns(
-					Arrays.asList(new DtbsSourcePropertyPattern("*first*"), new DtbsSourcePropertyPattern("*second*")));
+					Arrays.asList(new GuardPropertyPattern("*first*"), new GuardPropertyPattern("*second*")));
 			dtbsSourceGuard.setPropertiesMatchMode(DtbsSourceGuard.PROPERTIES_MATCH_MODE_ANY);
 
 			assertTrue(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard,
@@ -405,7 +405,7 @@ public class DtbsSourceGuardCheckerTest
 		{
 			DtbsSourceGuard dtbsSourceGuard = new DtbsSourceGuard("1", "1", "*", "*", true);
 			dtbsSourceGuard.setPropertyPatterns(
-					Arrays.asList(new DtbsSourcePropertyPattern("*first*"), new DtbsSourcePropertyPattern("*second*")));
+					Arrays.asList(new GuardPropertyPattern("*first*"), new GuardPropertyPattern("*second*")));
 			dtbsSourceGuard.setPropertiesMatchMode(DtbsSourceGuard.PROPERTIES_MATCH_MODE_ALL);
 
 			assertTrue(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard,
@@ -422,7 +422,7 @@ public class DtbsSourceGuardCheckerTest
 		{
 			DtbsSourceGuard dtbsSourceGuard = new DtbsSourceGuard("1", "1", "*", "*", true);
 			dtbsSourceGuard.setPropertyPatterns(
-					Arrays.asList(new DtbsSourcePropertyPattern("*first*", "root")));
+					Arrays.asList(new GuardPropertyPattern("*first*", "root")));
 
 			assertTrue(this.dtbsSourceGuardChecker.isPropertiesMatched(dtbsSourceGuard,
 					new GuardEntity("", "", Arrays.asList(new GuardProperty("firstProperty", "root")))));

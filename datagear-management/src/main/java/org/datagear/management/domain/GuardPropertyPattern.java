@@ -27,7 +27,7 @@ import org.springframework.lang.Nullable;
  * @author datagear@163.com
  *
  */
-public class DtbsSourcePropertyPattern implements Serializable
+public class GuardPropertyPattern implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -37,18 +37,18 @@ public class DtbsSourcePropertyPattern implements Serializable
 	/** 属性值匹配模式，{@code null}、{@code ""}匹配所有 */
 	private String valuePattern = "";
 
-	public DtbsSourcePropertyPattern()
+	public GuardPropertyPattern()
 	{
 		super();
 	}
 
-	public DtbsSourcePropertyPattern(String namePattern)
+	public GuardPropertyPattern(String namePattern)
 	{
 		super();
 		this.namePattern = namePattern;
 	}
 
-	public DtbsSourcePropertyPattern(String namePattern, String valuePattern)
+	public GuardPropertyPattern(String namePattern, String valuePattern)
 	{
 		super();
 		this.namePattern = namePattern;

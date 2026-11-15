@@ -56,7 +56,7 @@ public class DtbsSourceGuard extends AbstractStringIdEntity implements CreateTim
 	private String userPattern = "";
 
 	/** 连接属性匹配模式，{@code null}、空列表匹配所有 */
-	private List<DtbsSourcePropertyPattern> propertyPatterns = Collections.emptyList();
+	private List<GuardPropertyPattern> propertyPatterns = Collections.emptyList();
 
 	/**
 	 * 当{@linkplain #propertyPatterns}为空时，是否匹配任意连接属性，否则将仅匹配空连接属性。
@@ -166,12 +166,12 @@ public class DtbsSourceGuard extends AbstractStringIdEntity implements CreateTim
 	}
 
 	@Nullable
-	public List<DtbsSourcePropertyPattern> getPropertyPatterns()
+	public List<GuardPropertyPattern> getPropertyPatterns()
 	{
 		return propertyPatterns;
 	}
 
-	public void setPropertyPatterns(List<DtbsSourcePropertyPattern> propertyPatterns)
+	public void setPropertyPatterns(List<GuardPropertyPattern> propertyPatterns)
 	{
 		this.propertyPatterns = propertyPatterns;
 	}
@@ -275,7 +275,7 @@ public class DtbsSourceGuard extends AbstractStringIdEntity implements CreateTim
 		}
 		else
 		{
-			DtbsSourcePropertyPattern[] propertyPatterns = JsonSupport.parse(json, DtbsSourcePropertyPattern[].class, null);
+			GuardPropertyPattern[] propertyPatterns = JsonSupport.parse(json, GuardPropertyPattern[].class, null);
 			setPropertyPatterns(Arrays.asList(propertyPatterns));
 		}
 	}
