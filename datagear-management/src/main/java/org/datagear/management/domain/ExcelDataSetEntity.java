@@ -237,23 +237,30 @@ public class ExcelDataSetEntity extends AbstractExcelFileDataSet<ExcelFileDataSe
 	@Override
 	protected ExcelFileDataSetResource getResource(DataSetQuery query) throws Throwable
 	{
-		String sheetName = resolveTemplateSheetName(query);
-
 		if (FILE_SOURCE_TYPE_UPLOAD.equals(getFileSourceType()))
 		{
+			// 支持sheet名参数化
+			String sheetName = resolveTemplateSheetName(query);
 			File file = FileUtil.getFile(getDirectory(), getFileName());
 			return toExcelFileDataSetResource(sheetName, file, sheetName);
 		}
 		else if (FILE_SOURCE_TYPE_SERVER.equals(getFileSourceType()))
 		{
-			// 服务器端文件名允许参数化
-			String fileName = resolveTemplateFileName(getDataSetResFileName(), query);
-			File directory = FileUtil.getDirectory(getFileSource().getDirectory(), false);
-			File file = FileUtil.getFile(directory, fileName, false);
-			return toExcelFileDataSetResource("name: " + fileName + "\n" + "sheet: " + sheetName, file, sheetName);
+			return getResourceForFileSource(query);
 		}
 		else
 			throw new IllegalStateException("Unknown file source type :" + getFileSourceType());
+	}
+
+	protected ExcelFileDataSetResource getResourceForFileSource(DataSetQuery query) throws Throwable
+	{
+		// 支持sheet名参数化
+		String sheetName = resolveTemplateSheetName(query);
+		// 支持文件名参数化
+		String fileName = resolveTemplateFileName(getDataSetResFileName(), query);
+		File directory = FileUtil.getDirectory(getFileSource().getDirectory(), false);
+		File file = FileUtil.getFile(directory, fileName, false);
+		return toExcelFileDataSetResource("name: " + fileName + "\n" + "sheet: " + sheetName, file, sheetName);
 	}
 
 	@Override

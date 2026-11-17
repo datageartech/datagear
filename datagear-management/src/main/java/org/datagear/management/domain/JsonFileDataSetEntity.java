@@ -289,14 +289,20 @@ public class JsonFileDataSetEntity extends AbstractJsonFileDataSet<JsonFileDataS
 		}
 		else if (FILE_SOURCE_TYPE_SERVER.equals(getFileSourceType()))
 		{
-			// 服务器端文件名允许参数化
-			String fileName = resolveTemplateFileName(getDataSetResFileName(), query);
-			File directory = FileUtil.getDirectory(getFileSource().getDirectory(), false);
-			File file = FileUtil.getFile(directory, fileName, false);
-			return toJsonFileDataSetResource(fileName, file);
+			return getResourceForFileSource(query);
 		}
 		else
 			throw new IllegalStateException("Unknown file source type :" + getFileSourceType());
+	}
+
+	protected JsonFileDataSetResource getResourceForFileSource(DataSetQuery query) throws Throwable
+	{
+		// 支持文件名参数化
+		String fileName = resolveTemplateFileName(getDataSetResFileName(), query);
+		File directory = FileUtil.getDirectory(getFileSource().getDirectory(), false);
+		File file = FileUtil.getFile(directory, fileName, false);
+		return toJsonFileDataSetResource(fileName, file);
+
 	}
 
 	@Override
