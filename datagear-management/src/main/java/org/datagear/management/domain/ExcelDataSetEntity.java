@@ -254,10 +254,10 @@ public class ExcelDataSetEntity extends AbstractExcelFileDataSet<ExcelFileDataSe
 
 	protected ExcelFileDataSetResource getResourceForFileSource(DataSetQuery query) throws Throwable
 	{
-		// 支持sheet名参数化
-		String sheetName = resolveTemplateSheetName(query);
 		// 支持文件名参数化
 		String fileName = resolveTemplateFileName(getDataSetResFileName(), query);
+		// 支持sheet名参数化
+		String sheetName = resolveTemplateSheetName(query);
 		File directory = FileUtil.getDirectory(getFileSource().getDirectory(), false);
 		File file = FileUtil.getFile(directory, fileName, false);
 		return toExcelFileDataSetResource("name: " + fileName + "\n" + "sheet: " + sheetName, file, sheetName);

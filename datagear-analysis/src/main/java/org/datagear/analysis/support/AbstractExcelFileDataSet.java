@@ -73,10 +73,48 @@ public abstract class AbstractExcelFileDataSet<T extends ExcelFileDataSetResourc
 	 */
 	protected ExcelFileDataSetResource toExcelFileDataSetResource(String resolvedTemplate, File file, String sheetName)
 	{
-		ExcelFileDataSetResource res = new ExcelFileDataSetResource(resolvedTemplate, sheetName, getSheetIndex(),
-				getNameRow(), getDataRowExp(), getDataColumnExp(), (isForceXls() ? true : isXls(file.getName())),
-				file.getAbsolutePath(), file.lastModified());
+		return toExcelFileDataSetResource(resolvedTemplate, file.getAbsolutePath(), sheetName, file.lastModified());
+	}
+
+	/**
+	 * 创建{@linkplain ExcelFileDataSetResource}实例。
+	 * 
+	 * @param resolvedTemplate
+	 * @param absolutePath
+	 * @param sheetName
+	 * @param lastModified
+	 * @return
+	 */
+	protected ExcelFileDataSetResource toExcelFileDataSetResource(String resolvedTemplate, String absolutePath,
+			String sheetName, long lastModified)
+	{
+		ExcelFileDataSetResource res = new ExcelFileDataSetResource();
+		toExcelFileDataSetResource(res, resolvedTemplate, absolutePath, sheetName, lastModified);
 		return res;
+	}
+
+	/**
+	 * 填充{@linkplain ExcelFileDataSetResource}。
+	 * 
+	 * @param res
+	 * @param resolvedTemplate
+	 * @param absolutePath
+	 * @param sheetName
+	 * @param lastModified
+	 * @return
+	 */
+	protected void toExcelFileDataSetResource(ExcelFileDataSetResource res, String resolvedTemplate,
+			String absolutePath, String sheetName, long lastModified)
+	{
+		res.setResolvedTemplate(resolvedTemplate);
+		res.setSheetName(sheetName);
+		res.setSheetIndex(getSheetIndex());
+		res.setNameRow(getNameRow());
+		res.setDataRowExp(getDataRowExp());
+		res.setDataColumnExp(getDataColumnExp());
+		res.setXls(isForceXls() ? true : isXls(absolutePath));
+		res.setAbsolutePath(absolutePath);
+		res.setLastModified(lastModified);
 	}
 
 	protected String resolveTemplateSheetName(DataSetQuery query)

@@ -71,12 +71,9 @@ public abstract class ExcelDataSetResource extends DataSetResource
 		this.sheetName = sheetName;
 		this.sheetIndex = sheetIndex;
 		this.nameRow = nameRow;
-		this.dataRowExp = dataRowExp;
-		this.dataColumnExp = dataColumnExp;
+		setDataRowExp(dataRowExp);
+		setDataColumnExp(dataColumnExp);
 		this.xls = xls;
-
-		this._dataRowRanges = getRangeExpResolver().resolveIndex(this.dataRowExp);
-		this._dataColumnRanges = resolveDataColumnRanges(dataColumnExp);
 	}
 
 	public String getSheetName()
@@ -84,9 +81,19 @@ public abstract class ExcelDataSetResource extends DataSetResource
 		return sheetName;
 	}
 
+	public void setSheetName(String sheetName)
+	{
+		this.sheetName = sheetName;
+	}
+
 	public int getSheetIndex()
 	{
 		return sheetIndex;
+	}
+
+	public void setSheetIndex(int sheetIndex)
+	{
+		this.sheetIndex = sheetIndex;
 	}
 
 	public int getNameRow()
@@ -94,9 +101,20 @@ public abstract class ExcelDataSetResource extends DataSetResource
 		return nameRow;
 	}
 
+	public void setNameRow(int nameRow)
+	{
+		this.nameRow = nameRow;
+	}
+
 	public String getDataRowExp()
 	{
 		return dataRowExp;
+	}
+
+	public void setDataRowExp(String dataRowExp)
+	{
+		this.dataRowExp = dataRowExp;
+		this._dataRowRanges = getRangeExpResolver().resolveIndex(dataRowExp);
 	}
 
 	public String getDataColumnExp()
@@ -104,11 +122,22 @@ public abstract class ExcelDataSetResource extends DataSetResource
 		return dataColumnExp;
 	}
 
+	public void setDataColumnExp(String dataColumnExp)
+	{
+		this.dataColumnExp = dataColumnExp;
+		this._dataColumnRanges = resolveDataColumnRanges(dataColumnExp);
+	}
+
 	public boolean isXls()
 	{
 		return xls;
 	}
 	
+	public void setXls(boolean xls)
+	{
+		this.xls = xls;
+	}
+
 	/**
 	 * 获取数据所在工作表。
 	 * 

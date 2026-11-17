@@ -80,8 +80,40 @@ public abstract class AbstractCsvFileDataSet<T extends CsvFileDataSetResource> e
 	 */
 	protected CsvFileDataSetResource toCsvFileDataSetResource(String resolvedTemplate, File file)
 	{
-		CsvFileDataSetResource res = new CsvFileDataSetResource(resolvedTemplate, getNameRow(), file.getAbsolutePath(),
-				getEncoding(), file.lastModified());
+		return toCsvFileDataSetResource(resolvedTemplate, file.getAbsolutePath(), file.lastModified());
+	}
+
+	/**
+	 * 创建{@linkplain CsvFileDataSetResource}实例。
+	 * 
+	 * @param resolvedTemplate
+	 * @param absolutePath
+	 * @param lastModified
+	 * @return
+	 */
+	protected CsvFileDataSetResource toCsvFileDataSetResource(String resolvedTemplate, String absolutePath,
+			long lastModified)
+	{
+		CsvFileDataSetResource res = new CsvFileDataSetResource();
+		toCsvFileDataSetResource(res, resolvedTemplate, absolutePath, lastModified);
 		return res;
+	}
+
+	/**
+	 * 填充{@linkplain CsvFileDataSetResource}。
+	 * 
+	 * @param res
+	 * @param resolvedTemplate
+	 * @param absolutePath
+	 * @param lastModified
+	 */
+	protected void toCsvFileDataSetResource(CsvFileDataSetResource res, String resolvedTemplate, String absolutePath,
+			long lastModified)
+	{
+		res.setResolvedTemplate(resolvedTemplate);
+		res.setNameRow(getNameRow());
+		res.setAbsolutePath(absolutePath);
+		res.setEncoding(getEncoding());
+		res.setLastModified(lastModified);
 	}
 }

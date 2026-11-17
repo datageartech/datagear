@@ -80,8 +80,41 @@ public abstract class AbstractJsonFileDataSet<T extends JsonFileDataSetResource>
 	 */
 	protected JsonFileDataSetResource toJsonFileDataSetResource(String resolvedTemplate, File file)
 	{
-		JsonFileDataSetResource res = new JsonFileDataSetResource(resolvedTemplate, getResultJsonRule(),
-				file.getAbsolutePath(), getEncoding(), file.lastModified());
+		return toJsonFileDataSetResource(resolvedTemplate, file.getAbsolutePath(), file.lastModified());
+	}
+
+	/**
+	 * 创建{@linkplain JsonFileDataSetResource}实例。
+	 * 
+	 * @param resolvedTemplate
+	 * @param absolutePath
+	 * @param lastModified
+	 * @return
+	 */
+	protected JsonFileDataSetResource toJsonFileDataSetResource(String resolvedTemplate, String absolutePath,
+			long lastModified)
+	{
+		JsonFileDataSetResource res = new JsonFileDataSetResource();
+		toJsonFileDataSetResource(res, resolvedTemplate, absolutePath, lastModified);
 		return res;
+	}
+
+	/**
+	 * 创建{@linkplain JsonFileDataSetResource}。
+	 * 
+	 * @param res
+	 * @param resolvedTemplate
+	 * @param absolutePath
+	 * @param lastModified
+	 * @return
+	 */
+	protected void toJsonFileDataSetResource(JsonFileDataSetResource res, String resolvedTemplate, String absolutePath,
+			long lastModified)
+	{
+		res.setResolvedTemplate(resolvedTemplate);
+		res.setResultJsonRule(getResultJsonRule());
+		res.setAbsolutePath(absolutePath);
+		res.setEncoding(getEncoding());
+		res.setLastModified(lastModified);
 	}
 }

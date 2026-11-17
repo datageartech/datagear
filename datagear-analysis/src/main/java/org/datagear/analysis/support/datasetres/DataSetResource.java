@@ -74,6 +74,11 @@ public abstract class DataSetResource implements CommonCacheKey
 		return resolvedTemplate;
 	}
 
+	public void setResolvedTemplate(String resolvedTemplate)
+	{
+		this.resolvedTemplate = resolvedTemplate;
+	}
+
 	/**
 	 * 是否是幂等的，即：相等{@linkplain DataSetResource}的{@linkplain #getResource()}表示的数据也是相等的。
 	 * 
