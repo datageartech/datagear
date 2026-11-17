@@ -20,6 +20,9 @@ package org.datagear.analysis;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * {@linkplain DashboardQuery}处理器。
  * 
@@ -28,6 +31,8 @@ import java.util.Map;
  */
 public abstract class DashboardQueryHandler
 {
+	protected static final Logger LOGGER = LoggerFactory.getLogger(DashboardQueryHandler.class);
+
 	public DashboardQueryHandler()
 	{
 		super();
@@ -76,6 +81,9 @@ public abstract class DashboardQueryHandler
 				catch (Throwable t)
 				{
 					chartResultErrors.put(chartId, new ChartResultError(t));
+
+					if (LOGGER.isDebugEnabled())
+						LOGGER.debug("Get chart result error", t);
 				}
 			}
 			else
