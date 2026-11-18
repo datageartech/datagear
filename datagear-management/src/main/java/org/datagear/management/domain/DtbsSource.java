@@ -24,7 +24,6 @@ import java.util.List;
 import org.datagear.analysis.support.JsonSupport;
 import org.datagear.connection.DriverEntity;
 import org.datagear.management.util.GuardEntity;
-import org.datagear.management.util.GuardEntityOrigin;
 import org.datagear.management.util.GuardProperty;
 import org.datagear.util.StringUtil;
 import org.springframework.beans.BeanUtils;
@@ -38,7 +37,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  *
  */
 public class DtbsSource extends AbstractStringIdEntity
-		implements CreateUserEntity, DataPermissionEntity, CloneableEntity, GuardEntityOrigin
+		implements CreateUserEntity, DataPermissionEntity, CloneableEntity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -276,7 +275,11 @@ public class DtbsSource extends AbstractStringIdEntity
 		return entity;
 	}
 
-	@Override
+	/**
+	 * 转换为{@linkplain GuardEntity}。
+	 * 
+	 * @return
+	 */
 	public GuardEntity toGuardEntity()
 	{
 		GuardEntity ge = new GuardEntity(getUrl(), getUser());

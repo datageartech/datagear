@@ -277,7 +277,7 @@ public class DtbsSourceController extends AbstractDtbsSourceConnTableController
 
 		User user = getCurrentUser();
 
-		if (!this.dtbsSourceGuardService.isPermitted(user, entity))
+		if (!this.dtbsSourceGuardService.isPermitted(user, entity.toGuardEntity()))
 			throw new SaveDeniedByGuardException();
 
 		// 用户选定驱动程序时

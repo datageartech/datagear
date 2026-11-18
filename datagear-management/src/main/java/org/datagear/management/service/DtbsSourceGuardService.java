@@ -20,7 +20,6 @@ package org.datagear.management.service;
 import org.datagear.management.domain.DtbsSourceGuard;
 import org.datagear.management.domain.User;
 import org.datagear.management.util.GuardEntity;
-import org.datagear.management.util.GuardEntityOrigin;
 
 /**
  * {@linkplain DtbsSourceGuard}业务服务接口。
@@ -42,17 +41,6 @@ public interface DtbsSourceGuardService extends EntityService<String, DtbsSource
 	boolean isPermitted(GuardEntity guardEntity);
 
 	/**
-	 * 是否允许创建指定的{@linkplain GuardEntityOrigin}。
-	 * <p>
-	 * 如果没有定义任何{@linkplain DtbsSourceGuard}，应返回{@code true}。
-	 * </p>
-	 * 
-	 * @param guardEntityOrigin
-	 * @return
-	 */
-	boolean isPermitted(GuardEntityOrigin guardEntityOrigin);
-
-	/**
 	 * 是否允许创建指定的{@linkplain GuardEntity}。
 	 * <p>
 	 * 如果没有定义任何{@linkplain DtbsSourceGuard}，应返回{@code true}。
@@ -63,16 +51,4 @@ public interface DtbsSourceGuardService extends EntityService<String, DtbsSource
 	 * @return
 	 */
 	boolean isPermitted(User user, GuardEntity guardEntity);
-
-	/**
-	 * 是否允许创建指定的{@linkplain GuardEntityOrigin}。
-	 * <p>
-	 * 如果没有定义任何{@linkplain DtbsSourceGuard}，应返回{@code true}。
-	 * </p>
-	 * 
-	 * @param user
-	 * @param guardEntityOrigin
-	 * @return
-	 */
-	boolean isPermitted(User user, GuardEntityOrigin guardEntityOrigin);
 }

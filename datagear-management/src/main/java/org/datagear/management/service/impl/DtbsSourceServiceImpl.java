@@ -222,7 +222,7 @@ public class DtbsSourceServiceImpl extends AbstractMybatisDataPermissionEntitySe
 	 */
 	protected void checkSavePermission(User user, DtbsSource dtbsSource) throws SaveDeniedByGuardException
 	{
-		if (this.dtbsSourceGuardService.isPermitted(user, dtbsSource))
+		if (this.dtbsSourceGuardService.isPermitted(user, dtbsSource.toGuardEntity()))
 			return;
 
 		throw new SaveDeniedByGuardException();

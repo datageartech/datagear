@@ -119,21 +119,6 @@ public class DtbsSourceGuardChecker
 	 * 是否准许。
 	 * 
 	 * @param dtbsSourceGuards
-	 * @param guardEntityOrigin
-	 * @return
-	 * @throws DtbsSourceGuardEvalExpException
-	 */
-	public boolean isPermitted(List<DtbsSourceGuard> dtbsSourceGuards, GuardEntityOrigin guardEntityOrigin)
-			throws DtbsSourceGuardEvalExpException
-	{
-		GuardEntity guardEntity = guardEntityOrigin.toGuardEntity();
-		return isPermitted(dtbsSourceGuards, guardEntity);
-	}
-
-	/**
-	 * 是否准许。
-	 * 
-	 * @param dtbsSourceGuards
 	 * @param guardEntity
 	 * @return
 	 * @throws DtbsSourceGuardEvalExpException
