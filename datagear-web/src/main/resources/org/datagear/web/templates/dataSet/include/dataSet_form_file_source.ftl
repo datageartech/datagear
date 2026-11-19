@@ -58,7 +58,7 @@
 <div class="field grid" v-if="fm.fileSourceType == '${DirectoryFileDataSetEntity.FILE_SOURCE_TYPE_SERVER}'">
 	<label for="${pid}fileSource" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 		title="<@spring.message code='dataSet.directoryOnServer.desc' />">
-		<@spring.message code='directoryOnServer' />
+		<@spring.message code='fileSource' />
 	</label>
        <div class="field-input col-12 md:col-9">
        	<div class="p-inputgroup">
@@ -78,7 +78,7 @@
 <div class="field grid" v-if="fm.fileSourceType == '${DirectoryFileDataSetEntity.FILE_SOURCE_TYPE_SERVER}'">
 	<label for="${pid}dataSetResFileName" class="field-label col-12 mb-2 md:col-3 md:mb-0"
 		title="<@spring.message code='dataSet.fileInDirectory.desc' />">
-		<@spring.message code='fileInDirectory' />
+		<@spring.message code='file' />
 	</label>
        <div class="field-input col-12 md:col-9">
        	<div class="p-inputgroup">

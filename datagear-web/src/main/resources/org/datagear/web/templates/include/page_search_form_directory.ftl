@@ -23,7 +23,7 @@
 <#assign DirectoryQuery=statics['org.datagear.util.dirquery.DirectoryQuery']>
 <form id="${pid}searchForm" @submit.prevent="onSearchFormSubmit" class="py-1">
 	<div class="p-inputgroup">
-		<p-inputtext type="text" v-model="pm.searchForm.keyword" maxlength="100"></p-inputtext>
+		<p-inputtext type="text" v-model="pm.searchForm.keyword" maxlength="100" :placeholder="pm.keywordInputPlaceholder"></p-inputtext>
 		<p-button type="button" :label="pm.dirQueryRangeLabel"
 			 aria-haspopup="true" aria-controls="${pid}dirQueryRangeMenu"
 			@click="onToggleDirQueryRangeMenu">
@@ -35,6 +35,9 @@
 <script>
 (function(po)
 {
+	po.keywordInputPlaceholderForChildren = "";
+	po.keywordInputPlaceholderForDescendant = "<@spring.message code='pleaseInputSearchKeyword' />";
+	
 	po.search = function(formData){ /*需实现*/ };
 	
 	//整合page_directory_breadcrumb.ftl功能
@@ -82,6 +85,7 @@
 	{
 		searchForm: { keyword: "", "queryRange": "${DirectoryQuery.QUERY_RANGE_CHILDREN}" },
 		dirQueryRangeLabel: "<@spring.message code='selfLevel' />",
+		keywordInputPlaceholder: "",
 		dirQueryRangeMenuItems:
 		[
 			{
@@ -89,6 +93,8 @@
 				value: "${DirectoryQuery.QUERY_RANGE_CHILDREN}",
 				command: function(e)
 				{
+					var pm = po.vuePageModel();
+					pm.keywordInputPlaceholder = po.keywordInputPlaceholderForChildren;
 					po.updateDirQueryRangeForMenuItem(e.item);
 					po.submitSearchForm();
 				}
@@ -98,6 +104,8 @@
 				value: "${DirectoryQuery.QUERY_RANGE_DESCENDANT}",
 				command: function(e)
 				{
+					var pm = po.vuePageModel();
+					pm.keywordInputPlaceholder = po.keywordInputPlaceholderForDescendant;
 					po.updateDirQueryRangeForMenuItem(e.item);
 					po.submitSearchForm();
 				}

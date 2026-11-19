@@ -39,9 +39,14 @@ public class DirectoryQuerySupport
 {
 	private File directory;
 
+	/** 查询结果是否包含文件长度信息 */
 	private boolean queryFileLength = true;
 
+	/** 查询结果是否包含最新修改时间信息 */
 	private boolean queryFileLastModified = true;
+
+	/** 当是全级查询时，是否必须输入查询关键字 */
+	private boolean needKeywordForDescendant = true;
 
 	private AsteriskPatternMatcher asteriskPatternMatcher = new AsteriskPatternMatcher(true);
 
@@ -84,6 +89,16 @@ public class DirectoryQuerySupport
 	public void setQueryFileLastModified(boolean queryFileLastModified)
 	{
 		this.queryFileLastModified = queryFileLastModified;
+	}
+
+	public boolean isNeedKeywordForDescendant()
+	{
+		return needKeywordForDescendant;
+	}
+
+	public void setNeedKeywordForDescendant(boolean needKeywordForDescendant)
+	{
+		this.needKeywordForDescendant = needKeywordForDescendant;
 	}
 
 	public AsteriskPatternMatcher getAsteriskPatternMatcher()
@@ -206,6 +221,9 @@ public class DirectoryQuerySupport
 	protected void searchInDirectory(File directory, String keyword, boolean descendent, boolean onlyDirectory,
 			List<File> result)
 	{
+		if (descendent && isNeedKeywordForDescendant() && StringUtil.isEmpty(keyword))
+			return;
+
 		File[] children = directory.listFiles();
 		
 		if(children == null)
