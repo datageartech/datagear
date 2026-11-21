@@ -3,10 +3,11 @@
 	ConcurrentChartPluginManager的读取接口内部应首先根据最新更新时间刷新数据；
 	看板的本地图表里可以通过ID直接引入数据集，并加载其数据；
 	Excel/CSV/JSON文件数据集支持上传和管理多个文件；
+	图表定义页面可以设置数据标记根字段，根数据JSON路径；
+	图表插件前端项目调试支持图表配置表单；
 	
 待定：
 	
-	图表插件前端项目调试支持图表配置表单；
 	看板页面端运行环境添加dashboardRuntime开放API变量，添加registerMap()、registerLib()、registerLibStore()函数；
 	图表联动添加【回退】默认工具按钮，恢复联动目标图表上一次的参数状态；
 	看板可视编辑模式绝对/相对定位元素可拖拽；
