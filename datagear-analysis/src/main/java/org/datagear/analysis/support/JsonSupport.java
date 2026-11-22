@@ -38,6 +38,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  */
 public class JsonSupport
 {
+	/** 空数组JSON：<code>"[]"</code> */
+	public static final String EMPTY_JSON_ARRAY = "[]";
+
+	/** 空对象JSON：<code>"{}"</code> */
+	public static final String EMPTY_JSON_OBJECT = "{}";
+
 	private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 	private static final ObjectMapper OBJECT_MAPPER_NON_STARDAND = new ObjectMapper();
 	static
