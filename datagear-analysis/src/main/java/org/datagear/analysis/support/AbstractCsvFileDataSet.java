@@ -65,10 +65,11 @@ public abstract class AbstractCsvFileDataSet<T extends CsvFileDataSetResource> e
 	}
 
 	@Override
-	protected Reader getResourceReader(CsvFileDataSetResource resource) throws Throwable
+	protected CloseableHolder<Reader> getResourceReader(CsvFileDataSetResource resource) throws Throwable
 	{
 		File file = FileUtil.getFile(resource.getAbsolutePath());
-		return IOUtil.getReader(file, resource.getEncoding());
+		CloseableHolder<Reader> re = new CloseableHolder<Reader>(IOUtil.getReader(file, resource.getEncoding()));
+		return re;
 	}
 
 	/**

@@ -65,10 +65,11 @@ public abstract class AbstractJsonFileDataSet<T extends JsonFileDataSetResource>
 	}
 
 	@Override
-	protected Reader getResourceReader(T resource) throws Throwable
+	protected CloseableHolder<Reader> getResourceReader(T resource) throws Throwable
 	{
 		File file = FileUtil.getFile(resource.getAbsolutePath());
-		return IOUtil.getReader(file, resource.getEncoding());
+		CloseableHolder<Reader> re = new CloseableHolder<Reader>(IOUtil.getReader(file, resource.getEncoding()));
+		return re;
 	}
 
 	/**

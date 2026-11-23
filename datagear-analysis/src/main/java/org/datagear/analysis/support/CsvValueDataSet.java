@@ -95,8 +95,8 @@ public class CsvValueDataSet extends AbstractCsvDataSet<CsvValueDataSetResource>
 	}
 
 	@Override
-	protected Reader getResourceReader(CsvValueDataSetResource resource) throws Throwable
+	protected CloseableHolder<Reader> getResourceReader(CsvValueDataSetResource resource) throws Throwable
 	{
-		return IOUtil.getReader(resource.getResolvedTemplate());
+		return new CloseableHolder<Reader>(IOUtil.getReader(resource.getResolvedTemplate()));
 	}
 }

@@ -57,10 +57,11 @@ public abstract class AbstractExcelFileDataSet<T extends ExcelFileDataSetResourc
 	}
 
 	@Override
-	protected InputStream getResourceInputStream(T resource) throws Throwable
+	protected CloseableHolder<InputStream> getResourceInputStream(T resource) throws Throwable
 	{
 		File file = FileUtil.getFile(resource.getAbsolutePath());
-		return IOUtil.getInputStream(file);
+		CloseableHolder<InputStream> re = new CloseableHolder<InputStream>(IOUtil.getInputStream(file));
+		return re;
 	}
 
 	/**

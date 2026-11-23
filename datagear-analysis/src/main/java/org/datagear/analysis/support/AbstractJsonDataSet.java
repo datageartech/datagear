@@ -79,12 +79,12 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 	@Override
 	protected ResourceResult resolveResourceResult(T resource, boolean resolveFields) throws Throwable
 	{
-		Reader reader = null;
+		CloseableHolder<Reader> readerHolder = null;
 
 		try
 		{
-			reader = getResourceReader(resource);
-			DataSetResult result = resolveSourceResult(resource, reader);
+			readerHolder = getResourceReader(resource);
+			DataSetResult result = resolveSourceResult(resource, readerHolder.getCloseable());
 			List<DataSetField> fields = null;
 
 			if (resolveFields)
@@ -94,7 +94,7 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 		}
 		finally
 		{
-			IOUtil.close(reader);
+			IOUtil.close(readerHolder);
 		}
 	}
 
@@ -105,7 +105,7 @@ public abstract class AbstractJsonDataSet<T extends JsonDataSetResource> extends
 	 * @return
 	 * @throws Throwable
 	 */
-	protected abstract Reader getResourceReader(T resource) throws Throwable;
+	protected abstract CloseableHolder<Reader> getResourceReader(T resource) throws Throwable;
 
 	/**
 	 * 解析JSON源结果。

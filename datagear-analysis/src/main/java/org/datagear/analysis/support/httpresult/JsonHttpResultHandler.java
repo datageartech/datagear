@@ -27,6 +27,7 @@ import org.datagear.analysis.DataSetQuery;
 import org.datagear.analysis.DataSetResult;
 import org.datagear.analysis.ResolvedDataSetResult;
 import org.datagear.analysis.support.AbstractJsonDataSet;
+import org.datagear.analysis.support.CloseableHolder;
 import org.datagear.analysis.support.HttpDataSet;
 import org.datagear.analysis.support.ResultJsonRule;
 import org.datagear.analysis.support.datasetres.JsonDataSetResource;
@@ -102,9 +103,9 @@ public class JsonHttpResultHandler extends AbstractHttpResultHandler
 		}
 
 		@Override
-		protected Reader getResourceReader(HttpResponseJsonDataSetResource resource) throws Throwable
+		protected CloseableHolder<Reader> getResourceReader(HttpResponseJsonDataSetResource resource) throws Throwable
 		{
-			return resource.getJsonReader();
+			return new CloseableHolder<Reader>(resource.getJsonReader());
 		}
 	}
 

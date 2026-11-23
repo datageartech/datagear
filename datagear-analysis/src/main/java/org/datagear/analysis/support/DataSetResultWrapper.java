@@ -284,7 +284,8 @@ public class DataSetResultWrapper implements ResultJsonRuleAware
 	{
 		private static final long serialVersionUID = 1L;
 
-		private static final Reader PLACEHOLDER_READER = new StringReader("");
+		private static final CloseableHolder<Reader> PLACEHOLDER_READER = new CloseableHolder<Reader>(
+				new StringReader(""));
 		
 		private final Object data;
 
@@ -318,7 +319,7 @@ public class DataSetResultWrapper implements ResultJsonRuleAware
 		}
 
 		@Override
-		protected Reader getResourceReader(InternalJsonDataSetResource resource) throws Throwable
+		protected CloseableHolder<Reader> getResourceReader(InternalJsonDataSetResource resource) throws Throwable
 		{
 			return PLACEHOLDER_READER;
 		}

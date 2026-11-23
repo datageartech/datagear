@@ -102,15 +102,13 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 	@Override
 	protected ResourceResult resolveResourceResult(T resource, boolean resolveFields) throws Throwable
 	{
-		Reader reader = null;
+		CloseableHolder<Reader> readerHolder = null;
 
 		try
 		{
-			reader = getResourceReader(resource);
-
-			CSVParser csvParser = buildCSVParser(reader);
+			readerHolder = getResourceReader(resource);
+			CSVParser csvParser = buildCSVParser(readerHolder.getCloseable());
 			List<CSVRecord> csvRecords = csvParser.getRecords();
-
 			List<String> fieldNames = resolveFieldNames(resource, csvRecords);
 			List<Map<String, String>> data = resolveData(resource, fieldNames, csvRecords);
 
@@ -123,7 +121,7 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 		}
 		finally
 		{
-			IOUtil.close(reader);
+			IOUtil.close(readerHolder);
 		}
 	}
 
@@ -134,7 +132,7 @@ public abstract class AbstractCsvDataSet<T extends CsvDataSetResource> extends A
 	 * @return
 	 * @throws Throwable
 	 */
-	protected abstract Reader getResourceReader(T resource) throws Throwable;
+	protected abstract CloseableHolder<Reader> getResourceReader(T resource) throws Throwable;
 
 	/**
 	 * 解析字段名。

@@ -260,14 +260,14 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 	 */
 	protected ResourceResult resolveResourceResultForXls(T resource, boolean resolveFields) throws Throwable
 	{
-		InputStream in = null;
+		CloseableHolder<InputStream> inHolder = null;
 		POIFSFileSystem poifs = null;
 		HSSFWorkbook wb = null;
 
 		try
 		{
-			in = getResourceInputStream(resource);
-			poifs = new POIFSFileSystem(in);
+			inHolder = getResourceInputStream(resource);
+			poifs = new POIFSFileSystem(inHolder.getCloseable());
 			wb = new HSSFWorkbook(poifs.getRoot(), true);
 			Sheet sheet = resource.getDataSheet(wb);
 
@@ -281,7 +281,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 		{
 			IOUtil.close(wb);
 			IOUtil.close(poifs);
-			IOUtil.close(in);
+			IOUtil.close(inHolder);
 		}
 	}
 
@@ -294,14 +294,14 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 	 */
 	protected ResourceResult resolveResourceResultForXlsx(T resource, boolean resolveFields) throws Throwable
 	{
-		InputStream in = null;
+		CloseableHolder<InputStream> inHolder = null;
 		OPCPackage pkg = null;
 		XSSFWorkbook wb = null;
 
 		try
 		{
-			in = getResourceInputStream(resource);
-			pkg = OPCPackage.open(in);
+			inHolder = getResourceInputStream(resource);
+			pkg = OPCPackage.open(inHolder.getCloseable());
 			wb = new XSSFWorkbook(pkg);
 			Sheet sheet = resource.getDataSheet(wb);
 
@@ -315,7 +315,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 		{
 			IOUtil.close(wb);
 			IOUtil.close(pkg);
-			IOUtil.close(in);
+			IOUtil.close(inHolder);
 		}
 	}
 	
@@ -326,7 +326,7 @@ public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> exten
 	 * @return
 	 * @throws Throwable
 	 */
-	protected abstract InputStream getResourceInputStream(T resource) throws Throwable;
+	protected abstract CloseableHolder<InputStream> getResourceInputStream(T resource) throws Throwable;
 
 	/**
 	 * 解析sheet数据。

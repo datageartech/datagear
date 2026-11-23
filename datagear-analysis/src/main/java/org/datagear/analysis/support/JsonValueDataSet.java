@@ -83,8 +83,8 @@ public class JsonValueDataSet extends AbstractJsonDataSet<JsonValueDataSetResour
 	}
 
 	@Override
-	protected Reader getResourceReader(JsonValueDataSetResource resource) throws Throwable
+	protected CloseableHolder<Reader> getResourceReader(JsonValueDataSetResource resource) throws Throwable
 	{
-		return IOUtil.getReader(resource.getResolvedTemplate());
+		return new CloseableHolder<Reader>(IOUtil.getReader(resource.getResolvedTemplate()));
 	}
 }
