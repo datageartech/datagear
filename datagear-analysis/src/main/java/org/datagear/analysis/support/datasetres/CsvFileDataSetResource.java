@@ -126,8 +126,7 @@ public class CsvFileDataSetResource extends CsvDataSetResource
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [absolutePath=" + absolutePath + ", encoding=" + encoding
-				+ ", lastModified=" + lastModified + ", nameRow=" + getNameRow() + ", resolvedTemplate="
-				+ getResolvedTemplate() + "]";
+		return super.toString() + ", [absolutePath=" + absolutePath + ", encoding=" + encoding + ", lastModified="
+				+ lastModified + "]";
 	}
 }

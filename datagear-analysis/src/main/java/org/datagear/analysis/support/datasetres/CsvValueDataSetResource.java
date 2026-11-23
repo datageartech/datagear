@@ -64,7 +64,6 @@ public class CsvValueDataSetResource extends CsvDataSetResource
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [nameRow=" + getNameRow() + ", resolvedTemplate="
-				+ getResolvedTemplate() + "]";
+		return super.toString();
 	}
 }

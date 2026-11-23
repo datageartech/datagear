@@ -98,4 +98,10 @@ public abstract class CsvDataSetResource extends DataSetResource
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString()
+	{
+		return super.toString() + ", [nameRow=" + nameRow + "]";
+	}
 }

@@ -66,7 +66,7 @@ public class JsonValueDataSetResource extends JsonDataSetResource
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [resolvedTemplate="
-				+ getResolvedTemplate() + ", resultJsonRule=" + getResultJsonRule() + "]";
+		return super.toString();
 	}
+
 }

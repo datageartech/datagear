@@ -308,4 +308,11 @@ public abstract class ExcelDataSetResource extends DataSetResource
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString()
+	{
+		return super.toString() + ", [sheetName=" + sheetName + ", sheetIndex=" + sheetIndex + ", nameRow=" + nameRow
+				+ ", dataRowExp=" + dataRowExp + ", dataColumnExp=" + dataColumnExp + ", xls=" + xls + "]";
+	}
 }

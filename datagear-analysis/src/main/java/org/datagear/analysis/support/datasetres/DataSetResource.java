@@ -139,4 +139,10 @@ public abstract class DataSetResource implements CommonCacheKey
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString()
+	{
+		return getClass().getSimpleName() + " [resolvedTemplate=" + resolvedTemplate + "]";
+	}
 }

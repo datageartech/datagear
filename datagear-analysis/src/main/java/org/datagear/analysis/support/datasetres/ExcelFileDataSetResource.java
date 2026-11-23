@@ -105,9 +105,6 @@ public class ExcelFileDataSetResource extends ExcelDataSetResource
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [absolutePath=" + absolutePath + ", lastModified=" + lastModified
-				+ ", sheetName=" + getSheetName() + ", sheetIndex=" + getSheetIndex() + ", nameRow=" + getNameRow()
-				+ ", dataRowExp=" + getDataRowExp() + ", dataColumnExp=" + getDataColumnExp() + ", xls=" + isXls()
-				+ ", resolvedTemplate=" + getResolvedTemplate() + "]";
+		return super.toString() + ", [absolutePath=" + absolutePath + ", lastModified=" + lastModified + "]";
 	}
 }

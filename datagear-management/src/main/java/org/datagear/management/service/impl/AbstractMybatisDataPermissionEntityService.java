@@ -683,8 +683,7 @@ public abstract class AbstractMybatisDataPermissionEntityService<ID, T extends D
 		@Override
 		public String toString()
 		{
-			return getClass().getSimpleName() + " [namespace=" + getNamespace() + ", id=" + getId() + ", userId="
-					+ getUserId() + "]";
+			return super.toString() + ", [userId=" + userId + "]";
 		}
 	}
 }

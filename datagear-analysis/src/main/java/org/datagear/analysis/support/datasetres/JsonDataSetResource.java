@@ -85,4 +85,10 @@ public abstract class JsonDataSetResource extends DataSetResource
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString()
+	{
+		return super.toString() + ", [resultJsonRule=" + resultJsonRule + "]";
+	}
 }

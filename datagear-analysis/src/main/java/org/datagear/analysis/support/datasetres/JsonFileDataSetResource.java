@@ -128,8 +128,7 @@ public class JsonFileDataSetResource extends JsonDataSetResource
 	@Override
 	public String toString()
 	{
-		return getClass().getSimpleName() + " [absolutePath=" + absolutePath + ", encoding=" + encoding
-				+ ", lastModified=" + lastModified + ", resultJsonRule=" + getResultJsonRule() + ", resolvedTemplate="
-				+ getResolvedTemplate() + "]";
+		return super.toString() + ", [absolutePath=" + absolutePath + ", encoding=" + encoding + ", lastModified="
+				+ lastModified + "]";
 	}
 }
