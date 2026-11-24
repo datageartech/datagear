@@ -40,8 +40,6 @@ import org.datagear.analysis.support.datasetres.ExcelDataSetResource;
 import org.datagear.analysis.support.datasetres.ResourceResult;
 import org.datagear.util.IOUtil;
 import org.datagear.util.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 抽象Excel数据集。
@@ -61,8 +59,6 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractExcelDataSet<T extends ExcelDataSetResource> extends AbstractResolvableResourceDataSet<T>
 {
 	private static final long serialVersionUID = 1L;
-
-	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractExcelDataSet.class);
 
 	public static final String EXTENSION_XLSX = "xlsx";
 
