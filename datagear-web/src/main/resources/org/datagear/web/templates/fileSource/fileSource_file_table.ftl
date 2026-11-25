@@ -81,7 +81,7 @@
 	
 	po.isMultipleQueryOrder = function(){ return false; };
 	
-	po.setupAjaxTable("/fileSource/file/pagingQueryData?id=" + encodeURIComponent(po.fileSourceId),
+	po.setupAjaxTable("/fileSource/file/" + encodeURIComponent(po.fileSourceId) + "/pagingQueryData",
 	{
 		multiSortMeta: [ {field: "displayName", order: 1} ]
 	});

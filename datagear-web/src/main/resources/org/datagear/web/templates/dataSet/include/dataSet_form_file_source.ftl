@@ -148,7 +148,7 @@
 			if(!fm.fileSource || !fm.fileSource.id)
 				return;
 			
-			po.handleOpenSelectAction("/fileSource/file/select?id=" + encodeURIComponent(fm.fileSource.id), function(fileInfo)
+			po.handleOpenSelectAction("/fileSource/file/" + encodeURIComponent(fm.fileSource.id) + "/select", function(fileInfo)
 			{
 				if(fileInfo.directory)
 				{

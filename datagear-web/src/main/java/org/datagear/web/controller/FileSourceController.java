@@ -38,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -211,9 +212,9 @@ public class FileSourceController extends AbstractController
 		return pagingData;
 	}
 	
-	@RequestMapping(value = "/file/select")
+	@RequestMapping(value = "/file/{id}/select")
 	public String fileSelect(HttpServletRequest request, HttpServletResponse response,
-			Model model, @RequestParam("id") String id)
+			Model model, @PathVariable("id") String id)
 	{
 		setSelectAction(request, model);
 		model.addAttribute("fileSourceId", id);
@@ -221,10 +222,10 @@ public class FileSourceController extends AbstractController
 		return "/fileSource/fileSource_file_table";
 	}
 
-	@RequestMapping(value = "/file/pagingQueryData", produces = CONTENT_TYPE_JSON)
+	@RequestMapping(value = "/file/{id}/pagingQueryData", produces = CONTENT_TYPE_JSON)
 	@ResponseBody
 	public PagingData<ResultFileInfo> filePagingQueryData(HttpServletRequest request, HttpServletResponse response,
-			Model springModel, @RequestParam("id") String id,
+			Model springModel, @PathVariable("id") String id,
 			@RequestBody(required = false) DirectoryPagingQuery pagingQuery) throws Exception
 	{
 		pagingQuery = (pagingQuery == null ? new DirectoryPagingQuery() : pagingQuery);
