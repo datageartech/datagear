@@ -20,7 +20,7 @@
 目录层级导航栏。
 -->
 <div id="${pid}dirBreadcrumbWrapper" class="flex align-items-center" style="min-height:2em;">
-	<p-breadcrumb :home="pm.dirBreadcrumb.home" :model="pm.dirBreadcrumb.items" class="py-1 border-0">
+	<p-breadcrumb :home="pm.dirBreadcrumb.home" :model="pm.dirBreadcrumb.items" class="py-1 border-none">
 		<template #separator> / </template>
 	</p-breadcrumb>
 </div>

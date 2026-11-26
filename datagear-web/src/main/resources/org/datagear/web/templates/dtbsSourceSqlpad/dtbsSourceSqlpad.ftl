@@ -89,7 +89,7 @@
 		<p-splitter layout="vertical" class="h-full">
 			<p-splitterpanel :size="60" :min-size="20" class="overflow-auto">
 				<form id="${pid}form" class="w-full h-full p-0 m-0">
-					<div id="${pid}sql" class="code-editor-wrapper input p-component p-inputtext w-full h-full border-0">
+					<div id="${pid}sql" class="code-editor-wrapper input p-component p-inputtext w-full h-full border-none">
 						<div id="${pid}sqlEditor" class="code-editor"></div>
 					</div>
 				</form>
